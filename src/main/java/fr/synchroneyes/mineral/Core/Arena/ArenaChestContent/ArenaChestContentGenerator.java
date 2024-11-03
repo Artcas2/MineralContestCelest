@@ -118,4 +118,10 @@ public class ArenaChestContentGenerator {
     private void initializeFromDefaultFile() throws Exception {
         File fichier = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_arena_chest.toString());
         if (!fichier.exists()) {
-         
+            throw new Exception("Impossible de charger le fichier de contenu du coffre d'ar\u00e8ne par d\u00e9faut");
+        }
+        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration((File)fichier);
+        this.initializeFromSection(yamlConfiguration.getConfigurationSection("chest_content"));
+    }
+}
+
