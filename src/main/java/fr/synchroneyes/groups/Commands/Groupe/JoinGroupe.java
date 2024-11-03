@@ -8,47 +8,32 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class JoinGroupe extends CommandTemplate {
-
-
     public JoinGroupe() {
-        addArgument("Nom du groupe", true);
-        constructArguments();
-
-        this.accessCommande.add(PLAYER_COMMAND);
-        this.accessCommande.add(NO_GROUP);
-        accessCommande.add(REQUIRE_COMMUNITY_VERSION);
-        accessCommande.add(GAME_NOT_STARTED);
-
-
-
+        this.addArgument("Nom du groupe", true);
+        this.constructArguments();
+        this.accessCommande.add(4);
+        this.accessCommande.add(1);
+        this.accessCommande.add(9);
+        this.accessCommande.add(12);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
-
-        for (Groupe groupe : mineralcontest.plugin.groupes)
-            if (groupe.getNom().equalsIgnoreCase(args[0])) {
-
-                // On commence par regarder si le groupe est ouvert ou fermé
-                if(groupe.isGroupLocked()) {
-                    // Le groupe est fermé, on regarde si le joueur a été invité ou non
-                    if(groupe.isPlayerInvited(joueur)) {
-                        groupe.addJoueur(joueur);
-                        return true;
-                    }
-
-                    // Sinon, message d'erreur car joueur non invité
-                    joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_you_cant_join_this_group.toString());
-                    groupe.sendToadmin(mineralcontest.prefixPrive + "Le joueur " + joueur.getDisplayName() + " a tenté de rejoindre le groupe sans invitation. Invitez le avec la commande /invitergroupe <nom>");
-                    return false;
+        Player joueur = (Player)commandSender;
+        for (Groupe groupe : mineralcontest.plugin.groupes) {
+            if (!groupe.getNom().equalsIgnoreCase(args[0])) continue;
+            if (groupe.isGroupLocked()) {
+                if (groupe.isPlayerInvited(joueur)) {
+                    groupe.addJoueur(joueur);
+                    return true;
                 }
-
-                // Le groupe est ouvert, on ajoute le joueur
-                groupe.addJoueur(joueur);
-                return true;
-
+                joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_you_cant_join_this_group.toString());
+                groupe.sendToadmin(mineralcontest.prefixPrive + "Le joueur " + joueur.getDisplayName() + " a tent\u00e9 de rejoindre le groupe sans invitation. Invitez le avec la commande /invitergroupe <nom>");
+                return false;
             }
+            groupe.addJoueur(joueur);
+            return true;
+        }
         joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_group_doesnt_exists.toString());
         return false;
     }
@@ -57,7 +42,6 @@ public class JoinGroupe extends CommandTemplate {
     public String getCommand() {
         return "joingroupe";
     }
-
 
     @Override
     public String getDescription() {
@@ -69,3 +53,4 @@ public class JoinGroupe extends CommandTemplate {
         return null;
     }
 }
+

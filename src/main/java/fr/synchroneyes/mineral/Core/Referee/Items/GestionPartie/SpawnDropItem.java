@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class SpawnDropItem extends RefereeItemTemplate {
-
     public SpawnDropItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -17,9 +16,12 @@ public class SpawnDropItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null) return;
-        if (groupe.getGame() == null) return;
-
+        if (groupe == null) {
+            return;
+        }
+        if (groupe.getGame() == null) {
+            return;
+        }
         if (groupe.getGame().isGameStarted()) {
             try {
                 groupe.getGame().getParachuteManager().spawnNewParachute();
@@ -46,3 +48,4 @@ public class SpawnDropItem extends RefereeItemTemplate {
         return Material.FLETCHING_TABLE;
     }
 }
+

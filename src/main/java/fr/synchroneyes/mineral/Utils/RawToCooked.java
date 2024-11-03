@@ -3,37 +3,39 @@ package fr.synchroneyes.mineral.Utils;
 import org.bukkit.Material;
 
 public class RawToCooked {
-
-    /**
-     * Converti un block en lingot
-     *
-     * @param material
-     * @return
-     */
     public static Material toCooked(Material material) {
         switch (material) {
-            case GOLD_ORE:
-            case DEEPSLATE_GOLD_ORE:
+            case GOLD_ORE: 
+            case DEEPSLATE_GOLD_ORE: {
                 return Material.GOLD_INGOT;
-            case IRON_ORE:
-            case DEEPSLATE_IRON_ORE:
+            }
+            case IRON_ORE: 
+            case DEEPSLATE_IRON_ORE: {
                 return Material.IRON_INGOT;
-            case BEEF:
+            }
+            case BEEF: {
                 return Material.COOKED_BEEF;
-            case CHICKEN:
+            }
+            case CHICKEN: {
                 return Material.COOKED_CHICKEN;
-            case COD:
+            }
+            case COD: {
                 return Material.COOKED_COD;
-            case MUTTON:
+            }
+            case MUTTON: {
                 return Material.COOKED_MUTTON;
-            case PORKCHOP:
+            }
+            case PORKCHOP: {
                 return Material.COOKED_PORKCHOP;
-            case RABBIT:
+            }
+            case RABBIT: {
                 return Material.COOKED_RABBIT;
-            case SALMON:
+            }
+            case SALMON: {
                 return Material.COOKED_SALMON;
-            default:
-                return null;
+            }
         }
+        return null;
     }
 }
+

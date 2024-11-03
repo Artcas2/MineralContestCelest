@@ -1,24 +1,18 @@
 package fr.synchroneyes.mineral.Shop.Items.Abstract;
 
-import lombok.Getter;
-import lombok.Setter;
+import fr.synchroneyes.mineral.Shop.Items.Abstract.ShopItem;
 
-/**
- * Classe représentant un item utilisable (avec un certain nombre d'utilisations)
- */
 public abstract class ConsumableItem extends ShopItem {
+    private int nombreUtilisationRestantes = this.getNombreUtilisations();
 
-    @Getter
-    @Setter
-    private int nombreUtilisationRestantes = getNombreUtilisations();
-
-
+    @Override
     public String getPurchaseText() {
-        return "Vous avez acheté " + getNombreUtilisations() + "x " + getNomItem();
+        return "Vous avez achet\u00e9 " + this.getNombreUtilisations() + "x " + this.getNomItem();
     }
 
+    @Override
     public void onPlayerBonusAdded() {
-        onItemUse();
+        this.onItemUse();
     }
 
     @Override
@@ -35,4 +29,13 @@ public abstract class ConsumableItem extends ShopItem {
     public boolean isEnabledOnDeathByAnotherPlayer() {
         return false;
     }
+
+    public int getNombreUtilisationRestantes() {
+        return this.nombreUtilisationRestantes;
+    }
+
+    public void setNombreUtilisationRestantes(int nombreUtilisationRestantes) {
+        this.nombreUtilisationRestantes = nombreUtilisationRestantes;
+    }
 }
+

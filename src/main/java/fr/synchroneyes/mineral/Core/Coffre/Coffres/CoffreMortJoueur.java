@@ -1,47 +1,38 @@
 package fr.synchroneyes.mineral.Core.Coffre.Coffres;
 
-import fr.synchroneyes.mineral.Core.Coffre.*;
+import fr.synchroneyes.mineral.Core.Coffre.Animations;
+import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
+import fr.synchroneyes.mineral.Core.Coffre.TimeChestAnimation;
+import fr.synchroneyes.mineral.Core.Coffre.TimeChestOpening;
 import fr.synchroneyes.mineral.Core.MCPlayer;
-import fr.synchroneyes.mineral.Core.Player.BaseItem.PlayerBaseItem;
 import fr.synchroneyes.mineral.Kits.Classes.Mineur;
 import fr.synchroneyes.mineral.Shop.ShopManager;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.Bukkit;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 public class CoffreMortJoueur extends TimeChestAnimation {
-
     private Player joueurMort;
     private int tailleInventaire;
     private MCPlayer mcPlayer;
-
     private List<ItemStack> playerInventory;
 
-    /**
-     * Constructeur, permet de donner en paramètre le nom de l'inventaire ainsi que la taille
-     *
-     * @param tailleInventaire - Taille de l'inventaire, doit-être un multiple de 7
-     * @param manager
-     */
     public CoffreMortJoueur(int tailleInventaire, AutomatedChestManager manager, Player joueur) {
         super(tailleInventaire, manager);
         this.joueurMort = joueur;
         this.tailleInventaire = tailleInventaire;
-
         this.mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-
-        this.playerInventory = new ArrayList<>();
-        for(ItemStack item : joueurMort.getInventory())
-            if(item != null && !item.equals(Mineur.getBarrierItem()) && !ShopManager.isAnShopItem(item) && item.getType() != Material.POTION) playerInventory.add(new ItemStack(item.getType(), item.getAmount()));
+        this.playerInventory = new ArrayList<ItemStack>();
+        for (ItemStack item : this.joueurMort.getInventory()) {
+            if (item == null || item.equals((Object)Mineur.getBarrierItem()) || ShopManager.isAnShopItem(item) || item.getType() == Material.POTION) continue;
+            this.playerInventory.add(new ItemStack(item.getType(), item.getAmount()));
+        }
     }
-
 
     @Override
     public int playNoteOnTick() {
@@ -55,7 +46,6 @@ public class CoffreMortJoueur extends TimeChestAnimation {
 
     @Override
     public void actionToPerformBeforeSpawn() {
-
     }
 
     @Override
@@ -63,16 +53,14 @@ public class CoffreMortJoueur extends TimeChestAnimation {
         return true;
     }
 
-
-
     @Override
     public String getOpeningChestTitle() {
-        return (joueurMort == null) ? "Chargement du titre ..." : Lang.translate(Lang.death_inventory_player_title.toString(), joueurMort);
+        return this.joueurMort == null ? "Chargement du titre ..." : Lang.translate(Lang.death_inventory_player_title.toString(), this.joueurMort);
     }
 
     @Override
     public String getOpenedChestTitle() {
-        return getOpeningChestTitle();
+        return this.getOpeningChestTitle();
     }
 
     @Override
@@ -117,9 +105,10 @@ public class CoffreMortJoueur extends TimeChestAnimation {
 
     @Override
     public int getChestAliveTime() {
-        MCPlayer player = mineralcontest.plugin.getMCPlayer(joueurMort);
-        // temps par défaut
-        if(player == null) return 60;
+        MCPlayer player = mineralcontest.plugin.getMCPlayer(this.joueurMort);
+        if (player == null) {
+            return 60;
+        }
         return player.getGroupe().getParametresPartie().getCVAR("drop_chest_on_death_time").getValeurNumerique();
     }
 
@@ -128,3 +117,4 @@ public class CoffreMortJoueur extends TimeChestAnimation {
         return TimeChestOpening.AFTER_OPENING_ANIMATION;
     }
 }
+

@@ -16,8 +16,9 @@ public class StartChickenItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null || !groupe.getGame().isGameStarted()) return;
-
+        if (groupe == null || !groupe.getGame().isGameStarted()) {
+            return;
+        }
         if (!groupe.getGame().getArene().chickenWaves.isEnabled()) {
             joueur.sendMessage(mineralcontest.prefixPrive + Lang.chicken_wave_error_disabled.toString());
             return;
@@ -42,3 +43,4 @@ public class StartChickenItem extends RefereeItemTemplate {
         return Material.IRON_INGOT;
     }
 }
+

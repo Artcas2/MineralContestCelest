@@ -1,11 +1,11 @@
 package fr.synchroneyes.challenges.Rewards;
 
+import fr.synchroneyes.challenges.Rewards.AbstractReward;
 import fr.synchroneyes.mineral.Core.MCPlayer;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-public class SingleArticleReward extends AbstractReward{
-
+public class SingleArticleReward extends AbstractReward {
     private ItemStack item;
 
     public SingleArticleReward(ItemStack itemToReward) {
@@ -14,18 +14,18 @@ public class SingleArticleReward extends AbstractReward{
 
     @Override
     public void giveToPlayer() {
-        World playerWorld = getJoueur().getWorld();
-        MCPlayer mcPlayer = getMcPlayer();
-        // On vérifie si son inventaire est plein. Si il est plein on le drop à côté de lui
-        if(getMcPlayer().isInventoryFull()) playerWorld.dropItemNaturally(getJoueur().getLocation(), item);
-        else mcPlayer.getJoueur().getInventory().addItem(item);
-
+        World playerWorld = this.getJoueur().getWorld();
+        MCPlayer mcPlayer = this.getMcPlayer();
+        if (this.getMcPlayer().isInventoryFull()) {
+            playerWorld.dropItemNaturally(this.getJoueur().getLocation(), this.item);
+        } else {
+            mcPlayer.getJoueur().getInventory().addItem(new ItemStack[]{this.item});
+        }
     }
 
     @Override
     public String getRewardText() {
-        return "Vous avez reçu une récompense dans votre inventaire! Si votre inventaire est plein, l'objet a été déposé à côté de vous.";
+        return "Vous avez re\u00e7u une r\u00e9compense dans votre inventaire! Si votre inventaire est plein, l'objet a \u00e9t\u00e9 d\u00e9pos\u00e9 \u00e0 c\u00f4t\u00e9 de vous.";
     }
-
-
 }
+

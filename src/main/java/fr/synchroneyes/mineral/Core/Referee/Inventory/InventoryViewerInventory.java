@@ -1,6 +1,7 @@
 package fr.synchroneyes.mineral.Core.Referee.Inventory;
 
 import fr.synchroneyes.groups.Core.Groupe;
+import fr.synchroneyes.mineral.Core.Referee.Inventory.InventoryTemplate;
 import fr.synchroneyes.mineral.Core.Referee.Items.OpenPlayerInventory;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
@@ -11,14 +12,13 @@ public class InventoryViewerInventory extends InventoryTemplate {
     @Override
     public void setInventoryItems(Player arbitre) {
         Groupe groupe = mineralcontest.getPlayerGroupe(arbitre);
-
-        if (groupe == null) return;
-
-        // On récupère tous les joueurs non arbitre
-        for (Player joueur : groupe.getPlayers())
-            if (!groupe.getGame().isReferee(joueur))
-                // On crée un item avec leur nom
-                registerItem(new OpenPlayerInventory(joueur, this));
+        if (groupe == null) {
+            return;
+        }
+        for (Player joueur : groupe.getPlayers()) {
+            if (groupe.getGame().isReferee(joueur)) continue;
+            this.registerItem(new OpenPlayerInventory(joueur, this));
+        }
     }
 
     @Override
@@ -36,3 +36,4 @@ public class InventoryViewerInventory extends InventoryTemplate {
         return Lang.referee_item_player_inventory_description.toString();
     }
 }
+

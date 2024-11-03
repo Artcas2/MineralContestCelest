@@ -12,59 +12,49 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 public class InventoryClick implements Listener {
-
     @EventHandler
     public void onInventoryCloseEvent(InventoryCloseEvent event) {
-        Player joueur = (Player) event.getPlayer();
+        Player joueur = (Player)event.getPlayer();
         if (mineralcontest.isInAMineralContestWorld(joueur)) {
+            Inventory baseItemInventory;
             Groupe playerGroupe = mineralcontest.getPlayerGroupe(joueur);
-            if (playerGroupe == null) return;
-
+            if (playerGroupe == null) {
+                return;
+            }
             PlayerBaseItem playerBaseItem = playerGroupe.getPlayerBaseItem();
-
             Inventory closedInventory = event.getInventory();
-            Inventory baseItemInventory = playerBaseItem.getInventory();
-
-
-            if (closedInventory.equals(baseItemInventory) && playerBaseItem.isBeingEdited()) {
-                mineralcontest.plugin.getServer().getScheduler().runTaskLater(mineralcontest.plugin, () -> {
-                    joueur.openInventory(baseItemInventory);
-                }, 1);
+            if (closedInventory.equals((Object)(baseItemInventory = playerBaseItem.getInventory())) && playerBaseItem.isBeingEdited()) {
+                mineralcontest.plugin.getServer().getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> joueur.openInventory(baseItemInventory), 1L);
             }
         }
     }
 
     @EventHandler
     public void onItemClick(InventoryClickEvent event) {
-        Player joueur = (Player) event.getWhoClicked();
-
+        Player joueur = (Player)event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
-
-
         if (joueur != null && mineralcontest.isInAMineralContestWorld(joueur)) {
+            ItemMeta meta;
             Groupe playerGroupe = mineralcontest.getPlayerGroupe(joueur);
-            if (playerGroupe == null) return;
+            if (playerGroupe == null) {
+                return;
+            }
             PlayerBaseItem playerBaseItem = playerGroupe.getPlayerBaseItem();
-            if (clickedItem == null) return;
-
-
+            if (clickedItem == null) {
+                return;
+            }
             Inventory inventaire = event.getClickedInventory();
-            if (inventaire == null) return;
-
-
-            if (clickedItem != null && clickedItem.getItemMeta() != null && inventaire.equals(playerBaseItem.getInventory())) {
-
-
-                ItemMeta meta = clickedItem.getItemMeta();
-                if (meta.getDisplayName().equals(Lang.player_base_item_close_inventory_item_title.toString())) {
-                    playerBaseItem.closeInventory(joueur);
-                    event.setCancelled(true);
-                }
+            if (inventaire == null) {
+                return;
+            }
+            if (clickedItem != null && clickedItem.getItemMeta() != null && inventaire.equals((Object)playerBaseItem.getInventory()) && (meta = clickedItem.getItemMeta()).getDisplayName().equals(Lang.player_base_item_close_inventory_item_title.toString())) {
+                playerBaseItem.closeInventory(joueur);
+                event.setCancelled(true);
             }
         }
     }
-
 }
 

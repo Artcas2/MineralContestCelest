@@ -7,27 +7,22 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class mcdownload extends CommandTemplate {
-
     public mcdownload() {
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(PLAYER_ADMIN);
-        accessCommande.add(PLAYER_IN_HUB);
-        constructArguments();
+        this.accessCommande.add(4);
+        this.accessCommande.add(10);
+        this.accessCommande.add(11);
+        this.constructArguments();
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
-
-
+        Player joueur = (Player)commandSender;
         if (!WorldDownloader.areMapsLoaded) {
             joueur.sendMessage(mineralcontest.prefixErreur + "Getting all maps, please wait ...");
             return false;
         }
-
         joueur.closeInventory();
         joueur.openInventory(WorldDownloader.getInstance().getInventory());
-
         return false;
     }
 
@@ -36,10 +31,9 @@ public class mcdownload extends CommandTemplate {
         return "mcdownloader";
     }
 
-
     @Override
     public String getDescription() {
-        return "Permet d'ouvrir le menu de télécargement de map";
+        return "Permet d'ouvrir le menu de t\u00e9l\u00e9cargement de map";
     }
 
     @Override
@@ -47,3 +41,4 @@ public class mcdownload extends CommandTemplate {
         return null;
     }
 }
+

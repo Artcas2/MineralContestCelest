@@ -7,6 +7,10 @@ import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.Shop.NPCs.BonusSeller;
 import fr.synchroneyes.mineral.Utils.Door.DisplayBlock;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -16,98 +20,65 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
 public class mcbuild extends CommandTemplate {
-
-    private LinkedList<String> actionsPossible;
-
-
+    private LinkedList<String> actionsPossible = new LinkedList();
 
     public mcbuild() {
-
-
-        this.actionsPossible = new LinkedList<>();
-        actionsPossible.add("save");
-        actionsPossible.add("menu");
-        actionsPossible.add("setSpawn");
-        actionsPossible.add("enable");
-        actionsPossible.add("disable");
-        actionsPossible.add("playzone_radius");
-
-        addArgument("action", true);
-        addArgument("nom de la map", false);
-        constructArguments();
-
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(PLAYER_ADMIN);
-        accessCommande.add(GROUP_REQUIRED);
-        accessCommande.add(GAME_NOT_STARTED);
-
+        this.actionsPossible.add("save");
+        this.actionsPossible.add("menu");
+        this.actionsPossible.add("setSpawn");
+        this.actionsPossible.add("enable");
+        this.actionsPossible.add("disable");
+        this.actionsPossible.add("playzone_radius");
+        this.addArgument("action", true);
+        this.addArgument("nom de la map", false);
+        this.constructArguments();
+        this.accessCommande.add(4);
+        this.accessCommande.add(10);
+        this.accessCommande.add(0);
+        this.accessCommande.add(12);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
         Monde monde = MapBuilder.monde;
-
-        Player joueur = (Player) commandSender;
-
+        Player joueur = (Player)commandSender;
         Bukkit.getLogger().info("x: " + joueur.getLocation().getX() + "");
         Bukkit.getLogger().info("y: " + joueur.getLocation().getY() + "");
         Bukkit.getLogger().info("z: " + joueur.getLocation().getZ() + "");
         Bukkit.getLogger().info("pitch: " + joueur.getLocation().getPitch() + "");
         Bukkit.getLogger().info("yaw: " + joueur.getLocation().getYaw() + "");
-
         if (args[0].equalsIgnoreCase("save")) {
             if (args.length == 2) {
                 String nomMap = args[1];
                 joueur.sendMessage("Sauvegarde de la map: " + nomMap);
-                sauvegarderMonde(nomMap);
-                return false;
-            } else {
-                joueur.sendMessage(mineralcontest.prefixErreur + "Usage: /" + getCommand() + "save <nom de la map>");
+                this.sauvegarderMonde(nomMap);
                 return false;
             }
-        }
-
-        if (args[0].equalsIgnoreCase("menu")) {
-            /*for (BlocksDataColor color : BlocksDataColor.values()) {
-                ColoredHouseItem house = new ColoredHouseItem(color);
-                house.giveItemToPlayer((Player) commandSender);
-            }
-            commandSender.sendMessage(mineralcontest.prefixPrive + "Vous avez reçu les blocs de création de maison. Vous n'avez plus qu'a les poser");
-            AreneItem item = new AreneItem();
-            item.giveItemToPlayer((Player) commandSender);
-            commandSender.sendMessage(mineralcontest.prefixPrive + "Vous avez reçu le bloc de création d'arène Vous n'avez plus qu'a le poser");*/
-            //MapBuilder.getInstance().getMenuManager().openInventory(joueur);
+            joueur.sendMessage(mineralcontest.prefixErreur + "Usage: /" + this.getCommand() + "save <nom de la map>");
             return false;
         }
-
+        if (args[0].equalsIgnoreCase("menu")) {
+            return false;
+        }
         if (args[0].equalsIgnoreCase("setSpawn")) {
             monde.setSpawnDepart(joueur.getLocation());
-            joueur.sendMessage(mineralcontest.prefixPrive + "Le spawn de départ pour ce monde a bien été enregistré !");
+            joueur.sendMessage(mineralcontest.prefixPrive + "Le spawn de d\u00e9part pour ce monde a bien \u00e9t\u00e9 enregistr\u00e9 !");
             return false;
         }
-
         if (args[0].equalsIgnoreCase("playzone_radius")) {
             int taille = Integer.parseInt(args[1]);
             World _monde = joueur.getWorld();
             _monde.getWorldBorder().setCenter(monde.getArene().getCoffre().getLocation());
-            _monde.getWorldBorder().setSize(taille * 2);
+            _monde.getWorldBorder().setSize((double)(taille * 2));
             monde.setHouses_playzone_radius(taille);
             return false;
         }
-
         if (args[0].equalsIgnoreCase("enable")) {
             MapBuilder.enableMapBuilder();
         } else if (args[0].equalsIgnoreCase("disable")) {
             MapBuilder.disableMapBuilder();
         }
-
-
         return false;
     }
 
@@ -116,98 +87,82 @@ public class mcbuild extends CommandTemplate {
         return "mcbuild";
     }
 
-
     private void sauvegarderMonde(String nom) {
         Monde monde = MapBuilder.monde;
         monde.setNom(nom);
-
         File fichierMonde = new File(mineralcontest.plugin.getDataFolder() + File.separator + "generated_maps" + File.separator + nom + ".yml");
-        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(fichierMonde);
-
-        yamlConfiguration.set("map_name", nom);
-
+        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration((File)fichierMonde);
+        yamlConfiguration.set("map_name", (Object)nom);
         Location spawnLocation = monde.getSpawnDepart();
-
-
         if (spawnLocation == null) {
-            yamlConfiguration.set("default_spawn", "null");
+            yamlConfiguration.set("default_spawn", (Object)"null");
         } else {
-            yamlConfiguration.set("default_spawn.x", spawnLocation.getBlockX());
-            yamlConfiguration.set("default_spawn.y", spawnLocation.getBlockY());
-            yamlConfiguration.set("default_spawn.z", spawnLocation.getBlockZ());
-
+            yamlConfiguration.set("default_spawn.x", (Object)spawnLocation.getBlockX());
+            yamlConfiguration.set("default_spawn.y", (Object)spawnLocation.getBlockY());
+            yamlConfiguration.set("default_spawn.z", (Object)spawnLocation.getBlockZ());
         }
-
         try {
-            yamlConfiguration.set("arena.chest.x", monde.getArene().getCoffre().getLocation().getX());
-            yamlConfiguration.set("arena.chest.y", monde.getArene().getCoffre().getLocation().getY());
-            yamlConfiguration.set("arena.chest.z", monde.getArene().getCoffre().getLocation().getZ());
+            yamlConfiguration.set("arena.chest.x", (Object)monde.getArene().getCoffre().getLocation().getX());
+            yamlConfiguration.set("arena.chest.y", (Object)monde.getArene().getCoffre().getLocation().getY());
+            yamlConfiguration.set("arena.chest.z", (Object)monde.getArene().getCoffre().getLocation().getZ());
         } catch (Exception e) {
             Bukkit.getLogger().severe(e.getMessage());
             e.printStackTrace();
-            Bukkit.broadcastMessage("Une erreur est survenue lors de la sauvegarde de la map, veuillez regarder la console!");
+            Bukkit.broadcastMessage((String)"Une erreur est survenue lors de la sauvegarde de la map, veuillez regarder la console!");
             return;
         }
-
-        yamlConfiguration.set("arena.teleport.x", monde.getArene().getTeleportSpawn().getX());
-        yamlConfiguration.set("arena.teleport.y", monde.getArene().getTeleportSpawn().getY());
-        yamlConfiguration.set("arena.teleport.z", monde.getArene().getTeleportSpawn().getZ());
-
+        yamlConfiguration.set("arena.teleport.x", (Object)monde.getArene().getTeleportSpawn().getX());
+        yamlConfiguration.set("arena.teleport.y", (Object)monde.getArene().getTeleportSpawn().getY());
+        yamlConfiguration.set("arena.teleport.z", (Object)monde.getArene().getTeleportSpawn().getZ());
         try {
             for (House house : monde.getHouses()) {
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".color", house.getTeam().getCouleur().toString());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.x", house.getHouseLocation().getX());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.y", house.getHouseLocation().getY());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.z", house.getHouseLocation().getZ());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.x", house.getCoffreEquipeLocation().getX());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.y", house.getCoffreEquipeLocation().getY());
-                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.z", house.getCoffreEquipeLocation().getZ());
-
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".color", (Object)house.getTeam().getCouleur().toString());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.x", (Object)house.getHouseLocation().getX());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.y", (Object)house.getHouseLocation().getY());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".spawn.z", (Object)house.getHouseLocation().getZ());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.x", (Object)house.getCoffreEquipeLocation().getX());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.y", (Object)house.getCoffreEquipeLocation().getY());
+                yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".coffre.z", (Object)house.getCoffreEquipeLocation().getZ());
                 int index = 0;
                 for (DisplayBlock blockPorte : house.getPorte().getPorte()) {
-                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".x", blockPorte.getBlock().getLocation().getX());
-                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".y", blockPorte.getBlock().getLocation().getY());
-                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".z", blockPorte.getBlock().getLocation().getZ());
-                    index++;
+                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".x", (Object)blockPorte.getBlock().getLocation().getX());
+                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".y", (Object)blockPorte.getBlock().getLocation().getY());
+                    yamlConfiguration.set("house." + house.getTeam().getNomEquipe() + ".porte." + index + ".z", (Object)blockPorte.getBlock().getLocation().getZ());
+                    ++index;
                 }
             }
         } catch (Exception e) {
             Bukkit.getLogger().severe(e.getMessage());
             e.printStackTrace();
-            Bukkit.broadcastMessage("Une erreur est survenue lors de la sauvegarde de la map, veuillez regarder la console!");
+            Bukkit.broadcastMessage((String)"Une erreur est survenue lors de la sauvegarde de la map, veuillez regarder la console!");
             return;
         }
-
         try {
             int indexNPC = 0;
             for (BonusSeller npc : monde.getGroupe().getGame().getShopManager().getListe_pnj()) {
-                yamlConfiguration.set("npcs." + indexNPC + ".x", npc.getEmplacement().getX());
-                yamlConfiguration.set("npcs." + indexNPC + ".y", npc.getEmplacement().getY());
-                yamlConfiguration.set("npcs." + indexNPC + ".z", npc.getEmplacement().getZ());
-                yamlConfiguration.set("npcs." + indexNPC + ".pitch", npc.getEmplacement().getPitch());
-                yamlConfiguration.set("npcs." + indexNPC + ".yaw", npc.getEmplacement().getYaw());
-                indexNPC++;
+                yamlConfiguration.set("npcs." + indexNPC + ".x", (Object)npc.getEmplacement().getX());
+                yamlConfiguration.set("npcs." + indexNPC + ".y", (Object)npc.getEmplacement().getY());
+                yamlConfiguration.set("npcs." + indexNPC + ".z", (Object)npc.getEmplacement().getZ());
+                yamlConfiguration.set("npcs." + indexNPC + ".pitch", (Object)Float.valueOf(npc.getEmplacement().getPitch()));
+                yamlConfiguration.set("npcs." + indexNPC + ".yaw", (Object)Float.valueOf(npc.getEmplacement().getYaw()));
+                ++indexNPC;
             }
-
-            for (Entity entity : monde.getArene().getCoffre().getLocation().getWorld().getEntities())
-                if (entity instanceof Villager) entity.remove();
-
+            for (Entity entity : monde.getArene().getCoffre().getLocation().getWorld().getEntities()) {
+                if (!(entity instanceof Villager)) continue;
+                entity.remove();
+            }
             monde.getArene().getCoffre().getLocation().getWorld().save();
-        } catch (Exception e) {
-
+        } catch (Exception indexNPC) {
+            // empty catch block
         }
-
-        yamlConfiguration.set("settings.protected_zone_area_radius", monde.getHouses_playzone_radius());
-        yamlConfiguration.set("settings.mp_set_playzone_radius", 1000);
-
+        yamlConfiguration.set("settings.protected_zone_area_radius", (Object)monde.getHouses_playzone_radius());
+        yamlConfiguration.set("settings.mp_set_playzone_radius", (Object)1000);
         try {
             yamlConfiguration.save(fichierMonde);
-            Bukkit.broadcastMessage("Le fichier a bien été enregistré ! Il se trouve dans " + fichierMonde.getPath());
+            Bukkit.broadcastMessage((String)("Le fichier a bien \u00e9t\u00e9 enregistr\u00e9 ! Il se trouve dans " + fichierMonde.getPath()));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
@@ -220,11 +175,11 @@ public class mcbuild extends CommandTemplate {
         return null;
     }
 
-    @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        if (alias.equalsIgnoreCase("mcbuild")) {
-            if (args.length == 0 || args.length == 1) return actionsPossible;
+        if (alias.equalsIgnoreCase("mcbuild") && (args.length == 0 || args.length == 1)) {
+            return this.actionsPossible;
         }
-        return new LinkedList<>();
+        return new LinkedList<String>();
     }
 }
+

@@ -1,66 +1,40 @@
 package fr.synchroneyes.mineral.Core.Game.JoinTeam.Inventories;
 
+import fr.synchroneyes.mineral.Core.Game.JoinTeam.Inventories.InventoryInterface;
 import fr.synchroneyes.mineral.Core.Game.JoinTeam.Items.JoinTeamItem;
 import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.Translation.Lang;
+import java.util.List;
 import org.bukkit.Material;
 
-import java.util.List;
-
 public class SelectionEquipeInventory extends InventoryInterface {
-
     private List<House> maisons;
 
     public SelectionEquipeInventory() {
-        // On veut 3 lignes, donc 3*9 items
-        super(true, 3 * 9);
+        super(true, 27);
     }
 
     public SelectionEquipeInventory(List<House> maisons) {
-        // On veut 3 lignes, donc 3*9 items
-        super(true, 3 * 9);
+        super(true, 27);
         this.maisons = maisons;
     }
 
-
     @Override
     public void setInventoryItems() {
-        inventaire.setMaxStackSize(1);
-
-
-        /**
-         * Pour styliser, le mieux serait de faire:
-         *  - 1 bloc sur 2 entre chaque équipe
-         *  - Centrer les blocs
-         *
-         *  Pour centrer les blocs, on prend le nombre d'espace avant un bloc + sa taille
-         *  On multiplie ce résultat par le nombre d'équipe, et on divise le 9/nombre equipe
-         *  On arrondi au supérieur, pour avoir le nombre de block à sauter avant de commencer a afficher
-         */
-
-
-        // Position de départ dans l'inventaire
+        this.inventaire.setMaxStackSize(1);
         int positionItem = 8;
-
-
-        // Nombre de case avant un bloc
         int espaceAvantBloc = 1;
-        // Nombre de case pour un bloc
         int tailleBloc = 1;
-        if (maisons != null) {
-            // On récupère le nombre d'équipe
-            int nombreEquipe = maisons.size();
+        if (this.maisons != null) {
+            int nombreEquipe = this.maisons.size();
             int resultatOperationNombreEquipe = nombreEquipe * (tailleBloc + espaceAvantBloc);
-
             int nombreItemsParLigne = 9;
-
-            positionItem += Math.ceil(nombreItemsParLigne / nombreEquipe);
-
-            for (House maison : maisons) {
+            positionItem = (int)((double)positionItem + Math.ceil(nombreItemsParLigne / nombreEquipe));
+            for (House maison : this.maisons) {
                 JoinTeamItem item = new JoinTeamItem(maison.getTeam());
-                inventaire.setItem(positionItem, item.toItemStack());
-                items.add(item);
-                positionItem += (espaceAvantBloc + tailleBloc);
+                this.inventaire.setItem(positionItem, item.toItemStack());
+                this.items.add(item);
+                positionItem += espaceAvantBloc + tailleBloc;
             }
         }
     }
@@ -80,3 +54,4 @@ public class SelectionEquipeInventory extends InventoryInterface {
         return Lang.item_team_selection_title.toString();
     }
 }
+

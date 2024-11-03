@@ -6,7 +6,6 @@ import fr.synchroneyes.mineral.Core.Game.BlockManager;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.Core.MCPlayer;
 import fr.synchroneyes.mineral.Kits.Classes.Mineur;
-import fr.synchroneyes.mineral.Kits.KitManager;
 import fr.synchroneyes.mineral.Shop.Items.Permanent.AutoLingot;
 import fr.synchroneyes.mineral.Shop.Players.PlayerBonus;
 import fr.synchroneyes.mineral.Statistics.Class.MinerStat;
@@ -15,6 +14,7 @@ import fr.synchroneyes.mineral.Utils.BlockSaver;
 import fr.synchroneyes.mineral.Utils.Radius;
 import fr.synchroneyes.mineral.Utils.RawToCooked;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,159 +29,87 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BlockDestroyed implements Listener {
-
-    /**
-     * Evenement appelé lors de la destruction d'un bloc
-     *
-     * @param event
-     */
     @EventHandler
     public void onBlockDestroyed(BlockBreakEvent event) {
-
-        // Si on est en mode création de map, on ignore l'event
         if (MapBuilder.getInstance().isBuilderModeEnabled) {
             return;
         }
-
-
-        // On récupère le joueur ayant cassé le bloc
         Player joueur = event.getPlayer();
-
-        // Si le joueur n'est pas dans un monde mineral contest, on s'en fou
-        if (!mineralcontest.isInAMineralContestWorld(joueur)) return;
-
-        // Le joueur se trouve dans un monde mineral contest
-        // On récupère son groupe
-        Groupe playerGroupe = mineralcontest.getPlayerGroupe(joueur);
-
-        // On vérifie si le joueur est dans le hub ou non
-        if(mineralcontest.isInMineralContestHub(joueur)) {
-            if(!mineralcontest.enable_lobby_block_protection) return;
+        if (!mineralcontest.isInAMineralContestWorld(joueur)) {
+            return;
         }
-
-        // Si le group est null, on annule l'event.
-        // ça veut dire que le joueur est dans le lobby & version communautaire activée
+        Groupe playerGroupe = mineralcontest.getPlayerGroupe(joueur);
+        if (mineralcontest.isInMineralContestHub(joueur) && !mineralcontest.enable_lobby_block_protection) {
+            return;
+        }
         if (playerGroupe == null) {
             joueur.sendMessage(mineralcontest.prefixErreur + Lang.cant_break_block_here.toString());
             event.setCancelled(true);
             return;
         }
-
-        // on récupère la partie du joueur
         Game partie = playerGroupe.getGame();
-
-        // Si le joueur est un arbitre, on l'autorise à poser le bloc
-        if (partie.isReferee(joueur)) return;
-
-        // Si la partie est non démarrée, on annule l'event, on ne veut pas casser de bloc
+        if (partie.isReferee(joueur)) {
+            return;
+        }
         if (!partie.isGameStarted() || partie.isPreGame() || partie.isGamePaused()) {
             joueur.sendMessage(mineralcontest.prefixErreur + Lang.cant_break_block_here.toString());
             event.setCancelled(true);
             return;
         }
-
-        // Maintenant, on doit vérifier si la partie est en cours
         if (partie.isGameStarted()) {
-
-            // On bloque les hopper
+            MCPlayer mcPlayer;
+            Material materialToDrop;
             if (event.getBlock().getType() == Material.HOPPER) {
                 event.setCancelled(true);
                 return;
             }
-
-            // On vérifie si c'est un block que l'on veut supprimer sans check
-
-
-            // On doit vérifier si on se trouve autour de la zone protegée
             int rayonZoneProtege = playerGroupe.getParametresPartie().getCVAR("protected_zone_area_radius").getValeurNumerique();
             Block blockDetruit = event.getBlock();
             Location centreArene = playerGroupe.getGame().getArene().getCoffre().getLocation();
-
-            // Si le block détruit est dans le rayon de la zone protegé, on annule l'event
             if (Radius.isBlockInRadius(centreArene, blockDetruit.getLocation(), rayonZoneProtege)) {
-
-                if (canBlockBeDestroyed(event.getBlock())) {
+                if (this.canBlockBeDestroyed(event.getBlock())) {
                     event.setDropItems(false);
                     return;
                 }
-
-                // Si le block est un bloc ajouté par un joueur, on ne fait rien
                 BlockManager blockManager = BlockManager.getInstance();
-
                 if (!blockManager.wasBlockAdded(blockDetruit)) {
                     event.setCancelled(true);
                     joueur.sendMessage(mineralcontest.prefixErreur + Lang.cant_break_block_here.toString());
                     return;
                 }
-
-
             }
-
-            // Si c'est un block
-            if (PlayerBonus.getPlayerBonus(AutoLingot.class, joueur) != null && event.isDropItems()) {
-                Material materialToDrop = RawToCooked.toCooked(blockDetruit.getType());
-
-                if (materialToDrop != null) {
-                    blockDetruit.setType(Material.AIR);
-                    blockDetruit.getWorld().dropItemNaturally(blockDetruit.getLocation(), new ItemStack(materialToDrop));
-                }
-
+            if (PlayerBonus.getPlayerBonus(AutoLingot.class, joueur) != null && event.isDropItems() && (materialToDrop = RawToCooked.toCooked(blockDetruit.getType())) != null) {
+                blockDetruit.setType(Material.AIR);
+                blockDetruit.getWorld().dropItemNaturally(blockDetruit.getLocation(), new ItemStack(materialToDrop));
             }
-
             if (blockDetruit.getState() instanceof InventoryHolder && !partie.isThisBlockAGameChest(blockDetruit)) {
-                ((InventoryHolder) blockDetruit.getState()).getInventory().clear();
+                ((InventoryHolder)blockDetruit.getState()).getInventory().clear();
                 event.setDropItems(false);
             }
-
-            // Mise à jour MC des blocs de fer
-            // On applique pas cette logique si le joueur est mineur
-            if(blockDetruit.getType() == Material.IRON_ORE) {
-                MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-                if(!(mcPlayer.getKit() instanceof Mineur)) {
-                    event.setDropItems(false);
-                    blockDetruit.getWorld().dropItemNaturally(blockDetruit.getLocation(), new ItemStack(Material.IRON_ORE));
-
-                }
+            if (blockDetruit.getType() == Material.IRON_ORE && !((mcPlayer = mineralcontest.plugin.getMCPlayer(joueur)).getKit() instanceof Mineur)) {
+                event.setDropItems(false);
+                blockDetruit.getWorld().dropItemNaturally(blockDetruit.getLocation(), new ItemStack(Material.IRON_ORE));
             }
-
-            // Sinon, le block détruit n'est pas dans la zone protégé, on autorise la destruction
             playerGroupe.getGame().addBlock(event.getBlock(), BlockSaver.Type.DESTROYED);
-
-            // On enregistre la destruction pour les stats
             playerGroupe.getGame().getStatsManager().register(MinerStat.class, event.getPlayer(), null);
-
         } else {
-            // La partie n'est pas démarrée, on annule l'event
             joueur.sendMessage(mineralcontest.prefixErreur + Lang.cant_break_block_here.toString());
             event.setCancelled(true);
         }
-
-
     }
-
 
     @EventHandler
     public void onVehicleDestroyed(VehicleDestroyEvent event) {
-
+        StorageMinecart vehicle;
         Bukkit.getLogger().info(event.getVehicle().getType().toString());
-        if (event.getVehicle().getType() == EntityType.MINECART_CHEST) {
-            StorageMinecart vehicle = (StorageMinecart) event.getVehicle();
-
-            if (mineralcontest.isAMineralContestWorld(vehicle.getWorld())) {
-                vehicle.getInventory().clear();
-            }
-
+        if (event.getVehicle().getType() == EntityType.MINECART_CHEST && mineralcontest.isAMineralContestWorld((vehicle = (StorageMinecart)event.getVehicle()).getWorld())) {
+            vehicle.getInventory().clear();
         }
     }
 
     private boolean canBlockBeDestroyed(Block b) {
-
-        List<Material> allowedToBeDestroyed = new ArrayList<>();
-
+        ArrayList<Material> allowedToBeDestroyed = new ArrayList<Material>();
         allowedToBeDestroyed.add(Material.GRASS);
         allowedToBeDestroyed.add(Material.WHEAT);
         allowedToBeDestroyed.add(Material.TALL_GRASS);
@@ -209,10 +137,7 @@ public class BlockDestroyed implements Listener {
         allowedToBeDestroyed.add(Material.SUNFLOWER);
         allowedToBeDestroyed.add(Material.OXEYE_DAISY);
         allowedToBeDestroyed.add(Material.POTTED_OXEYE_DAISY);
-
-
         return allowedToBeDestroyed.contains(b.getType());
     }
-
-
 }
+

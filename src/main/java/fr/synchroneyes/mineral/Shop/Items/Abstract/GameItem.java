@@ -1,9 +1,9 @@
 package fr.synchroneyes.mineral.Shop.Items.Abstract;
 
+import fr.synchroneyes.mineral.Shop.Items.Abstract.ConsumableItem;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class GameItem extends ConsumableItem {
-
     @Override
     public boolean isEnabledOnRespawn() {
         return false;
@@ -21,7 +21,7 @@ public abstract class GameItem extends ConsumableItem {
 
     @Override
     public void onItemUse() {
-        this.joueur.getInventory().addItem(new ItemStack(getItemMaterial()));
-
+        this.joueur.getInventory().addItem(new ItemStack[]{new ItemStack(this.getItemMaterial())});
     }
 }
+

@@ -7,10 +7,11 @@ import org.bukkit.entity.Player;
 public class BossKiller extends MeilleurStatistic {
     @Override
     public void perform(Player p, Object target) {
-        if (!infoJoueurs.containsKey(p)) infoJoueurs.put(p, 0);
-
-        int nbPouletsTue = infoJoueurs.get(p);
-        infoJoueurs.replace(p, nbPouletsTue + 1);
+        if (!this.infoJoueurs.containsKey(p)) {
+            this.infoJoueurs.put(p, 0);
+        }
+        int nbPouletsTue = (Integer)this.infoJoueurs.get(p);
+        this.infoJoueurs.replace(p, nbPouletsTue + 1);
     }
 
     @Override
@@ -20,7 +21,7 @@ public class BossKiller extends MeilleurStatistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return "Avec %d de boss tué";
+        return "Avec %d de boss tu\u00e9";
     }
 
     @Override
@@ -28,3 +29,4 @@ public class BossKiller extends MeilleurStatistic {
         return Material.SPIDER_EYE;
     }
 }
+

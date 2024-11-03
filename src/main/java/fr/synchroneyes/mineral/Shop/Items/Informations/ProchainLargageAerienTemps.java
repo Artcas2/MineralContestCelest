@@ -11,7 +11,7 @@ import org.bukkit.Material;
 public class ProchainLargageAerienTemps extends ConsumableItem {
     @Override
     public void onPlayerBonusAdded() {
-        onItemUse();
+        this.onItemUse();
     }
 
     @Override
@@ -47,20 +47,18 @@ public class ProchainLargageAerienTemps extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         int tempsRestant = playerGroup.getGame().getParachuteManager().getTimeleft_before_next_drop();
-
         String tempsRestantText = Lang.shopitem_next_airdrop_onitemuse_timeleft.toString();
         tempsRestantText = tempsRestantText.replace("%time", TimeConverter.intToString(tempsRestant));
-        joueur.sendMessage(mineralcontest.prefixPrive + tempsRestantText);
-
+        this.joueur.sendMessage(mineralcontest.prefixPrive + tempsRestantText);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("next_airdrop_time");
     }
-
 }
+

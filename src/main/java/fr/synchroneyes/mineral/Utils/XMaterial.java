@@ -3,7 +3,6 @@ package fr.synchroneyes.mineral.Utils;
 import org.bukkit.Material;
 
 public enum XMaterial {
-
     AIR("AIR"),
     STONE("STONE"),
     GRASS("GRASS"),
@@ -103,7 +102,7 @@ public enum XMaterial {
     TRAP_DOOR("OAK_TRAPDOOR"),
     MONSTER_EGGS("SILVERFISH_SPAWN_EGG"),
     SMOOTH_BRICK("STONE_BRICKS"),
-    HUGE_MUSHROOM_1("STONE"), //UNSURE
+    HUGE_MUSHROOM_1("STONE"),
     HUGE_MUSHROOM_2("STONE"),
     IRON_FENCE("IRON_BARS"),
     THIN_GLASS("GLASS_PANE"),
@@ -153,8 +152,8 @@ public enum XMaterial {
     TRAPPED_CHEST("TRAPPED_CHEST"),
     GOLD_PLATE("LIGHT_WEIGHTED_PRESSURE_PLATE"),
     IRON_PLATE("HEAVY_WEIGHTED_PRESSURE_PLATE"),
-    REDSTONE_COMPARATOR_OFF("COMPARATOR"), //UNSURE
-    REDSTONE_COMPARATOR_ON("COMPARATOR"), //UNSURE
+    REDSTONE_COMPARATOR_OFF("COMPARATOR"),
+    REDSTONE_COMPARATOR_ON("COMPARATOR"),
     DAYLIGHT_DETECTOR("DAYLIGHT_DETECTOR"),
     REDSTONE_BLOCK("REDSTONE_BLOCK"),
     QUARTZ_ORE("NETHER_QUARTZ_ORE"),
@@ -208,10 +207,10 @@ public enum XMaterial {
     PURPUR_BLOCK("PURPUR_BLOCK"),
     PURPUR_PILLAR("PURPUR_PILLAR"),
     PURPUR_STAIRS("PURPUR_STAIRS"),
-    PURPUR_DOUBLE_SLAB("PURPUR_SLAB"), //UNKNOWN
+    PURPUR_DOUBLE_SLAB("PURPUR_SLAB"),
     PURPUR_SLAB("PURPUR_SLAB"),
     END_BRICKS("END_STONE_BRICKS"),
-    BEETROOT_BLOCK("BEETROOT"), //UNSURE
+    BEETROOT_BLOCK("BEETROOT"),
     GRASS_PATH("GRASS_PATH"),
     END_GATEWAY("END_GATEWAY"),
     COMMAND_REPEATING("REPEATING_COMMAND_BLOCK"),
@@ -219,7 +218,7 @@ public enum XMaterial {
     FROSTED_ICE("FROSTED_ICE"),
     MAGMA("MAGMA_BLOCK"),
     NETHER_WART_BLOCK("NETHER_WART_BLOCK"),
-    RED_NETHER_BRICK("STONE"), //UNKNOWN
+    RED_NETHER_BRICK("STONE"),
     BONE_BLOCK("BONE_BLOCK"),
     STRUCTURE_VOID("STRUCTURE_VOID"),
     OBSERVER("OBSERVER"),
@@ -255,8 +254,8 @@ public enum XMaterial {
     GREEN_GLAZED_TERRACOTTA("GREEN_GLAZED_TERRACOTTA"),
     RED_GLAZED_TERRACOTTA("RED_GLAZED_TERRACOTTA"),
     BLACK_GLAZED_TERRACOTTA("BLACK_GLAZED_TERRACOTTA"),
-    CONCRETE("STONE"), //UNKNOWN
-    CONCRETE_POWDER("STONE"), //UNKNOWN
+    CONCRETE("STONE"),
+    CONCRETE_POWDER("STONE"),
     STRUCTURE_BLOCK("STRUCTURE_BLOCK"),
     IRON_SPADE("IRON_SHOVEL"),
     IRON_PICKAXE("IRON_PICKAXE"),
@@ -466,33 +465,33 @@ public enum XMaterial {
     RECORD_9("MUSIC_DISC_STAL"),
     RECORD_10("MUSIC_DISC_STRAD"),
     RECORD_11("MUSIC_DISC_WAIT"),
-    RECORD_12("MUSIC_DISC_WARD"),
+    RECORD_12("MUSIC_DISC_WARD");
 
-    ;
-    //1.12 Material
     String value;
 
-    XMaterial(String value) {
+    private XMaterial(String value) {
         this.value = value;
     }
 
     public static Material req(String material) {
-        Material mat = Material.matchMaterial(material);
+        Material mat = Material.matchMaterial((String)material);
         return mat;
     }
 
     public static Material reqIfNot(String material, XMaterial backup) {
-        Material mat = req(material);
-        if (mat != null) return mat;
+        Material mat = XMaterial.req(material);
+        if (mat != null) {
+            return mat;
+        }
         return backup.parse();
     }
 
     public Material parse() {
-        Material mat = Material.matchMaterial(this.toString());
+        Material mat = Material.matchMaterial((String)this.toString());
         if (mat != null) {
             return mat;
         }
-        return Material.matchMaterial(value);
+        return Material.matchMaterial((String)this.value);
     }
-
 }
+

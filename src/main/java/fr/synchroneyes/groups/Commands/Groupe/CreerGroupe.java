@@ -8,36 +8,27 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class CreerGroupe extends CommandTemplate {
-
-
     public CreerGroupe() {
-        super();
-        addArgument("nom", true);
-        constructArguments();
-
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(REQUIRE_COMMUNITY_VERSION);
-        accessCommande.add(NO_GROUP);
-        accessCommande.add(GAME_NOT_STARTED);
-
-
+        this.addArgument("nom", true);
+        this.constructArguments();
+        this.accessCommande.add(4);
+        this.accessCommande.add(9);
+        this.accessCommande.add(1);
+        this.accessCommande.add(12);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
-        if (!joueur.getWorld().equals(mineralcontest.plugin.pluginWorld)) {
+        Player joueur = (Player)commandSender;
+        if (!joueur.getWorld().equals((Object)mineralcontest.plugin.pluginWorld)) {
             commandSender.sendMessage(mineralcontest.prefixErreur + Lang.error_command_can_only_be_used_hub_world.toString());
             return false;
         }
-
-
         Groupe nouveauGroupe = new Groupe();
         nouveauGroupe.setNom(args[0]);
         nouveauGroupe.addJoueur(joueur);
         nouveauGroupe.addAdmin(joueur);
         mineralcontest.plugin.creerNouveauGroupe(nouveauGroupe);
-
         return false;
     }
 
@@ -48,12 +39,12 @@ public class CreerGroupe extends CommandTemplate {
 
     @Override
     public String getDescription() {
-        return "Permet de créer un groupe";
+        return "Permet de cr\u00e9er un groupe";
     }
 
     @Override
     public String getPermissionRequise() {
         return "";
     }
-
 }
+

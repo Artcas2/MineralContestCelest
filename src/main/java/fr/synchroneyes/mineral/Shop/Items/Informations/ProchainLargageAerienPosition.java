@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 
 public class ProchainLargageAerienPosition extends ConsumableItem {
-
     @Override
     public String getNomItem() {
         return Lang.shopitem_next_airdrop_location_title.toString();
@@ -43,23 +42,19 @@ public class ProchainLargageAerienPosition extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         Location positionDrop = playerGroup.getGame().getParachuteManager().getNextDropLocation();
-
         String prochainLargageTexte = Lang.shopitem_next_airdrop_onitemuse_location.toString();
-
         prochainLargageTexte = prochainLargageTexte.replace("%x", positionDrop.getBlockX() + "");
         prochainLargageTexte = prochainLargageTexte.replace("%z", positionDrop.getBlockZ() + "");
-
-        joueur.sendMessage(mineralcontest.prefixPrive + prochainLargageTexte);
-
+        this.joueur.sendMessage(mineralcontest.prefixPrive + prochainLargageTexte);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("next_airdrop_location");
     }
-
 }
+

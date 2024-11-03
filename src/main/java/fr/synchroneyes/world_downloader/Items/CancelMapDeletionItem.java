@@ -1,13 +1,11 @@
 package fr.synchroneyes.world_downloader.Items;
 
 import fr.synchroneyes.mineral.Translation.Lang;
+import fr.synchroneyes.world_downloader.Items.ItemInterface;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class CancelMapDeletionItem extends ItemInterface {
-
-
-
     @Override
     public Material getItemMaterial() {
         return Material.GREEN_CONCRETE;
@@ -28,3 +26,4 @@ public class CancelMapDeletionItem extends ItemInterface {
         joueur.closeInventory();
     }
 }
+

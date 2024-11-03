@@ -7,10 +7,9 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public class WaterSpiderAnimation extends EffectAnimation {
-
     @Override
     public String getAnimationName() {
-        return "Araignée d'eau";
+        return "Araign\u00e9e d'eau";
     }
 
     @Override
@@ -35,14 +34,14 @@ public class WaterSpiderAnimation extends EffectAnimation {
 
     @Override
     public void applyCustomSettings(Effect e) {
-        FountainEffect effect = (FountainEffect) e;
-        effect.height = 1F;
-        effect.radius = 3F;
+        FountainEffect effect = (FountainEffect)e;
+        effect.height = 1.0f;
+        effect.radius = 3.0f;
         effect.strands = 8;
-        effect.heightSpout = 0F;
+        effect.heightSpout = 0.0f;
         effect.particlesSpout = 15;
         effect.particlesStrand = 15;
         effect.particle = Particle.DRIP_WATER;
-
     }
 }
+

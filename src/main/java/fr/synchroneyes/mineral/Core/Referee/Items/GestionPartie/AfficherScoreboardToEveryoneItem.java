@@ -10,8 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class AfficherScoreboardToEveryoneItem extends RefereeItemTemplate {
-
-
     public AfficherScoreboardToEveryoneItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -19,19 +17,18 @@ public class AfficherScoreboardToEveryoneItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null || !groupe.getGame().isGameStarted()) return;
-
-
+        if (groupe == null || !groupe.getGame().isGameStarted()) {
+            return;
+        }
         int teamNonEmpty = 0;
         for (House maison : groupe.getGame().getHouses()) {
-            if (!maison.getTeam().getJoueurs().isEmpty()) {
-                groupe.sendToEveryone(Lang.translate(Lang.team_score.toString(), maison.getTeam()));
-                teamNonEmpty++;
-            }
+            if (maison.getTeam().getJoueurs().isEmpty()) continue;
+            groupe.sendToEveryone(Lang.translate(Lang.team_score.toString(), maison.getTeam()));
+            ++teamNonEmpty;
         }
-
-        if (teamNonEmpty == 0)
+        if (teamNonEmpty == 0) {
             joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_no_teams_with_player.toString());
+        }
     }
 
     @Override
@@ -49,3 +46,4 @@ public class AfficherScoreboardToEveryoneItem extends RefereeItemTemplate {
         return Material.EMERALD;
     }
 }
+

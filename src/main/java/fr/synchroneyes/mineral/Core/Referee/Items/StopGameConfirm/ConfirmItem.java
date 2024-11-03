@@ -16,7 +16,9 @@ public class ConfirmItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null || !groupe.getGame().isGameStarted()) return;
+        if (groupe == null || !groupe.getGame().isGameStarted()) {
+            return;
+        }
         try {
             groupe.getGame().terminerPartie();
         } catch (Exception e) {
@@ -39,3 +41,4 @@ public class ConfirmItem extends RefereeItemTemplate {
         return Material.GREEN_CONCRETE;
     }
 }
+

@@ -1,17 +1,15 @@
 package fr.synchroneyes.mineral.Core.Referee.Items;
 
-
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public interface RefereeItem {
+    public void performClick(Player var1);
 
-    public abstract void performClick(Player joueur);
+    public String getNomItem();
 
-    public abstract String getNomItem();
+    public String getDescriptionItem();
 
-    public abstract String getDescriptionItem();
-
-    public abstract Material getItemMaterial();
-
+    public Material getItemMaterial();
 }
+

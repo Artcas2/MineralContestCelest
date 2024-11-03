@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public class EnderDomeAnimation extends EffectAnimation {
-
     @Override
     public String getAnimationName() {
         return "EnderDome";
@@ -35,8 +34,9 @@ public class EnderDomeAnimation extends EffectAnimation {
 
     @Override
     public void applyCustomSettings(Effect e) {
-        ShieldEffect effect = (ShieldEffect) e;
-        effect.radius = 2F;
+        ShieldEffect effect = (ShieldEffect)e;
+        effect.radius = 2.0;
         effect.particle = Particle.REVERSE_PORTAL;
     }
 }
+

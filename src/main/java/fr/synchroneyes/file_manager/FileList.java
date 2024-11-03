@@ -3,7 +3,6 @@ package fr.synchroneyes.file_manager;
 import java.io.File;
 
 public enum FileList {
-
     Lang_french_file("language", "french.yml"),
     Lang_english_file("language", "english.yml"),
     Config_default_plugin("config", "plugin_config.yml"),
@@ -27,22 +26,22 @@ public enum FileList {
     private String path;
     private String fileName;
 
-    FileList(String path, String fileName) {
+    private FileList(String path, String fileName) {
         this.path = path;
         this.fileName = fileName;
     }
 
-
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public String getFileName() {
-        return fileName;
+        return this.fileName;
     }
 
     public String toString() {
-        String dossier = getPath().replace("/", File.separator);
-        return dossier + File.separator + getFileName();
+        String dossier = this.getPath().replace("/", File.separator);
+        return dossier + File.separator + this.getFileName();
     }
 }
+

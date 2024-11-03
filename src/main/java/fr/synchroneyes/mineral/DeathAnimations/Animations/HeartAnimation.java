@@ -1,25 +1,14 @@
 package fr.synchroneyes.mineral.DeathAnimations.Animations;
 
 import de.slikey.effectlib.Effect;
-import de.slikey.effectlib.EffectManager;
-import de.slikey.effectlib.effect.*;
-import fr.synchroneyes.mineral.DeathAnimations.DeathAnimation;
+import de.slikey.effectlib.effect.ImageEffect;
 import fr.synchroneyes.mineral.DeathAnimations.EffectAnimation;
-import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.Color;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-
-import java.io.File;
 
 public class HeartAnimation extends EffectAnimation {
-
     @Override
     public String getAnimationName() {
-        return "Araignée d'eau";
+        return "Araign\u00e9e d'eau";
     }
 
     @Override
@@ -44,6 +33,6 @@ public class HeartAnimation extends EffectAnimation {
 
     @Override
     public void applyCustomSettings(Effect e) {
-
     }
 }
+

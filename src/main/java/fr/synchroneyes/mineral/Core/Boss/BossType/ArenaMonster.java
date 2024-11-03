@@ -5,26 +5,23 @@ import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.DeathAnimations.Animations.HalloweenHurricaneAnimation;
 import fr.synchroneyes.mineral.Utils.Radius;
 import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.Bukkit;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class ArenaMonster extends Boss {
-
     private Game partie;
 
     public ArenaMonster(Game partie) {
-        super();
         this.partie = partie;
     }
 
@@ -35,12 +32,12 @@ public class ArenaMonster extends Boss {
 
     @Override
     public double getSanteMax() {
-        return 150;
+        return 150.0;
     }
 
     @Override
     public double getDegatsParAttaque() {
-        return 5;
+        return 5.0;
     }
 
     @Override
@@ -59,30 +56,23 @@ public class ArenaMonster extends Boss {
 
     @Override
     public List<ItemStack> getKillRewards() {
-        List<ItemStack> items = new LinkedList<>();
-
-        // On donne 5 émeraudes
-        for(int i = 0; i < 5; ++i)
+        int i;
+        LinkedList<ItemStack> items = new LinkedList<ItemStack>();
+        for (i = 0; i < 5; ++i) {
             items.add(new ItemStack(Material.EMERALD, 1));
-
-        // 15 diams
-        for(int i = 0; i < 15; ++i)
+        }
+        for (i = 0; i < 15; ++i) {
             items.add(new ItemStack(Material.DIAMOND, 1));
-
-        // 20 or
-        for(int i = 0; i < 4; ++i)
+        }
+        for (i = 0; i < 4; ++i) {
             items.add(new ItemStack(Material.GOLD_INGOT, 5));
-
-        // 30 fer
-        for(int i = 0; i < 3; ++i)
+        }
+        for (i = 0; i < 3; ++i) {
             items.add(new ItemStack(Material.IRON_INGOT, 10));
-
-        // 20 redstone
-        for(int i = 0; i < 3; ++i)
+        }
+        for (i = 0; i < 3; ++i) {
             items.add(new ItemStack(Material.REDSTONE, 20));
-
-
-
+        }
         return items;
     }
 
@@ -103,15 +93,12 @@ public class ArenaMonster extends Boss {
 
     @Override
     public void doMobSpecialAttack() {
-        for(Player joueur : this.partie.groupe.getPlayers()) {
-            // Si le boss est proche du joueur
-            if(Radius.isBlockInRadius(entity.getLocation(), joueur.getLocation(), 5)) {
-                joueur.sendMessage(mineralcontest.prefixPrive + this.getName() + ": Ceci n'est qu'un avant-goût de ma puissance ... Souffrez !");
-                joueur.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 20*3, 1));
-                joueur.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20*3, 1));
-
-                joueur.getWorld().strikeLightningEffect(joueur.getLocation());
-            }
+        for (Player joueur : this.partie.groupe.getPlayers()) {
+            if (!Radius.isBlockInRadius(this.entity.getLocation(), joueur.getLocation(), 5)) continue;
+            joueur.sendMessage(mineralcontest.prefixPrive + this.getName() + ": Ceci n'est qu'un avant-go\u00fbt de ma puissance ... Souffrez !");
+            joueur.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 60, 1));
+            joueur.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 60, 1));
+            joueur.getWorld().strikeLightningEffect(joueur.getLocation());
         }
     }
 
@@ -127,24 +114,22 @@ public class ArenaMonster extends Boss {
 
     @Override
     public void defineCustomAttributes() {
-        this.entity.getAttribute(Attribute.GENERIC_ATTACK_KNOCKBACK).setBaseValue(2);
+        this.entity.getAttribute(Attribute.GENERIC_ATTACK_KNOCKBACK).setBaseValue(2.0);
     }
 
     @Override
     public void onBossDeath() {
         HalloweenHurricaneAnimation animationMort = new HalloweenHurricaneAnimation();
-        animationMort.playAnimation(entity);
+        animationMort.playAnimation((LivingEntity)this.entity);
     }
 
     @Override
     public void onBossSpawn() {
         this.entity.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 99999999, 10));
-
     }
 
     @Override
     protected void performAnnouncement() {
-
     }
 
     @Override
@@ -154,6 +139,6 @@ public class ArenaMonster extends Boss {
 
     @Override
     public void onBossRemove() {
-
     }
 }
+

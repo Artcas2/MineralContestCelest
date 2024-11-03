@@ -1,9 +1,8 @@
 package fr.synchroneyes.mineral.Utils.Log;
 
-import org.json.JSONObject;
-
 import java.text.DateFormat;
 import java.util.Date;
+import org.json.JSONObject;
 
 public class Log {
     private String type;
@@ -24,38 +23,27 @@ public class Log {
     }
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public String toJson() {
-
-        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(
-                DateFormat.SHORT,
-                DateFormat.SHORT);
-
+        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(3, 3);
         JSONObject value = new JSONObject();
-        value.put("type", type);
-        value.put("content", content);
-        value.put("date", shortDateFormat.format(hour));
-        value.put("cause", cause);
-
+        value.put("type", this.type);
+        value.put("content", this.content);
+        value.put("date", shortDateFormat.format(this.hour));
+        value.put("cause", this.cause);
         return value.toString();
-
     }
 
     public JSONObject toJsonObject() {
-
-        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(
-                DateFormat.SHORT,
-                DateFormat.SHORT);
-
+        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(3, 3);
         JSONObject value = new JSONObject();
-        value.put("type", type);
-        value.put("content", content);
-        value.put("date", shortDateFormat.format(hour));
-        value.put("cause", cause);
-
+        value.put("type", this.type);
+        value.put("content", this.content);
+        value.put("date", shortDateFormat.format(this.hour));
+        value.put("cause", this.cause);
         return value;
-
     }
 }
+

@@ -1,28 +1,27 @@
 package fr.synchroneyes.mineral.Core.Game.JoinTeam.Items;
 
 import fr.synchroneyes.groups.Core.Groupe;
+import fr.synchroneyes.mineral.Core.Game.JoinTeam.Items.ItemInterface;
 import fr.synchroneyes.mineral.Teams.Equipe;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.Utils.ChatColorString;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JoinTeamItem extends ItemInterface {
-
     private Equipe team;
 
     public JoinTeamItem(Equipe equipe) {
-        team = equipe;
+        this.team = equipe;
     }
 
     @Override
     public Material getItemMaterial() {
         try {
-            return Material.valueOf(ChatColorString.toStringEN(team.getCouleur()) + "_CONCRETE");
+            return Material.valueOf((String)(ChatColorString.toStringEN(this.team.getCouleur()) + "_CONCRETE"));
         } catch (IllegalArgumentException iae) {
             return Material.WHITE_WOOL;
         }
@@ -30,21 +29,19 @@ public class JoinTeamItem extends ItemInterface {
 
     @Override
     public String getNomInventaire() {
-        return team.getCouleur() + team.getNomEquipe();
+        return this.team.getCouleur() + this.team.getNomEquipe();
     }
 
     @Override
     public List<String> getDescriptionInventaire() {
-        // On ajoute la liste des joueurs présent dans l'équipe
-        List<String> list = new ArrayList<>();
-        if (team.getJoueurs().isEmpty()) {
+        ArrayList<String> list = new ArrayList<String>();
+        if (this.team.getJoueurs().isEmpty()) {
             list.add(Lang.currently_no_player_in_this_team.toString());
             return list;
         }
-
-        for (Player joueur : team.getJoueurs())
+        for (Player joueur : this.team.getJoueurs()) {
             list.add("> " + joueur.getDisplayName());
-
+        }
         return list;
     }
 
@@ -59,19 +56,15 @@ public class JoinTeamItem extends ItemInterface {
             joueur.closeInventory();
             return;
         }
-
-        // Si le joueur possède une équipe, on le retire de son équipe
         Equipe playerTeam = playerGroup.getPlayerTeam(joueur);
-        if (playerTeam != null) playerTeam.removePlayer(joueur);
-
-        // On ajoute le joueur dans sa nouvelle équipe
-
+        if (playerTeam != null) {
+            playerTeam.removePlayer(joueur);
+        }
         try {
-
             this.team.addPlayerToTeam(joueur, !playerGroup.getGame().isGameStarted());
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
+

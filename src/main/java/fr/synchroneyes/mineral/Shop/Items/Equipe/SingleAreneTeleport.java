@@ -42,19 +42,19 @@ public class SingleAreneTeleport extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         Equipe playerTeam = playerGroup.getPlayerTeam(this.joueur);
-        if (playerTeam == null) return;
-
+        if (playerTeam == null) {
+            return;
+        }
         playerGroup.getGame().getArene().addTeamToSinglePlayerTeleport(playerTeam);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("team_single_teleport");
-
     }
-
 }
+

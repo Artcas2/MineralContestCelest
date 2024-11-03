@@ -2,62 +2,36 @@ package fr.synchroneyes.mineral.Events;
 
 import fr.synchroneyes.custom_events.MCPlayerChangedWorldEvent;
 import fr.synchroneyes.custom_events.MCPlayerJoinEvent;
-import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mineral.Core.MCPlayer;
 import fr.synchroneyes.mineral.mineralcontest;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerEvent;
 
 public class Spigot_WorldChangeEvent implements Listener {
-
     @EventHandler
     public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-
-
-        World monde_source, monde_destination;
-        monde_source = event.getFrom();
-        monde_destination = event.getPlayer().getWorld();
-
-        //Bukkit.broadcastMessage(event.getPlayer().getWorld().getName() + " - " + event.getPlayer().getLocation().getX() + " - " + event.getPlayer().getLocation().getZ());
-
-        // On ne traite que les changements de monde du plugin
+        World monde_source = event.getFrom();
+        World monde_destination = event.getPlayer().getWorld();
         Player joueur = event.getPlayer();
-
-        // On regarde si le joueur fait déjà parti du plugin
         MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-
-        // Si le mcPlayer est null; le joueur ne vient pas du plugin.
-        // On doit alors regarder si il se dirige vers un monde du plugin
-        if(mcPlayer == null) {
-            // Vérification du monde de destination
-            // Il faut aussi que le monde de départ ne soit pas le lobby
-            if(mineralcontest.isAMineralContestWorld(monde_destination) && !mineralcontest.isAMineralContestWorld(monde_source)) {
-                // Le joueur se rend dans un monde mineral contest pour la première fois
-                // On appelle l'event "MCPlayerJoinEvent"
+        if (mcPlayer == null) {
+            if (mineralcontest.isAMineralContestWorld(monde_destination) && !mineralcontest.isAMineralContestWorld(monde_source)) {
                 MCPlayerJoinEvent joinEvent = new MCPlayerJoinEvent(joueur);
-                Bukkit.getServer().getPluginManager().callEvent(joinEvent);
+                Bukkit.getServer().getPluginManager().callEvent((Event)joinEvent);
                 return;
             }
-
-            // Le joueur ne se dirige pas vers un monde mineral contest; on s'en fou
             return;
         }
-
-        // Le joueur fait parti du plugin mineral contest
         MCPlayerChangedWorldEvent mcPlayerChangedWorldEvent = new MCPlayerChangedWorldEvent(monde_source, monde_destination, mcPlayer);
-        Bukkit.getServer().getPluginManager().callEvent(mcPlayerChangedWorldEvent);
-
-        if(mcPlayerChangedWorldEvent.isCancelled()) {
-            // On téléporte le joueur à son ancienne position
+        Bukkit.getServer().getPluginManager().callEvent((Event)mcPlayerChangedWorldEvent);
+        if (mcPlayerChangedWorldEvent.isCancelled()) {
             event.getPlayer().teleport(mcPlayer.getPLayerLocationFromWorld(monde_source));
         }
-        return;
-
-
     }
 }
+

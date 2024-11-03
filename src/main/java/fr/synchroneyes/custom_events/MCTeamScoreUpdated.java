@@ -1,16 +1,13 @@
 package fr.synchroneyes.custom_events;
 
-import fr.synchroneyes.mineral.Core.MCPlayer;
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Teams.Equipe;
 import org.bukkit.event.Cancellable;
 
 public class MCTeamScoreUpdated extends MCEvent implements Cancellable {
-
     private int oldScore;
     private int newScore;
     private Equipe equipe;
-
-
     private boolean cancelled = false;
 
     public MCTeamScoreUpdated(int oldScore, int newScore, Equipe equipe) {
@@ -19,26 +16,24 @@ public class MCTeamScoreUpdated extends MCEvent implements Cancellable {
         this.equipe = equipe;
     }
 
-    @Override
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
-    @Override
     public void setCancelled(boolean b) {
-        cancelled = b;
+        this.cancelled = b;
     }
-
 
     public int getOldScore() {
-        return oldScore;
+        return this.oldScore;
     }
 
     public int getNewScore() {
-        return newScore;
+        return this.newScore;
     }
 
     public Equipe getEquipe() {
-        return equipe;
+        return this.equipe;
     }
 }
+

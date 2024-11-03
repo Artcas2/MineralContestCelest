@@ -8,13 +8,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class OuvrirGroupe extends CommandTemplate {
-
-    public OuvrirGroupe(){
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(REQUIRE_COMMUNITY_VERSION);
-        accessCommande.add(GROUP_REQUIRED);
-        accessCommande.add(GAME_NOT_STARTED);
-        accessCommande.add(GROUP_ADMIN);
+    public OuvrirGroupe() {
+        this.accessCommande.add(4);
+        this.accessCommande.add(9);
+        this.accessCommande.add(0);
+        this.accessCommande.add(12);
+        this.accessCommande.add(2);
     }
 
     @Override
@@ -34,26 +33,16 @@ public class OuvrirGroupe extends CommandTemplate {
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-
-        // On sait que le joueur est déjà dans un group, et qu'il est admin
-        Player joueur = (Player) commandSender;
-
+        Player joueur = (Player)commandSender;
         MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-
-        // ON récupère son groupe
         Groupe groupe = mcPlayer.getGroupe();
-
-        if(!groupe.isGroupLocked()) {
-            joueur.sendMessage(mineralcontest.prefixErreur + "Le groupe est déjà ouvert!");
+        if (!groupe.isGroupLocked()) {
+            joueur.sendMessage(mineralcontest.prefixErreur + "Le groupe est d\u00e9j\u00e0 ouvert!");
             return true;
         }
-
         groupe.setGroupLocked(false);
-
-        joueur.sendMessage(mineralcontest.prefixPrive + "Le groupe est désormais ouvert.");
-
-
-
+        joueur.sendMessage(mineralcontest.prefixPrive + "Le groupe est d\u00e9sormais ouvert.");
         return false;
     }
 }
+

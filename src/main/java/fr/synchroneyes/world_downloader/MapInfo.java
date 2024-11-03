@@ -20,7 +20,7 @@ public class MapInfo {
         map.map_description = object.getString("map_description");
         map.map_file_name = object.getString("map_file_name");
         map.map_folder_name = object.getString("map_folder_name");
-
         return map;
     }
 }
+

@@ -18,7 +18,5 @@ public class CouplePlayerTeam {
     public Equipe getTeam() {
         return this.team;
     }
-
-
-
 }
+

@@ -1,18 +1,18 @@
 package fr.synchroneyes.mineral.Scoreboard;
 
-import org.bukkit.entity.Player;
-
+import fr.synchroneyes.mineral.Scoreboard.AutomaticBoard;
+import fr.synchroneyes.mineral.Scoreboard.BoardPage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.bukkit.entity.Player;
 
 public class PagedBoard extends AutomaticBoard {
-    private HashMap<BoardPage, Integer> pages;
-    private int count, currentPageId;
+    private HashMap<BoardPage, Integer> pages = new HashMap();
+    private int count = 0;
+    private int currentPageId;
 
     public PagedBoard() {
         super(1);
-        this.pages = new HashMap<>();
-        this.count = 0;
     }
 
     public void addPage(BoardPage page, int ticks) {
@@ -25,22 +25,23 @@ public class PagedBoard extends AutomaticBoard {
 
     @Override
     public void update(Player p) {
-        getPage().update(p);
+        this.getPage().update(p);
     }
 
     public BoardPage getPage() {
-        return new ArrayList<>(pages.keySet()).get(currentPageId);
+        return new ArrayList<BoardPage>(this.pages.keySet()).get(this.currentPageId);
     }
 
     @Override
     public void run() {
         super.run();
-        if (++this.count >= pages.get(getPage())) {
+        if (++this.count >= this.pages.get(this.getPage())) {
             this.count = 0;
-            this.currentPageId++;
-
-            if (this.currentPageId >= this.pages.size())
+            ++this.currentPageId;
+            if (this.currentPageId >= this.pages.size()) {
                 this.currentPageId = 0;
+            }
         }
     }
 }
+

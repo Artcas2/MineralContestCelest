@@ -9,20 +9,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-
 public class ReadyCommand implements CommandExecutor {
-    @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-
-
         if (!(commandSender instanceof Player)) {
             commandSender.sendMessage(Lang.error_command_can_only_be_used_in_game.toString());
             return false;
         }
-
-        Player player = (Player) commandSender;
-
-
+        Player player = (Player)commandSender;
         if (mineralcontest.isInAMineralContestWorld(player)) {
             Game partie = mineralcontest.getPlayerGame(player);
             if (partie == null) {
@@ -30,18 +23,18 @@ public class ReadyCommand implements CommandExecutor {
                 return false;
             }
             if (command.getName().equalsIgnoreCase("ready")) {
-
-                if (partie.groupe.getEtatPartie().equals(Etats.EN_ATTENTE)) {
+                if (partie.groupe.getEtatPartie().equals((Object)Etats.EN_ATTENTE)) {
                     try {
                         partie.setPlayerReady(player);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-
-                if (partie.groupe.getEtatPartie().equals(Etats.ATTENTE_DEBUT_PARTIE)) {
+                if (partie.groupe.getEtatPartie().equals((Object)Etats.ATTENTE_DEBUT_PARTIE)) {
                     try {
-                        if (!partie.isPlayerReady(player)) partie.setPlayerReady(player);
+                        if (!partie.isPlayerReady(player)) {
+                            partie.setPlayerReady(player);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -51,3 +44,4 @@ public class ReadyCommand implements CommandExecutor {
         return false;
     }
 }
+

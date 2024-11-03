@@ -21,7 +21,6 @@ public class PotionSpeed1 extends PotionItem {
         return ShopManager.getBonusPriceFromName("speed1_potion");
     }
 
-
     @Override
     public PotionEffectType getPotionType() {
         return PotionEffectType.SPEED;
@@ -37,3 +36,4 @@ public class PotionSpeed1 extends PotionItem {
         return 5;
     }
 }
+

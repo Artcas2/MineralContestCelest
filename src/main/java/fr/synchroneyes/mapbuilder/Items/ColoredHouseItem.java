@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ColoredHouseItem {
-
     private ItemStack item;
     public static String itemPrefix = "Maison ";
 
@@ -18,7 +17,7 @@ public class ColoredHouseItem {
     }
 
     public void giveItemToPlayer(Player p) {
-        p.getInventory().addItem(item);
+        p.getInventory().addItem(new ItemStack[]{this.item});
     }
-
 }
+

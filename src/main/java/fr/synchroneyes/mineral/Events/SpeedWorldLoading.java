@@ -9,15 +9,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldInitEvent;
 
 public class SpeedWorldLoading implements Listener {
-
-    @EventHandler(priority= EventPriority.HIGHEST)
+    @EventHandler(priority=EventPriority.HIGHEST)
     public void enableSpeedWorldLoading(WorldInitEvent event) {
         World monde = event.getWorld();
-
-        // Si c'est un monde mineral contest; on active le chargement rapide
-        if(mineralcontest.isAMineralContestWorld(monde)) {
+        if (mineralcontest.isAMineralContestWorld(monde)) {
             Bukkit.getLogger().info("Fast load for:" + monde.getName());
             monde.setKeepSpawnInMemory(false);
         }
     }
 }
+

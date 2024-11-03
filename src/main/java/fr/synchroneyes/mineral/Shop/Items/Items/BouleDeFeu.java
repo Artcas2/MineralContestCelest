@@ -6,6 +6,7 @@ import fr.synchroneyes.mineral.Shop.Items.Abstract.ConsumableItem;
 import fr.synchroneyes.mineral.Shop.ShopManager;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.LinkedList;
 import org.bukkit.Material;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
@@ -13,23 +14,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class BouleDeFeu extends ConsumableItem {
-
     public static ItemStack toInventoryItem() {
-
         BouleDeFeu instance = new BouleDeFeu();
         ItemStack item = new ItemStack(Material.FIRE_CHARGE);
         ItemMeta meta = item.getItemMeta();
-        List<String> description = new LinkedList<>();
-
+        LinkedList<String> description = new LinkedList<String>();
         description.add(Lang.translate(instance.getDescriptionItem()[0]));
-
         meta.setDisplayName(Lang.translate(instance.getNomItem()));
         item.setItemMeta(meta);
-
         return item;
     }
 
@@ -65,9 +58,7 @@ public class BouleDeFeu extends ConsumableItem {
 
     @Override
     public void onItemUse() {
-
-
-        joueur.getInventory().addItem(toInventoryItem());
+        this.joueur.getInventory().addItem(new ItemStack[]{BouleDeFeu.toInventoryItem()});
     }
 
     @Override
@@ -75,17 +66,14 @@ public class BouleDeFeu extends ConsumableItem {
         return ShopManager.getBonusPriceFromName("fireball");
     }
 
-
     public static void FireballPlayerInteractEvent(PlayerInteractEvent event) throws EventAlreadyHandledException {
         Player joueur = event.getPlayer();
-
         ItemStack itemBouleDeFeu = BouleDeFeu.toInventoryItem();
-
         if (mineralcontest.isInAMineralContestWorld(joueur)) {
             Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-            if (playerGroup == null) return;
-
-
+            if (playerGroup == null) {
+                return;
+            }
             if (event.getItem() != null && event.getItem().getItemMeta() != null && event.getItem().getItemMeta().getDisplayName().equals(itemBouleDeFeu.getItemMeta().getDisplayName())) {
                 event.getItem().setAmount(event.getItem().getAmount() - 1);
                 joueur.launchProjectile(Fireball.class);
@@ -94,3 +82,4 @@ public class BouleDeFeu extends ConsumableItem {
         }
     }
 }
+

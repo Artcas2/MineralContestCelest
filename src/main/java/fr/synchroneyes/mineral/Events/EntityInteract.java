@@ -13,37 +13,32 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 
 public class EntityInteract implements Listener {
-
     @EventHandler
     public void onEntityInteract(EntityInteractEvent event) {
-
-        if (MapBuilder.getInstance().isBuilderModeEnabled) return;
-
+        if (MapBuilder.getInstance().isBuilderModeEnabled) {
+            return;
+        }
         World worldEvent = event.getEntity().getWorld();
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             Game partie = mineralcontest.getWorldGame(worldEvent);
-            if (event.getEntity() instanceof Player) {
-                if (partie != null && partie.isGamePaused())
-                    event.setCancelled(true);
+            if (event.getEntity() instanceof Player && partie != null && partie.isGamePaused()) {
+                event.setCancelled(true);
             }
         }
-
-
     }
 
     @EventHandler
     public void onEntityAttack(EntityDamageByEntityEvent event) {
-
-        if (MapBuilder.getInstance().isBuilderModeEnabled) return;
-
+        if (MapBuilder.getInstance().isBuilderModeEnabled) {
+            return;
+        }
         World worldEvent = event.getEntity().getWorld();
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             Game partie = mineralcontest.getWorldGame(worldEvent);
-            if (event.getEntity() instanceof Player)
-                if (partie != null && partie.isGamePaused())
-                    if (event.getDamager() instanceof Monster || event.getDamager() instanceof Arrow)
-                        event.setCancelled(true);
+            if (event.getEntity() instanceof Player && partie != null && partie.isGamePaused() && (event.getDamager() instanceof Monster || event.getDamager() instanceof Arrow)) {
+                event.setCancelled(true);
+            }
         }
-
     }
 }
+

@@ -2,6 +2,7 @@ package fr.synchroneyes.mineral.Core.Referee.Items;
 
 import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.Core.Referee.Inventory.InventoryTemplate;
+import fr.synchroneyes.mineral.Core.Referee.Items.RefereeItemTemplate;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
 import org.bukkit.Material;
@@ -11,21 +12,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public class OpenTeamInventory extends RefereeItemTemplate {
-
     public OpenTeamInventory(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
 
     @Override
     public void performClick(Player joueur) {
-        if (target instanceof House) {
-            House maison = (House) target;
+        if (this.target instanceof House) {
+            House maison = (House)this.target;
             joueur.closeInventory();
-
             Inventory coffreMaison = null;
             try {
                 Block block_coffre = maison.getCoffreEquipeLocation().getBlock();
-                Chest coffre = ((Chest) block_coffre.getState());
+                Chest coffre = (Chest)block_coffre.getState();
                 coffreMaison = coffre.getInventory();
                 joueur.openInventory(coffreMaison);
                 joueur.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.referee_team_current_score.toString(), maison.getTeam()));
@@ -37,12 +36,12 @@ public class OpenTeamInventory extends RefereeItemTemplate {
 
     @Override
     public String getNomItem() {
-        return Lang.translate(Lang.referee_item_team_chest_item_title.toString(), ((House) target).getTeam());
+        return Lang.translate(Lang.referee_item_team_chest_item_title.toString(), ((House)this.target).getTeam());
     }
 
     @Override
     public String getDescriptionItem() {
-        return Lang.translate(Lang.referee_item_team_chest_item_description.toString(), ((House) target).getTeam());
+        return Lang.translate(Lang.referee_item_team_chest_item_description.toString(), ((House)this.target).getTeam());
     }
 
     @Override
@@ -50,3 +49,4 @@ public class OpenTeamInventory extends RefereeItemTemplate {
         return Material.CHEST;
     }
 }
+

@@ -5,65 +5,50 @@ import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mapbuilder.Core.Monde;
 import fr.synchroneyes.mapbuilder.MapBuilder;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 public class mcarena extends CommandTemplate {
-
-    private LinkedList<String> actionsPossible;
-
+    private LinkedList<String> actionsPossible = new LinkedList();
 
     public mcarena() {
-
-
-        this.actionsPossible = new LinkedList<>();
-        actionsPossible.add("setCoffreLocation");
-        actionsPossible.add("setTeleportLocation");
-        actionsPossible.add("setSafezoneRadius");
-
-
-        addArgument("action", true);
-        addArgument("taille", false);
-
-
-
-        accessCommande.add(PLAYER_COMMAND);
-        constructArguments();
+        this.actionsPossible.add("setCoffreLocation");
+        this.actionsPossible.add("setTeleportLocation");
+        this.actionsPossible.add("setSafezoneRadius");
+        this.addArgument("action", true);
+        this.addArgument("taille", false);
+        this.accessCommande.add(4);
+        this.constructArguments();
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
         Monde monde = MapBuilder.monde;
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         if (args[0].equalsIgnoreCase("setCoffreLocation")) {
             Location coffreLocation = joueur.getLocation().getBlock().getLocation();
             monde.getArene().setCoffre(coffreLocation);
-            joueur.sendMessage(mineralcontest.prefixPrive + "La position du coffre a bien été ajouté en " + coffreLocation.toVector().toString());
+            joueur.sendMessage(mineralcontest.prefixPrive + "La position du coffre a bien \u00e9t\u00e9 ajout\u00e9 en " + coffreLocation.toVector().toString());
             return false;
         }
-
         if (args[0].equalsIgnoreCase("setTeleportLocation")) {
             Location coffreLocation = joueur.getLocation().getBlock().getLocation();
             monde.getArene().setTeleportSpawn(coffreLocation);
-            joueur.sendMessage(mineralcontest.prefixPrive + "La position de téléportation de /arene a bien été ajoutée en " + coffreLocation.toVector().toString());
-
+            joueur.sendMessage(mineralcontest.prefixPrive + "La position de t\u00e9l\u00e9portation de /arene a bien \u00e9t\u00e9 ajout\u00e9e en " + coffreLocation.toVector().toString());
             return false;
         }
-
         if (args[0].equalsIgnoreCase("setSafezoneRadius")) {
             Location teleportLocation = monde.getArene().getTeleportSpawn();
             World _monde = teleportLocation.getWorld();
             _monde.getWorldBorder().setCenter(teleportLocation);
-            _monde.getWorldBorder().setSize(Integer.parseInt(args[1]) * 2);
+            _monde.getWorldBorder().setSize((double)(Integer.parseInt(args[1]) * 2));
             monde.setArena_safezone_radius(Integer.parseInt(args[1]));
         }
-
         return false;
     }
 
@@ -72,10 +57,9 @@ public class mcarena extends CommandTemplate {
         return "mcarena";
     }
 
-
     @Override
     public String getDescription() {
-        return "Commandes relative à la création d'une arène";
+        return "Commandes relative \u00e0 la cr\u00e9ation d'une ar\u00e8ne";
     }
 
     @Override
@@ -83,27 +67,27 @@ public class mcarena extends CommandTemplate {
         return "admin";
     }
 
-    @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] arguments) throws IllegalArgumentException {
         if (sender instanceof Player) {
-            Player joueur = (Player) sender;
+            Player joueur = (Player)sender;
             Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-            if (playerGroup == null) return null;
-
+            if (playerGroup == null) {
+                return null;
+            }
             if (arguments.length == 1) {
                 String argument = arguments[0];
-
-                List<String> available_cvar = new ArrayList<>();
-                for (String action : actionsPossible) {
-                    if (action.equalsIgnoreCase(argument) || action.toLowerCase().contains(argument.toLowerCase()))
-                        available_cvar.add(action);
+                ArrayList<String> available_cvar = new ArrayList<String>();
+                for (String action : this.actionsPossible) {
+                    if (!action.equalsIgnoreCase(argument) && !action.toLowerCase().contains(argument.toLowerCase())) continue;
+                    available_cvar.add(action);
                 }
-
-                if (available_cvar.isEmpty()) available_cvar.add("No results");
+                if (available_cvar.isEmpty()) {
+                    available_cvar.add("No results");
+                }
                 return available_cvar;
             }
         }
-
         return null;
     }
 }
+

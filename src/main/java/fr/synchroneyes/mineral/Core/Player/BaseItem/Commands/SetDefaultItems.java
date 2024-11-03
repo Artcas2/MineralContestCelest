@@ -7,21 +7,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SetDefaultItems extends CommandTemplate {
-
     public SetDefaultItems() {
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(GROUP_REQUIRED);
-        accessCommande.add(GROUP_ADMIN);
-
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(2);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-
         groupe.getPlayerBaseItem().openInventory(joueur);
-
         return false;
     }
 
@@ -32,7 +28,7 @@ public class SetDefaultItems extends CommandTemplate {
 
     @Override
     public String getDescription() {
-        return "Permet de définir les objets par défaut";
+        return "Permet de d\u00e9finir les objets par d\u00e9faut";
     }
 
     @Override
@@ -40,3 +36,4 @@ public class SetDefaultItems extends CommandTemplate {
         return "";
     }
 }
+

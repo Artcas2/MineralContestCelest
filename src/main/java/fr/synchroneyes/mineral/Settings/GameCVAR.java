@@ -1,7 +1,6 @@
 package fr.synchroneyes.mineral.Settings;
 
 public class GameCVAR {
-
     private String command;
     private String description;
     private String valeur;
@@ -17,45 +16,44 @@ public class GameCVAR {
         this.type = type;
         this.canBeReloaded = canBeReloadedInGame;
         this.isNumber = isNumber;
-
-        if (isNumber) valeurNumerique = Integer.parseInt(valeur);
+        if (isNumber) {
+            this.valeurNumerique = Integer.parseInt(valeur);
+        }
     }
 
-
     public String getCommand() {
-        return command;
+        return this.command;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
-
     public String getValeur() {
-        return valeur;
+        return this.valeur;
     }
 
     public void setValeur(String valeur) {
         this.valeur = valeur;
-        if (isNumber) valeurNumerique = Integer.parseInt(valeur);
-
+        if (this.isNumber) {
+            this.valeurNumerique = Integer.parseInt(valeur);
+        }
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
-
 
     public boolean canBeReloaded() {
-        return canBeReloaded;
+        return this.canBeReloaded;
     }
 
-
     public boolean isNumber() {
-        return isNumber;
+        return this.isNumber;
     }
 
     public int getValeurNumerique() {
-        return valeurNumerique;
+        return this.valeurNumerique;
     }
 }
+

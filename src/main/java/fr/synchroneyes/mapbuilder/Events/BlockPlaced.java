@@ -17,24 +17,22 @@ import org.bukkit.inventory.ItemStack;
 public class BlockPlaced implements Listener {
     @EventHandler
     public void onBlockPlaced(BlockPlaceEvent event) {
-
-        if (!MapBuilder.getInstance().isBuilderModeEnabled) return;
+        if (!MapBuilder.getInstance().isBuilderModeEnabled) {
+            return;
+        }
         ItemStack placedItem = event.getItemInHand();
         String itemName = placedItem.getItemMeta().getDisplayName();
         Player player = event.getPlayer();
-
         if (itemName.contains(ColoredHouseItem.itemPrefix)) {
             placedItem.setType(Material.AIR);
             Location spawnItemLocation = event.getBlock().getLocation();
             House.spawn(BlocksDataColor.fromItemName(itemName), player);
             event.setCancelled(true);
         }
-
         if (itemName.equalsIgnoreCase(AreneItem.itemPrefix)) {
             Arene.spawn(player);
             event.setCancelled(true);
         }
-
-
     }
 }
+

@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class PauseGameItem extends RefereeItemTemplate {
-
     public PauseGameItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -17,9 +16,12 @@ public class PauseGameItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null) return;
-        if (groupe.getGame() == null) return;
-
+        if (groupe == null) {
+            return;
+        }
+        if (groupe.getGame() == null) {
+            return;
+        }
         if (groupe.getGame().isGameStarted()) {
             if (!groupe.getGame().isGamePaused()) {
                 groupe.getGame().pauseGame();
@@ -44,3 +46,4 @@ public class PauseGameItem extends RefereeItemTemplate {
         return Material.YELLOW_CONCRETE;
     }
 }
+

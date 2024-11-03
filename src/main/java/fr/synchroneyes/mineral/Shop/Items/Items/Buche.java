@@ -21,10 +21,9 @@ public class Buche extends GameItem {
         return Material.OAK_LOG;
     }
 
-
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("oak");
     }
-
 }
+

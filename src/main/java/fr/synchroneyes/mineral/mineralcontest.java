@@ -1,7 +1,11 @@
 package fr.synchroneyes.mineral;
 
 import de.slikey.effectlib.EffectManager;
-import fr.synchroneyes.custom_events.*;
+import fr.synchroneyes.custom_events.MCGameEndEvent;
+import fr.synchroneyes.custom_events.MCPlayerJoinEvent;
+import fr.synchroneyes.custom_events.MCPluginLoaded;
+import fr.synchroneyes.custom_events.PermissionCheckerLoop;
+import fr.synchroneyes.custom_events.PlayerLocationSaverLoop;
 import fr.synchroneyes.custom_plugins.CustomPlugin;
 import fr.synchroneyes.custom_plugins.CustomPluginManager;
 import fr.synchroneyes.data_storage.Data_EventHandler;
@@ -13,7 +17,23 @@ import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.groups.GroupeExtension;
 import fr.synchroneyes.groups.Utils.Etats;
 import fr.synchroneyes.mapbuilder.MapBuilder;
-import fr.synchroneyes.mineral.Commands.*;
+import fr.synchroneyes.mineral.Commands.AllowCommand;
+import fr.synchroneyes.mineral.Commands.AreneTeleportCommand;
+import fr.synchroneyes.mineral.Commands.DisplayScoreCommand;
+import fr.synchroneyes.mineral.Commands.JoinCommand;
+import fr.synchroneyes.mineral.Commands.LeaveTeamCommand;
+import fr.synchroneyes.mineral.Commands.MCCvarCommand;
+import fr.synchroneyes.mineral.Commands.McStats;
+import fr.synchroneyes.mineral.Commands.PauseGameCommand;
+import fr.synchroneyes.mineral.Commands.ReadyCommand;
+import fr.synchroneyes.mineral.Commands.RefereeCommand;
+import fr.synchroneyes.mineral.Commands.ResumeGameCommand;
+import fr.synchroneyes.mineral.Commands.SelectDeathAnimationCommand;
+import fr.synchroneyes.mineral.Commands.SpawnChestCommand;
+import fr.synchroneyes.mineral.Commands.StartGameCommand;
+import fr.synchroneyes.mineral.Commands.StopGameCommand;
+import fr.synchroneyes.mineral.Commands.SwitchCommand;
+import fr.synchroneyes.mineral.Commands.TeamChat;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.Core.Game.JoinTeam.JoinTeamInventoryEvent;
 import fr.synchroneyes.mineral.Core.MCPlayer;
@@ -22,8 +42,37 @@ import fr.synchroneyes.mineral.Core.Player.BaseItem.Commands.SetDefaultItems;
 import fr.synchroneyes.mineral.Core.Player.BaseItem.Events.InventoryClick;
 import fr.synchroneyes.mineral.Core.Referee.RefereeEvent;
 import fr.synchroneyes.mineral.DeathAnimations.DeathAnimationManager;
-import fr.synchroneyes.mineral.Events.*;
 import fr.synchroneyes.mineral.Events.ArmorStandPickup;
+import fr.synchroneyes.mineral.Events.BlockDestroyed;
+import fr.synchroneyes.mineral.Events.BlockPlaced;
+import fr.synchroneyes.mineral.Events.BucketEvent;
+import fr.synchroneyes.mineral.Events.ChestEvent;
+import fr.synchroneyes.mineral.Events.EntityDamage;
+import fr.synchroneyes.mineral.Events.EntityDeathEvent;
+import fr.synchroneyes.mineral.Events.EntityInteract;
+import fr.synchroneyes.mineral.Events.EntitySpawn;
+import fr.synchroneyes.mineral.Events.EntityTarget;
+import fr.synchroneyes.mineral.Events.ExplosionEvent;
+import fr.synchroneyes.mineral.Events.ItemDropped;
+import fr.synchroneyes.mineral.Events.MCPlayerLeavePlugin;
+import fr.synchroneyes.mineral.Events.PlayerChat;
+import fr.synchroneyes.mineral.Events.PlayerDeathEvent;
+import fr.synchroneyes.mineral.Events.PlayerDisconnect;
+import fr.synchroneyes.mineral.Events.PlayerHUDEvents;
+import fr.synchroneyes.mineral.Events.PlayerInteract;
+import fr.synchroneyes.mineral.Events.PlayerJoin;
+import fr.synchroneyes.mineral.Events.PlayerJoinPlugin;
+import fr.synchroneyes.mineral.Events.PlayerKilledByPlayer;
+import fr.synchroneyes.mineral.Events.PlayerLeavePluginWorld;
+import fr.synchroneyes.mineral.Events.PlayerMove;
+import fr.synchroneyes.mineral.Events.PlayerPermissionChange;
+import fr.synchroneyes.mineral.Events.PlayerPick;
+import fr.synchroneyes.mineral.Events.PlayerSpawn;
+import fr.synchroneyes.mineral.Events.PlayerWorldChangeEvent;
+import fr.synchroneyes.mineral.Events.SafeZoneEvent;
+import fr.synchroneyes.mineral.Events.SpeedWorldLoading;
+import fr.synchroneyes.mineral.Events.Spigot_WorldChangeEvent;
+import fr.synchroneyes.mineral.Events.WorldLoaded;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
 import fr.synchroneyes.mineral.Utils.Log.GameLogger;
@@ -33,36 +82,37 @@ import fr.synchroneyes.mineral.Utils.UrlFetcher.Urls;
 import fr.synchroneyes.mineral.Utils.VersionChecker.Version;
 import fr.synchroneyes.special_events.SpecialEventManager;
 import fr.synchroneyes.world_downloader.WorldDownloader;
-import lombok.Getter;
-import org.bukkit.*;
-import org.bukkit.command.CommandMap;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Difficulty;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandMap;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.SimplePluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public final class mineralcontest extends JavaPlugin {
-
     public static boolean debug = false;
-
-    /**
-     * Community version is a version ran by server that wants to have multiple games running at the same time.
-     * If set to true, then players will have to create a groupe, invite players, start the vote.
-     * If set to false, one group will automatically be created, OP players will be set as admin, and every players joining the server
-     * will automatically be added to the group.
-     */
     public static boolean communityVersion = false;
-
     public static String prefix = "[MineralContest]";
     public static String prefixErreur;
     public static String prefixGlobal;
@@ -71,142 +121,98 @@ public final class mineralcontest extends JavaPlugin {
     public static String prefixTeamChat;
     public static String prefixGroupe;
     public static String prefixWeb;
-
-    public static Logger log = Bukkit.getLogger();
+    public static Logger log;
     public static mineralcontest plugin;
     public World pluginWorld;
-
     public Location defaultSpawn;
     public MapBuilder mapBuilderInstance;
-
     public EffectManager effectManager;
-
     public SpecialEventManager eventManager;
-
-    public static int player_location_hud_refresh_rate = 10;
-
-    // Variable permettant d'avertir l'utilisateur en cas d'interaction avec un bloc avant une game
-    public static boolean enable_block_warning = false;
-    public static boolean enable_lobby_block_protection = true;
-
-
-    /**
-     * Array of all the messages we can fetch from synchroneyes's plugin website.
-     */
-    @Getter
+    public static int player_location_hud_refresh_rate;
+    public static boolean enable_block_warning;
+    public static boolean enable_lobby_block_protection;
     private ArrayList<String> messagesFromWebsite;
     public GroupeExtension groupeExtension;
-
-    @Getter
     public LinkedList<Groupe> groupes;
     public WorldDownloader worldDownloader;
-
-    /**
-     * List of every players of the plugin
-     */
     private List<MCPlayer> joueurs;
-
-    @Getter
     private Connection connexion_database;
-
-
     private CustomPluginManager pluginManager;
-
-
-    // Only when communityVersion is set to True
-    // define how many player required per group before being able to start a game
-    public static int min_player_per_group = 3;
-
-    // Gestionnaire des animations dde mort
+    public static int min_player_per_group;
     public DeathAnimationManager deathAnimationManager;
 
-
-
-
-    // Constructeur, on initialise les variables
     public mineralcontest() {
-        mineralcontest.plugin = this;
-        this.joueurs = new ArrayList<>();
+        plugin = this;
+        this.joueurs = new ArrayList<MCPlayer>();
         this.pluginManager = new CustomPluginManager();
     }
 
-
-    /**
-     * Affiche dans le chat les messages récupéré depuis le site web, lié à cette version du plugin
-     */
     public static void afficherMessageVersion() {
-        // Pour chaque message
-        for (String message : plugin.messagesFromWebsite) {
-            broadcastMessage(mineralcontest.prefixWeb + message);
+        for (String message : mineralcontest.plugin.messagesFromWebsite) {
+            mineralcontest.broadcastMessage(prefixWeb + message);
         }
     }
 
     public static void afficherMessageVersionToPlayer(Player joueur) {
-        for (String message : plugin.messagesFromWebsite) {
-            joueur.sendMessage(mineralcontest.prefixWeb + message);
+        for (String message : mineralcontest.plugin.messagesFromWebsite) {
+            joueur.sendMessage(prefixWeb + message);
         }
-
     }
-
 
     public static Object getPluginConfigValue(String configName) {
         File fichierConfigurationPlugin = new File(plugin.getDataFolder(), FileList.Config_default_plugin.toString());
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(fichierConfigurationPlugin);
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration((File)fichierConfigurationPlugin);
         return configuration.get(configName);
     }
 
     public static void supprimerGroupe(Groupe g) {
-        plugin.groupes.remove(g);
+        mineralcontest.plugin.groupes.remove(g);
     }
 
     public static Groupe getPlayerGroupe(Player p) {
         mineralcontest instance = plugin;
         MCPlayer joueur = instance.getMCPlayer(p);
-
-        if(joueur == null) return null;
-
-        // On regarde si le joueur fait parti du plugin
-        MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(p);
-        if(mcPlayer == null) return null;
-
-        // Et si il est tjrs présent dans un monde du plugin
-        if(!mcPlayer.isInPlugin()) return null;
-
+        if (joueur == null) {
+            return null;
+        }
+        MCPlayer mcPlayer = plugin.getMCPlayer(p);
+        if (mcPlayer == null) {
+            return null;
+        }
+        if (!mcPlayer.isInPlugin()) {
+            return null;
+        }
         return joueur.getGroupe();
-
     }
 
     public Groupe getNonCommunityGroup() {
-        return groupes.getFirst();
+        return this.groupes.getFirst();
     }
 
     public void creerNouveauGroupe(Groupe nouveauGroupe) {
-
-        if (!communityVersion) return;
-
-        GameLogger.addLog(new Log("group_create", "Creating a new group with name " + nouveauGroupe.getNom(), "mineralcontest: creerNouveauGroupe"));
-        for (Groupe groupe : groupes) {
-            if (groupe.getNom().equals(nouveauGroupe.getNom())) {
-                groupe.sendToadmin(prefixErreur + Lang.error_group_with_this_name_already_exists.toString());
-                GameLogger.addLog(new Log("error_group_create", Lang.error_group_with_this_name_already_exists.getDefault(), "mineralcontest: creerNouveauGroupe"));
-                return;
-            }
+        if (!communityVersion) {
+            return;
         }
-
-        while (!isGroupeIdentifiantUnique(nouveauGroupe)) {
+        GameLogger.addLog(new Log("group_create", "Creating a new group with name " + nouveauGroupe.getNom(), "mineralcontest: creerNouveauGroupe"));
+        for (Groupe groupe : this.groupes) {
+            if (!groupe.getNom().equals(nouveauGroupe.getNom())) continue;
+            groupe.sendToadmin(prefixErreur + Lang.error_group_with_this_name_already_exists.toString());
+            GameLogger.addLog(new Log("error_group_create", Lang.error_group_with_this_name_already_exists.getDefault(), "mineralcontest: creerNouveauGroupe"));
+            return;
+        }
+        while (!this.isGroupeIdentifiantUnique(nouveauGroupe)) {
             nouveauGroupe.genererIdentifiant();
         }
-
-
         this.groupes.add(nouveauGroupe);
         nouveauGroupe.sendToEveryone(prefixPrive + Lang.success_group_successfully_created.toString());
         GameLogger.addLog(new Log("group_created", "created a new group with name " + nouveauGroupe.getNom(), "mineralcontest: creerNouveauGroupe"));
-
     }
 
     private boolean isGroupeIdentifiantUnique(Groupe groupe) {
-        for (Groupe g : groupes)
-            if (g.getIdentifiant().equalsIgnoreCase(groupe.getIdentifiant())) return false;
+        for (Groupe g : this.groupes) {
+            if (!g.getIdentifiant().equalsIgnoreCase(groupe.getIdentifiant())) continue;
+            return false;
+        }
         return true;
     }
 
@@ -215,382 +221,211 @@ public final class mineralcontest extends JavaPlugin {
             Groupe defaut = new Groupe();
             defaut.setEtat(Etats.EN_ATTENTE);
             defaut.setNom("MineralContest");
-            groupes.add(defaut);
-
-            if (pluginWorld == null) pluginWorld = PlayerUtils.getPluginWorld();
-            if (pluginWorld == null) return;
-            for (Player joueur : mineralcontest.plugin.pluginWorld.getPlayers())
-                if (joueur.isOp()) getNonCommunityGroup().addAdmin(joueur);
-                else getNonCommunityGroup().addJoueur(joueur);
+            this.groupes.add(defaut);
+            if (this.pluginWorld == null) {
+                this.pluginWorld = PlayerUtils.getPluginWorld();
+            }
+            if (this.pluginWorld == null) {
+                return;
+            }
+            for (Player joueur : mineralcontest.plugin.pluginWorld.getPlayers()) {
+                if (joueur.isOp()) {
+                    this.getNonCommunityGroup().addAdmin(joueur);
+                    continue;
+                }
+                this.getNonCommunityGroup().addJoueur(joueur);
+            }
         }
     }
 
-    @Override
     public void onEnable() {
-
-        // On copie les fichiers par défaut
         RessourceFilesManager.createDefaultFiles();
-
-        // On écrit les valeurs par défaut
-        writeNonExistingConfigValuesToConfigFile();
-
-
-        // On charge le fichier de langue
-        Lang.loadLang(getPluginConfigValue("language").toString());
-
-        // On charge la valeur du fichier de config pour le nombre de joueur requis
-        min_player_per_group = Integer.parseInt(getPluginConfigValue("min_player_per_group").toString());
-
-        // On charge le nombre de tick requis pour update le scoreboard
-        player_location_hud_refresh_rate = Integer.parseInt(getPluginConfigValue("player_location_refresh_rate").toString());
-
-        enable_block_warning = Boolean.parseBoolean(getPluginConfigValue("enable_block_warning").toString());
-        enable_lobby_block_protection = Boolean.parseBoolean(getPluginConfigValue("enable_lobby_block_protection").toString());
-
-
-        // On regard si on doit lancer le mode communautaire ou non
-        communityVersion = (boolean) getPluginConfigValue("enable_community_version");
+        this.writeNonExistingConfigValuesToConfigFile();
+        Lang.loadLang(mineralcontest.getPluginConfigValue("language").toString());
+        min_player_per_group = Integer.parseInt(mineralcontest.getPluginConfigValue("min_player_per_group").toString());
+        player_location_hud_refresh_rate = Integer.parseInt(mineralcontest.getPluginConfigValue("player_location_refresh_rate").toString());
+        enable_block_warning = Boolean.parseBoolean(mineralcontest.getPluginConfigValue("enable_block_warning").toString());
+        enable_lobby_block_protection = Boolean.parseBoolean(mineralcontest.getPluginConfigValue("enable_lobby_block_protection").toString());
+        communityVersion = (Boolean)mineralcontest.getPluginConfigValue("enable_community_version");
         Bukkit.getLogger().info("Version communautaire: " + communityVersion);
-
-        this.groupes = new LinkedList<>();
+        this.groupes = new LinkedList();
         this.groupeExtension = GroupeExtension.getInstance();
-
-
-
-        registerCommands();
-        registerEvents();
-
-        // On initialise la base de donnée
-        if((boolean) getPluginConfigValue("enable_mysql_storage")) {
+        this.registerCommands();
+        this.registerEvents();
+        if (((Boolean)mineralcontest.getPluginConfigValue("enable_mysql_storage")).booleanValue()) {
             this.connexion_database = SQLConnection.getInstance();
-
-            // On crée la database seulement si on a réussi à se connecter
-            if(connexion_database != null) {
+            if (this.connexion_database != null) {
                 try {
                     DatabaseInitialisation.createDatabase();
-
-                    Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.GREEN + " Successfully connected to MySQL database");
+                    Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + " Successfully connected to MySQL database");
                 } catch (Exception throwables) {
                     throwables.printStackTrace();
                 }
             }
-
         }
-
-
-        initCommunityVersion();
-
-        // Initialisation de l'effect manager
-        effectManager = new EffectManager(this);
-
-        // Initialisation des effets de mort
+        this.initCommunityVersion();
+        this.effectManager = new EffectManager((Plugin)this);
         this.deathAnimationManager = new DeathAnimationManager();
-
-        // Initialisation des variables du plugin
         this.mapBuilderInstance = MapBuilder.getInstance();
-        this.messagesFromWebsite = new ArrayList<>();
+        this.messagesFromWebsite = new ArrayList();
         this.worldDownloader = WorldDownloader.getInstance();
         this.eventManager = new SpecialEventManager();
-
-        // Initialisation des events customs
         PermissionCheckerLoop permissionCheckerLoop = new PermissionCheckerLoop(this, 1);
         permissionCheckerLoop.run();
-
-        // Initialisation de la sauvegarde des position d'un joueur
         PlayerLocationSaverLoop playerLocationSaverLoop = new PlayerLocationSaverLoop(this, 1);
         playerLocationSaverLoop.run();
-
-        // Initialisation des evenements spéciaux
-        eventManager.init();
-
-
-
-
-        pluginWorld = PlayerUtils.getPluginWorld();
-        defaultSpawn = (pluginWorld != null) ? pluginWorld.getSpawnLocation() : null;
-        if (pluginWorld != null) pluginWorld.setDifficulty(Difficulty.PEACEFUL);
-
-
-
-
-
-        if (!debug && !communityVersion) {
-            if (pluginWorld != null) {
-                for (Player online : pluginWorld.getPlayers()) {
-                    PlayerUtils.teleportPlayer(online, defaultSpawn.getWorld(), defaultSpawn);
-                    if(online.isOp()) getNonCommunityGroup().addAdmin(online);
-                    else getNonCommunityGroup().addJoueur(online);
-
-                    MCPlayerJoinEvent event = new MCPlayerJoinEvent(online);
-                    Bukkit.getServer().getPluginManager().callEvent(event);
+        this.eventManager.init();
+        this.pluginWorld = PlayerUtils.getPluginWorld();
+        Location location = this.defaultSpawn = this.pluginWorld != null ? this.pluginWorld.getSpawnLocation() : null;
+        if (this.pluginWorld != null) {
+            this.pluginWorld.setDifficulty(Difficulty.PEACEFUL);
+        }
+        if (!debug && !communityVersion && this.pluginWorld != null) {
+            for (Player online : this.pluginWorld.getPlayers()) {
+                PlayerUtils.teleportPlayer(online, this.defaultSpawn.getWorld(), this.defaultSpawn);
+                if (online.isOp()) {
+                    this.getNonCommunityGroup().addAdmin(online);
+                } else {
+                    this.getNonCommunityGroup().addJoueur(online);
                 }
+                MCPlayerJoinEvent event = new MCPlayerJoinEvent(online);
+                Bukkit.getServer().getPluginManager().callEvent((Event)event);
             }
         }
-
         PlayerUtils.runScoreboardManager();
         GameLogger.addLog(new Log("server_event", "OnEnable", "plugin_startup"));
-
-        /*new BukkitRunnable() {
-            @Override
-            public void run() {
-                PlayerUtils.drawPlayersHUD();
-            }
-        }.runTaskTimer(this, 0, 20);*/
-
-
-
-        /*
-            Verification de mise à jour et téléchargement automatique
-            Seulement si la config l'autorise
-         */
-        if ((boolean) getPluginConfigValue("enable_auto_update")) {
-
-            // On lance la procédure de vérification de version une fois que le plugin est totalement chargé
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-
-
+        if (((Boolean)mineralcontest.getPluginConfigValue("enable_auto_update")).booleanValue()) {
+            this.getServer().getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
                 Version.isCheckingStarted = true;
                 Thread operationsThreade = new Thread(() -> {
-                    // On récupère toutes les URL du plugin
                     Urls.FetchAllUrls();
-
-                    if(Urls.isWebsiteDown) {
-                        Bukkit.broadcastMessage(ChatColor.RED + Urls.WEBSITE_URL + " is down. Please check on our discord to get the latest plugin version & maps mirrors link");
+                    if (Urls.isWebsiteDown) {
+                        Bukkit.broadcastMessage((String)(ChatColor.RED + Urls.WEBSITE_URL + " is down. Please check on our discord to get the latest plugin version & maps mirrors link"));
                         return;
                     }
-
-                    worldDownloader.initMapLists();
-
-                    Version.fetchAllMessages(messagesFromWebsite);
-
-                    afficherMessageVersion();
-
+                    this.worldDownloader.initMapLists();
+                    Version.fetchAllMessages(this.messagesFromWebsite);
+                    mineralcontest.afficherMessageVersion();
                     Version.Check(true);
-
                 });
-
                 operationsThreade.start();
+                new BukkitRunnable(){
 
-                // On lance un timer qui vérifie, à chaque seconde, si le téléchargement est terminé
-                new BukkitRunnable() {
-                    @Override
                     public void run() {
-                        // La procédure à commencer
                         if (Version.isCheckingStarted && !Urls.isWebsiteDown) {
-
-                            // Si le plugin a été mis à jour, on reload le plugin
                             if (Version.hasUpdated) {
                                 Bukkit.reload();
                             }
-
                         } else {
-                            // On arrête le timer
                             this.cancel();
                         }
                     }
-                }.runTaskTimer(this, 20, 20);
-
+                }.runTaskTimer((Plugin)this, 20L, 20L);
             });
-
-
-
         }
-
     }
 
-    @Override
     public void onDisable() {
-
-        Bukkit.getScheduler().cancelTasks(this);
+        Bukkit.getScheduler().cancelTasks((Plugin)this);
         GameLogger.addLog(new Log("server_event", "OnDisable", "plugin_shutdown"));
-
-        if(groupes.isEmpty()) return;
-
-        for (Groupe groupe : groupes) {
+        if (this.groupes.isEmpty()) {
+            return;
+        }
+        for (Groupe groupe : this.groupes) {
             Game game = groupe.getGame();
-
             MCGameEndEvent endEvent = new MCGameEndEvent(game);
-            if(game.isGameStarted()) {
-                Bukkit.getPluginManager().callEvent(endEvent);
+            if (game.isGameStarted()) {
+                Bukkit.getPluginManager().callEvent((Event)endEvent);
             }
-
-            //SendInformation.sendGameData(SendInformation.ended, game);
-            if (pluginWorld != null && !debug) {
-                for (Player player : pluginWorld.getPlayers()) {
-                    game.teleportToLobby(player);
-                    PlayerUtils.clearPlayer(player, true);
-                }
+            if (this.pluginWorld == null || debug) continue;
+            for (Player player : this.pluginWorld.getPlayers()) {
+                game.teleportToLobby(player);
+                PlayerUtils.clearPlayer(player, true);
             }
         }
-        //
-
-        //getGame().resetMap();
-
-
     }
 
     private void registerEvents() {
-
-        Bukkit.getServer().getPluginManager().registerEvents(new ArmorStandPickup(), this);
-
-        Bukkit.getServer().getPluginManager().registerEvents(new BlockDestroyed(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BlockPlaced(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new EntityInteract(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerInteract(), this);
-
-
-        Bukkit.getServer().getPluginManager().registerEvents(new BucketEvent(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new ChestEvent(), this);
-
-        //
-        Bukkit.getServer().getPluginManager().registerEvents(new EntityDamage(), this);
-        //Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeathEvent(), this);
-
-
-        Bukkit.getServer().getPluginManager().registerEvents(new EntityTarget(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new EntitySpawn(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new EntityDeathEvent(), this);
-
-
-
-
-        Bukkit.getServer().getPluginManager().registerEvents(new ExplosionEvent(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new ItemDropped(), this);
-
-
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerDisconnect(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerKilledByPlayer(), this);
-
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoin(), this);
-
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerMove(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerSpawn(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeathEvent(), this);
-
-        Bukkit.getServer().getPluginManager().registerEvents(new SafeZoneEvent(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerChat(), this);
-
-
-        Bukkit.getServer().getPluginManager().registerEvents(new RefereeEvent(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerPick(), this);
-        //Bukkit.getServer().getPluginManager().registerEvents(new PlayerWorldChange(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new WorldLoaded(), this);
-
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerPermissionChange(), this);
-
-
-        // PlayerBaseItem
-        Bukkit.getServer().getPluginManager().registerEvents(new InventoryClick(), this);
-
-        // JoinMenu
-        Bukkit.getServer().getPluginManager().registerEvents(new JoinTeamInventoryEvent(), this);
-
-        // Drop
-        Bukkit.getServer().getPluginManager().registerEvents(new ParachuteHitDetection(), this);
-
-
-        // Halloween
-        //Bukkit.getServer().getPluginManager().registerEvents(new fr.synchroneyes.halloween_event.PlayerDeathEvent(), this);
-        //Bukkit.getServer().getPluginManager().registerEvents(new fr.synchroneyes.halloween_event.OnGameStart(), this);
-
-
-        // Database Save
-        Bukkit.getServer().getPluginManager().registerEvents(new Data_EventHandler(), this);
-
-        // Listener changement monde joueur (Spigot)
-        Bukkit.getServer().getPluginManager().registerEvents(new Spigot_WorldChangeEvent(), this);
-
-        // Listenenr changement monde joueur (Plugin)
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerWorldChangeEvent(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerLeavePluginWorld(), this);
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinPlugin(), this);
-
-
-        // On active le chargement rapide des maps mineral contest
-        Bukkit.getServer().getPluginManager().registerEvents(new SpeedWorldLoading(), this);
-
-        // Déconnexion d'un joueur
-        Bukkit.getServer().getPluginManager().registerEvents(new MCPlayerLeavePlugin(), this);
-
-        // Events gérant les HUD
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayerHUDEvents(), this);
-
-
-
-
-
-        // AutomatedChest
-        //Bukkit.getServer().getPluginManager().registerEvents(new ChestOpenEvent(), this);
-
-
-
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new ArmorStandPickup(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new BlockDestroyed(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new BlockPlaced(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new EntityInteract(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerInteract(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new BucketEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new ChestEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new EntityDamage(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new EntityTarget(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new EntitySpawn(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new EntityDeathEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new ExplosionEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new ItemDropped(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerDisconnect(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerKilledByPlayer(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerJoin(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerMove(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerSpawn(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerDeathEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new SafeZoneEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerChat(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new RefereeEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerPick(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new WorldLoaded(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerPermissionChange(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new InventoryClick(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new JoinTeamInventoryEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new ParachuteHitDetection(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new Data_EventHandler(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new Spigot_WorldChangeEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerWorldChangeEvent(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerLeavePluginWorld(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerJoinPlugin(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new SpeedWorldLoading(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new MCPlayerLeavePlugin(), (Plugin)this);
+        Bukkit.getServer().getPluginManager().registerEvents((Listener)new PlayerHUDEvents(), (Plugin)this);
     }
 
     private void registerCommands() {
-
-        // Register les commands
-        getCommand("start").setExecutor(new StartGameCommand());
-        getCommand("pause").setExecutor(new PauseGameCommand());
-        getCommand("stopGame").setExecutor(new StopGameCommand());
-        getCommand("arene").setExecutor(new AreneTeleportCommand());
-        getCommand("arena").setExecutor(new AreneTeleportCommand());
-        getCommand("join").setExecutor(new JoinCommand());
-        getCommand("ready").setExecutor(new ReadyCommand());
-        getCommand("t").setExecutor(new TeamChat());
-        getCommand("team").setExecutor(new TeamChat());
-
-
-
-        getCommand("switch").setExecutor(new SwitchCommand());
-        getCommand("resume").setExecutor(new ResumeGameCommand());
-
+        this.getCommand("start").setExecutor((CommandExecutor)new StartGameCommand());
+        this.getCommand("pause").setExecutor((CommandExecutor)new PauseGameCommand());
+        this.getCommand("stopGame").setExecutor((CommandExecutor)new StopGameCommand());
+        this.getCommand("arene").setExecutor((CommandExecutor)new AreneTeleportCommand());
+        this.getCommand("arena").setExecutor((CommandExecutor)new AreneTeleportCommand());
+        this.getCommand("join").setExecutor((CommandExecutor)new JoinCommand());
+        this.getCommand("ready").setExecutor((CommandExecutor)new ReadyCommand());
+        this.getCommand("t").setExecutor((CommandExecutor)new TeamChat());
+        this.getCommand("team").setExecutor((CommandExecutor)new TeamChat());
+        this.getCommand("switch").setExecutor((CommandExecutor)new SwitchCommand());
+        this.getCommand("resume").setExecutor((CommandExecutor)new ResumeGameCommand());
         Field cmdMapField = null;
         try {
             cmdMapField = SimplePluginManager.class.getDeclaredField("commandMap");
             cmdMapField.setAccessible(true);
-            CommandMap bukkitCommandMap = (CommandMap) cmdMapField.get(Bukkit.getPluginManager());
-
-            bukkitCommandMap.register("", new MCCvarCommand());
-            bukkitCommandMap.register("", new SetDefaultItems());
-            // bukkitCommandMap.register("", new SpawnDrop());
-            bukkitCommandMap.register("", new RefereeCommand());
-            bukkitCommandMap.register("", new McStats());
-
-            //bukkitCommandMap.register("", new Halloween());
-
-            bukkitCommandMap.register("", new DisplayScoreCommand());
-            bukkitCommandMap.register("", new SelectDeathAnimationCommand());
-
-
-
-            //bukkitCommandMap.register("", new OuvrirMenuShop());
-
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+            CommandMap bukkitCommandMap = (CommandMap)cmdMapField.get(Bukkit.getPluginManager());
+            bukkitCommandMap.register("", (Command)new MCCvarCommand());
+            bukkitCommandMap.register("", (Command)new SetDefaultItems());
+            bukkitCommandMap.register("", (Command)new RefereeCommand());
+            bukkitCommandMap.register("", (Command)new McStats());
+            bukkitCommandMap.register("", (Command)new DisplayScoreCommand());
+            bukkitCommandMap.register("", (Command)new SelectDeathAnimationCommand());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
-
-
-
-        getCommand("spawnchest").setExecutor(new SpawnChestCommand());
-        getCommand("allow").setExecutor(new AllowCommand());
-        getCommand("leaveteam").setExecutor(new LeaveTeamCommand());
-
+        this.getCommand("spawnchest").setExecutor((CommandExecutor)new SpawnChestCommand());
+        this.getCommand("allow").setExecutor((CommandExecutor)new AllowCommand());
+        this.getCommand("leaveteam").setExecutor((CommandExecutor)new LeaveTeamCommand());
     }
-
 
     public void setDefaultWorldBorder() {
-
-        if (mapBuilderInstance.isBuilderModeEnabled) return;
-
+        if (this.mapBuilderInstance.isBuilderModeEnabled) {
+            return;
+        }
         World game_world = mineralcontest.plugin.pluginWorld;
         int size = 30000000;
-
         if (game_world != null) {
             game_world.getWorldBorder().setCenter(mineralcontest.plugin.defaultSpawn);
-            game_world.getWorldBorder().setSize(size);
+            game_world.getWorldBorder().setSize((double)size);
         }
     }
-
 
     public static void broadcastMessage(String message, Groupe groupe) {
         groupe.sendToEveryone(message);
@@ -599,192 +434,168 @@ public final class mineralcontest extends JavaPlugin {
     }
 
     public static void broadcastMessage(String message) {
-        for (Player joueur : Bukkit.getOnlinePlayers())
-            if (isInAMineralContestWorld(joueur))
-                joueur.sendMessage(message);
-
+        for (Player joueur : Bukkit.getOnlinePlayers()) {
+            if (!mineralcontest.isInAMineralContestWorld(joueur)) continue;
+            joueur.sendMessage(message);
+        }
         Bukkit.getConsoleSender().sendMessage(message);
         GameLogger.addLog(new Log("broadcast-plugin", message, "server"));
     }
 
-
-
     public static boolean isInAMineralContestWorld(Player p) {
-
-        if(p.getWorld().equals(plugin.pluginWorld)) return true;
-
-        for(Groupe groupe : plugin.groupes) {
-            if(groupe.getMonde() != null && groupe.getMonde().equals(p.getWorld())) return true;
+        if (p.getWorld().equals((Object)mineralcontest.plugin.pluginWorld)) {
+            return true;
+        }
+        for (Groupe groupe : mineralcontest.plugin.groupes) {
+            if (groupe.getMonde() == null || !groupe.getMonde().equals((Object)p.getWorld())) continue;
+            return true;
         }
         return false;
-
-        /*MCPlayer joueur = plugin.getMCPlayer(p);
-        return (p.getWorld().equals(plugin.pluginWorld) ||
-
-                (   joueur != null &&
-                    joueur.getGroupe().getMonde() != null &&
-                    joueur.getGroupe().getMonde().equals(p.getWorld())
-                )
-        );*/
     }
 
     public static boolean isInMineralContestHub(Player p) {
-        return p.getWorld().equals(plugin.pluginWorld);
+        return p.getWorld().equals((Object)mineralcontest.plugin.pluginWorld);
     }
 
     public static boolean isAMineralContestWorld(World w) {
-
-        if (w.equals(plugin.pluginWorld)) return true;
-
-        for (Groupe groupe : plugin.groupes)
-            if(groupe.getMapName().equals(w.getName())) return true;
-            else if(w.getName().contains(groupe.getIdentifiant())) return true;
-            else if (groupe.getMonde() == null) return false;
-            else if (w.equals(groupe.getMonde())) return true;
-        return w.equals(plugin.pluginWorld);
+        if (w.equals((Object)mineralcontest.plugin.pluginWorld)) {
+            return true;
+        }
+        for (Groupe groupe : mineralcontest.plugin.groupes) {
+            if (groupe.getMapName().equals(w.getName())) {
+                return true;
+            }
+            if (w.getName().contains(groupe.getIdentifiant())) {
+                return true;
+            }
+            if (groupe.getMonde() == null) {
+                return false;
+            }
+            if (!w.equals((Object)groupe.getMonde())) continue;
+            return true;
+        }
+        return w.equals((Object)mineralcontest.plugin.pluginWorld);
     }
 
     public static Game getPlayerGame(Player p) {
-
-        // On regarde si le joueur fait parti du plugin
-        MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(p);
-        if(mcPlayer == null) return null;
-
-        // Et si il est tjrs présent dans un monde du plugin
-        if(!mcPlayer.isInPlugin()) return null;
-
-        Groupe g = getPlayerGroupe(p);
-        if (g != null) return g.getGame();
+        MCPlayer mcPlayer = plugin.getMCPlayer(p);
+        if (mcPlayer == null) {
+            return null;
+        }
+        if (!mcPlayer.isInPlugin()) {
+            return null;
+        }
+        Groupe g = mineralcontest.getPlayerGroupe(p);
+        if (g != null) {
+            return g.getGame();
+        }
         return null;
     }
 
     public static Game getWorldGame(World world) {
-        for (Groupe groupe : plugin.groupes) {
-            if (groupe.getMonde() == null && world != mineralcontest.plugin.pluginWorld) return null;
-            if (groupe.getMonde() == null && world == mineralcontest.plugin.pluginWorld) return groupe.getGame();
-
-            else if (groupe.getMonde().equals(world))
+        for (Groupe groupe : mineralcontest.plugin.groupes) {
+            if (groupe.getMonde() == null && world != mineralcontest.plugin.pluginWorld) {
+                return null;
+            }
+            if (groupe.getMonde() == null && world == mineralcontest.plugin.pluginWorld) {
                 return groupe.getGame();
+            }
+            if (!groupe.getMonde().equals((Object)world)) continue;
+            return groupe.getGame();
         }
         return null;
     }
 
-    /**
-     * Méthode permettant d'ajouter un nouveau joueur au plugin
-     * @param nouveauJoueur
-     */
     public void addNewPlayer(Player nouveauJoueur) {
-
-        // On vérifie si il existe déjà
-        for(MCPlayer joueur: joueurs) {
-            // Si il existe déjà, on le marque comme présent
-            if (joueur.getJoueur().equals(nouveauJoueur)) {
-                joueur.setInPlugin(true);
-                return;
-            }
+        for (MCPlayer joueur : this.joueurs) {
+            if (!joueur.getJoueur().equals((Object)nouveauJoueur)) continue;
+            joueur.setInPlugin(true);
+            return;
         }
-
         MCPlayer joueur = new MCPlayer(nouveauJoueur);
         this.joueurs.add(joueur);
     }
 
-    /**
-     * Méthode permettant de supprimer un joueur de la partie
-     * @param joueur
-     */
     public void removePlayer(Player joueur) {
-        // On vérifie si il existe déjà
-        for(MCPlayer _joueur: joueurs)
-            // Si il existe déjà, on ne l'ajoute pas
-            if(_joueur.getJoueur().equals(joueur)) {
-                _joueur.setInPlugin(false);
-                return;
-            }
+        for (MCPlayer _joueur : this.joueurs) {
+            if (!_joueur.getJoueur().equals((Object)joueur)) continue;
+            _joueur.setInPlugin(false);
+            return;
+        }
     }
 
-    /**
-     * Méthode permettant de récuperer l'instance du joueur
-     * @param joueur
-     * @return
-     */
     public MCPlayer getMCPlayer(Player joueur) {
-        for(MCPlayer _joueur: joueurs)
-            // Si il existe déjà, on ne l'ajoute pas
-            if(_joueur.getJoueur().equals(joueur)) return _joueur;
+        for (MCPlayer _joueur : this.joueurs) {
+            if (!_joueur.getJoueur().equals((Object)joueur)) continue;
+            return _joueur;
+        }
         return null;
     }
 
-    /**
-     * Fonction perméttant de vérifier si un joueur s'était déconnecté
-     * @param p
-     * @return
-     */
     public DisconnectedPlayer wasPlayerDisconnected(Player p) {
-        for(Groupe groupe : groupes) {
-            if(groupe.havePlayerDisconnected(p)) return groupe.getDisconnectedPlayerInfo(p);
+        for (Groupe groupe : this.groupes) {
+            if (!groupe.havePlayerDisconnected(p)) continue;
+            return groupe.getDisconnectedPlayerInfo(p);
         }
-
         return null;
     }
 
     public List<MCPlayer> getMCPlayers() {
-        LinkedList<MCPlayer> mcPlayers = new LinkedList<>(joueurs);
+        LinkedList<MCPlayer> mcPlayers = new LinkedList<MCPlayer>(this.joueurs);
         mcPlayers.removeIf(joueur -> !joueur.isInPlugin());
         return mcPlayers;
     }
 
-
-    /**
-     * Méthode permettant d'ajouter les valeurs présente dans le fichier de config par défaut du plugin, n'existant pas dans le fichier existant de config
-     */
     private void writeNonExistingConfigValuesToConfigFile() {
         try {
-
-            File tmp_default_config_file = new File(getDataFolder(), "tmp_default_config_file");
-
-            InputStream fichier_config_default = getClass().getClassLoader().getResourceAsStream("config/plugin_config.yml");
-            if(fichier_config_default == null) return;
-
+            File tmp_default_config_file = new File(this.getDataFolder(), "tmp_default_config_file");
+            InputStream fichier_config_default = ((Object)((Object)this)).getClass().getClassLoader().getResourceAsStream("config/plugin_config.yml");
+            if (fichier_config_default == null) {
+                return;
+            }
             byte[] buffer = new byte[fichier_config_default.available()];
             fichier_config_default.read(buffer);
-            // On le sauvegarde dans un fichier TMP
-            OutputStream outputStream = new FileOutputStream(tmp_default_config_file);
-            outputStream.write(buffer);
-            outputStream.close();
-
-
-
-
-
-            File fichier_config_existant = new File(getDataFolder(), FileList.Config_default_plugin.toString());
-
-            YamlConfiguration config_fichier_existant = YamlConfiguration.loadConfiguration(fichier_config_existant);
-            YamlConfiguration config_fichier_default = YamlConfiguration.loadConfiguration(tmp_default_config_file);
-
-            for(String valeur : config_fichier_default.getKeys(false)) {
-                if(config_fichier_existant.get(valeur) == null) {
-                    config_fichier_existant.set(valeur, config_fichier_default.get(valeur));
-                }
+            FileOutputStream outputStream = new FileOutputStream(tmp_default_config_file);
+            ((OutputStream)outputStream).write(buffer);
+            ((OutputStream)outputStream).close();
+            File fichier_config_existant = new File(this.getDataFolder(), FileList.Config_default_plugin.toString());
+            YamlConfiguration config_fichier_existant = YamlConfiguration.loadConfiguration((File)fichier_config_existant);
+            YamlConfiguration config_fichier_default = YamlConfiguration.loadConfiguration((File)tmp_default_config_file);
+            for (String valeur : config_fichier_default.getKeys(false)) {
+                if (config_fichier_existant.get(valeur) != null) continue;
+                config_fichier_existant.set(valeur, config_fichier_default.get(valeur));
             }
-
             config_fichier_existant.save(fichier_config_existant);
             tmp_default_config_file.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
-
 
     public void registerNewPlugin(CustomPlugin plugin) {
         this.pluginManager.registerPlugin(plugin);
         MCPluginLoaded mcPluginLoaded = new MCPluginLoaded(plugin);
-
-
-        Bukkit.getScheduler().runTaskLater(this, () -> Bukkit.getPluginManager().callEvent(mcPluginLoaded), 40);
-
-
+        Bukkit.getScheduler().runTaskLater((Plugin)this, () -> Bukkit.getPluginManager().callEvent((Event)mcPluginLoaded), 40L);
     }
 
+    public ArrayList<String> getMessagesFromWebsite() {
+        return this.messagesFromWebsite;
+    }
 
+    public LinkedList<Groupe> getGroupes() {
+        return this.groupes;
+    }
+
+    public Connection getConnexion_database() {
+        return this.connexion_database;
+    }
+
+    static {
+        log = Bukkit.getLogger();
+        player_location_hud_refresh_rate = 10;
+        enable_block_warning = false;
+        enable_lobby_block_protection = true;
+        min_player_per_group = 3;
+    }
 }
+

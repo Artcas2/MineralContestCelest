@@ -1,6 +1,8 @@
 package fr.synchroneyes.groups.Core;
 
 import fr.synchroneyes.custom_events.MCPlayerReconnectEvent;
+import fr.synchroneyes.groups.Core.MapVote;
+import fr.synchroneyes.groups.Core.WorldLoader;
 import fr.synchroneyes.groups.Utils.Etats;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
 import fr.synchroneyes.mineral.Core.Game.Game;
@@ -20,277 +22,183 @@ import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
 import fr.synchroneyes.mineral.Utils.Player.CouplePlayer;
 import fr.synchroneyes.mineral.Utils.Player.PlayerUtils;
 import fr.synchroneyes.mineral.mineralcontest;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.io.FileUtils;
-import org.bukkit.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import java.io.File;
-import java.util.*;
+import org.bukkit.plugin.Plugin;
 
 public class Groupe {
     private int tailleIdentifiant = 25;
     private String identifiant = "";
-
-    private LinkedList<Player> admins;
-    private LinkedList<Player> joueurs;
-    private LinkedList<Player> joueursInvites;
-
-
-    @Setter(AccessLevel.PROTECTED)
+    private LinkedList<Player> admins = new LinkedList();
+    private LinkedList<Player> joueurs = new LinkedList();
+    private LinkedList<Player> joueursInvites = new LinkedList();
     private World gameWorld;
-
     private World nether;
     private MapVote mapVote;
-
     private Game partie;
     private String nom;
     private WorldLoader worldLoader;
-
     private Etats etat;
-
     private boolean groupLocked = false;
     private String mapName = "";
-
     private GameSettings parametresPartie;
-
     private PlayerBaseItem playerBaseItem;
-
     private AutomatedChestManager automatedChestManager;
-
-    @Getter
     private KitManager kitManager;
-
-    @Getter
     private SpectatorManager spectatorManager;
-
-
-    // UUID, <NomEquipe, PositionDeco>
-    //
-    // private HashMap<UUID, Pair<String, Location>> disconnectedPlayers;
-    private LinkedList<DisconnectedPlayer> disconnectedPlayers;
-
-
+    private LinkedList<DisconnectedPlayer> disconnectedPlayers = new LinkedList();
 
     public Groupe() {
-
-        this.admins = new LinkedList<>();
-        this.joueurs = new LinkedList<>();
-        this.joueursInvites = new LinkedList<>();
-
-        this.disconnectedPlayers = new LinkedList<>();
-
-        parametresPartie = new GameSettings(true, this);
-
+        this.parametresPartie = new GameSettings(true, this);
         this.playerBaseItem = new PlayerBaseItem(this);
         this.automatedChestManager = new AutomatedChestManager(this);
-
         this.partie = new Game(this);
-        //this.partie.init();
-        partie.setGroupe(this);
-
+        this.partie.setGroupe(this);
         this.etat = Etats.EN_ATTENTE;
         this.worldLoader = new WorldLoader(this);
-
         this.kitManager = new KitManager(this);
-
         this.spectatorManager = new SpectatorManager(this.partie);
-
-
-
-
     }
-
-
-
 
     public AutomatedChestManager getAutomatedChestManager() {
-        return automatedChestManager;
+        return this.automatedChestManager;
     }
 
-    /**
-     * Méthode permettant de remettre à 0 une partie
-     * Cette méthode est appelée à la fin d'une partie
-     */
     public void resetGame() {
         this.kitManager.removeAllPlayersKit();
         String oldPartie = this.partie.toString();
         this.partie = new Game(this);
-
-        for(Player player : getPlayers()) {
+        for (Player player : this.getPlayers()) {
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(player);
             mcPlayer.setPartie(this.partie);
         }
-
         this.partie.startGameLoop();
-
         this.dechargerMonde();
-
     }
 
-    /**
-     * Méthode permettant de retirer un joueur du groupe
-     * @param joueur
-     */
     public void removePlayer(Player joueur) {
         this.joueurs.remove(joueur);
     }
 
-
-    /**
-     * Retourne une chaine contenant la liste des joueurs non prêt
-     *
-     * @return
-     */
     public String getNomsJoueurNonPret() {
-
-        List<Player> joueurNonPrets = new ArrayList<>(getPlayers());
-
+        ArrayList<Player> joueurNonPrets = new ArrayList<Player>(this.getPlayers());
         StringBuilder joueursNonPret_text = new StringBuilder();
-
-        for (Player joueurPret : partie.getPlayersReady())
+        for (Player joueurPret : this.partie.getPlayersReady()) {
             joueurNonPrets.remove(joueurPret);
-
-        for (Player joueurNonPret : joueurNonPrets)
+        }
+        for (Player joueurNonPret : joueurNonPrets) {
             joueursNonPret_text.append(joueurNonPret.getDisplayName() + " ");
-
+        }
         return joueursNonPret_text.toString();
-
     }
 
-    /**
-     * Retire tous les items au sol
-     * Source: https://bukkit.org/threads/remove-dropped-items-on-ground.100750/
-     */
     public void removeAllDroppedItem() {
-        List<Entity> entList = gameWorld.getEntities();//get all entities in the world
-
-        for (Entity current : entList) {//loop through the list
-            if (current instanceof Item) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
+        List<Entity> entList = this.gameWorld.getEntities();
+        for (Entity current : entList) {
+            if (!(current instanceof Item)) continue;
+            current.remove();
         }
     }
 
     public PlayerBaseItem getPlayerBaseItem() {
-        return playerBaseItem;
+        return this.playerBaseItem;
     }
 
     public GameSettings getParametresPartie() {
-        return parametresPartie;
+        return this.parametresPartie;
     }
 
     public String getMapName() {
-        return mapName;
+        return this.mapName;
     }
 
     public void setMapName(String mapName) {
         this.mapName = mapName;
     }
 
-    /**
-     * Méthode retournant les joueurs faisant parti du plugin et étant encore connecté
-     * @return
-     */
     public LinkedList<Player> getPlayers() {
-        LinkedList<Player> liste_joueurs = new LinkedList<>();
-        for(Player membre : this.joueurs){
+        LinkedList<Player> liste_joueurs = new LinkedList<Player>();
+        for (Player membre : this.joueurs) {
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(membre);
-            if(mcPlayer != null && mcPlayer.isInPlugin())
-                liste_joueurs.add(membre);
+            if (mcPlayer == null || !mcPlayer.isInPlugin()) continue;
+            liste_joueurs.add(membre);
         }
-
         return liste_joueurs;
     }
 
     public String getIdentifiant() {
-        return identifiant;
+        return this.identifiant;
     }
 
     public World getMonde() {
-        return gameWorld;
+        return this.gameWorld;
     }
 
-
     public Equipe getPlayerTeam(Player p) {
-        for (House maison : getGame().getHouses())
-            if (maison.getTeam().isPlayerInTeam(p)) return maison.getTeam();
+        for (House maison : this.getGame().getHouses()) {
+            if (!maison.getTeam().isPlayerInTeam(p)) continue;
+            return maison.getTeam();
+        }
         return null;
-
     }
 
     public void genererIdentifiant() {
-        String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        String[] alphabet = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         StringBuilder id_generer = new StringBuilder();
         Random random = new Random();
         int numero_aleatoire = 0;
-        for (int i = 0; i < tailleIdentifiant; ++i) {
+        for (int i = 0; i < this.tailleIdentifiant; ++i) {
             numero_aleatoire = random.nextInt(alphabet.length);
             id_generer.append(alphabet[numero_aleatoire]);
         }
-
         this.identifiant = id_generer.toString();
-
     }
 
-    /**
-     * @param nomMonde - Nom du monde à charger
-     * @return true si chargement réussi, false sinon
-     */
     public boolean chargerMonde(String nomMonde) {
-
         try {
-
-            sendToEveryone(mineralcontest.prefixGroupe + "Chargement de la map \"" + nomMonde + "\" en cours ...");
-
+            this.sendToEveryone(mineralcontest.prefixGroupe + "Chargement de la map \"" + nomMonde + "\" en cours ...");
             this.genererIdentifiant();
-
-
             this.setMapName(nomMonde + "_" + this.getIdentifiant());
-
-            worldLoader.chargerMondeThreade(nomMonde, this);
-
-
+            this.worldLoader.chargerMondeThreade(nomMonde, this);
         } catch (Exception e) {
-            sendToadmin(mineralcontest.prefixErreur + " Impossible de charger le monde. Erreur: " + e.getMessage());
+            this.sendToadmin(mineralcontest.prefixErreur + " Impossible de charger le monde. Erreur: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
-
         return true;
     }
 
-
-    /**
-     * Décharge un monde
-     *
-     * @return
-     */
     public boolean dechargerMonde() {
-        if (gameWorld == null) return false;
-
-        for (Player joueur : joueurs) {
+        if (this.gameWorld == null) {
+            return false;
+        }
+        for (Player joueur : this.joueurs) {
             joueur.teleport(mineralcontest.plugin.defaultSpawn);
         }
-
-
-        mineralcontest.plugin.getServer().unloadWorld(gameWorld, false);
-
-        worldLoader.supprimerMonde(gameWorld);
+        mineralcontest.plugin.getServer().unloadWorld(this.gameWorld, false);
+        this.worldLoader.supprimerMonde(this.gameWorld);
         return true;
     }
 
     public boolean isGroupLocked() {
-        return groupLocked;
+        return this.groupLocked;
     }
 
     public void setGroupLocked(boolean groupLocked) {
-        sendToadmin(mineralcontest.prefixPrive + ((groupLocked) ? Lang.group_is_now_locked.toString() : Lang.group_is_now_unlocked.toString()));
+        this.sendToadmin(mineralcontest.prefixPrive + (groupLocked ? Lang.group_is_now_locked.toString() : Lang.group_is_now_unlocked.toString()));
         this.groupLocked = groupLocked;
     }
 
@@ -301,26 +209,25 @@ public class Groupe {
     public void initVoteMap() {
         this.mapVote = new MapVote();
         this.mapVote.setGroupe(this);
-
-        if (mapVote.getMaps().isEmpty()) {
-            mapVote.disableVote();
-            setEtat(Etats.EN_ATTENTE);
-            setGroupLocked(false);
-            sendToadmin(mineralcontest.prefixErreur + Lang.error_no_maps_downloaded_to_start_game.toString());
+        if (this.mapVote.getMaps().isEmpty()) {
+            this.mapVote.disableVote();
+            this.setEtat(Etats.EN_ATTENTE);
+            this.setGroupLocked(false);
+            this.sendToadmin(mineralcontest.prefixErreur + Lang.error_no_maps_downloaded_to_start_game.toString());
         } else {
-            setEtat(Etats.VOTE_EN_COURS);
-            setGroupLocked(true);
-            sendToEveryone(mineralcontest.prefixGroupe + Lang.vote_started.toString());
-
-            for (Player membreGroupe : getPlayers())
-                getMapVote().getMenuVote().openInventory(membreGroupe);
-
-
+            this.setEtat(Etats.VOTE_EN_COURS);
+            this.setGroupLocked(true);
+            this.sendToEveryone(mineralcontest.prefixGroupe + Lang.vote_started.toString());
+            for (Player membreGroupe : this.getPlayers()) {
+                this.getMapVote().getMenuVote().openInventory(membreGroupe);
+            }
         }
     }
 
     public void enableVote() {
-        if (this.mapVote != null) mapVote.voteEnabled = true;
+        if (this.mapVote != null) {
+            this.mapVote.voteEnabled = true;
+        }
     }
 
     public Etats getEtatPartie() {
@@ -336,35 +243,30 @@ public class Groupe {
     }
 
     public void removeAdmin(Player joueur) {
-        sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_is_no_longer_a_group_admin.toString(), joueur));
+        this.sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_is_no_longer_a_group_admin.toString(), joueur));
         this.admins.remove(joueur);
-
     }
 
-
     public void inviterJoueur(Player p) {
-        if (joueursInvites.contains(p)) {
-            sendToadmin("ERREUR DEJA INVITE");
+        if (this.joueursInvites.contains(p)) {
+            this.sendToadmin("ERREUR DEJA INVITE");
             return;
         }
-
-        if (joueurs.contains(p)) {
-            sendToadmin(mineralcontest.prefixErreur + Lang.translate(Lang.error_player_already_in_this_group.toString(), p));
+        if (this.joueurs.contains(p)) {
+            this.sendToadmin(mineralcontest.prefixErreur + Lang.translate(Lang.error_player_already_in_this_group.toString(), p));
             return;
         }
-
         if (mineralcontest.getPlayerGroupe(p) != null) {
-            sendToadmin(mineralcontest.prefixErreur + Lang.translate(Lang.error_player_already_have_a_group.toString(), p));
+            this.sendToadmin(mineralcontest.prefixErreur + Lang.translate(Lang.error_player_already_have_a_group.toString(), p));
             return;
         }
-
         p.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.you_got_invited_to_a_group.toString(), this));
-        sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_successfully_invited_to_group.toString(), p));
+        this.sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_successfully_invited_to_group.toString(), p));
         this.joueursInvites.add(p);
     }
 
     public Game getGame() {
-        return partie;
+        return this.partie;
     }
 
     public String getNom() {
@@ -377,11 +279,11 @@ public class Groupe {
     }
 
     public boolean containsPlayer(Player p) {
-        return joueurs.contains(p);
+        return this.joueurs.contains(p);
     }
 
     public boolean isGroupeCreateur(Player p) {
-        return this.admins.getFirst().equals(p);
+        return this.admins.getFirst().equals((Object)p);
     }
 
     public boolean isAdmin(Player p) {
@@ -389,281 +291,225 @@ public class Groupe {
     }
 
     public World getNether() {
-        return nether;
+        return this.nether;
     }
 
     public void kickPlayer(Player p) {
-        retirerJoueur(p);
+        this.retirerJoueur(p);
         p.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.you_were_kicked_from_a_group.toString(), this));
-        sendToEveryone(mineralcontest.prefixPrive + Lang.translate(Lang.player_got_kicked_from_group.toString(), p));
+        this.sendToEveryone(mineralcontest.prefixPrive + Lang.translate(Lang.player_got_kicked_from_group.toString(), p));
     }
 
-    /**
-     * Envoie un message aux admins
-     * @param message: Message à envoyer
-     */
     public void sendToadmin(String message) {
-
-        for (Player player : getAdmins())
+        for (Player player : this.getAdmins()) {
             player.sendMessage(message);
+        }
     }
 
     public void sendToEveryone(String message) {
-        for (Player p : getPlayers()) {
+        for (Player p : this.getPlayers()) {
             p.sendMessage(message);
         }
     }
 
-
-
-
     public void addJoueur(Player p) {
         if (this.joueurs.contains(p)) {
-            //Bukkit.broadcastMessage("Already in addJoueur)");
             return;
         }
-
         p.setLevel(0);
         this.joueursInvites.remove(p);
         this.joueurs.add(p);
-        if (mineralcontest.communityVersion)
+        if (mineralcontest.communityVersion) {
             p.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.successfully_joined_a_group.toString(), this));
-        if (mineralcontest.communityVersion)
-            sendToEveryone(mineralcontest.prefixGroupe + Lang.translate(Lang.player_joined_our_group.toString(), p));
-
-        for (Player joueur : joueurs) {
-            if (!partie.isPlayerReady(joueur))
-                joueur.sendMessage(mineralcontest.prefixPrive + Lang.set_yourself_as_ready_to_start_votemap.toString());
         }
-
-        // On récupère l'instance MCPlayer du joueur et on set son groupe
-        if(mineralcontest.plugin.getMCPlayer(p) == null) mineralcontest.plugin.addNewPlayer(p);
+        if (mineralcontest.communityVersion) {
+            this.sendToEveryone(mineralcontest.prefixGroupe + Lang.translate(Lang.player_joined_our_group.toString(), p));
+        }
+        for (Player joueur : this.joueurs) {
+            if (this.partie.isPlayerReady(joueur)) continue;
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.set_yourself_as_ready_to_start_votemap.toString());
+        }
+        if (mineralcontest.plugin.getMCPlayer(p) == null) {
+            mineralcontest.plugin.addNewPlayer(p);
+        }
         mineralcontest.plugin.getMCPlayer(p).setGroupe(this);
-
-        // On met à jour tous les HUD
-        HashMap<ScoreboardFields, String> map = new HashMap<>();
-        map.put(ScoreboardFields.SCOREBOARD_PLAYER_COUNT, ScoreboardAPI.prefix + getPlayerCount() + "");
-        if(getAdmins().size() > 0) map.put(ScoreboardFields.SCOREBOARD_ADMINS, ScoreboardAPI.prefix + getAdmins().getFirst().getDisplayName());
-
-        updatePlayersHUD(map);
-
-
-        // Si le joueur n'est pas dans le monde du groupe, on le TP
-        Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> {
-            teleportToGroupWorld(p);
+        HashMap<ScoreboardFields, String> map = new HashMap<ScoreboardFields, String>();
+        map.put(ScoreboardFields.SCOREBOARD_PLAYER_COUNT, ScoreboardAPI.prefix + this.getPlayerCount() + "");
+        if (this.getAdmins().size() > 0) {
+            map.put(ScoreboardFields.SCOREBOARD_ADMINS, ScoreboardAPI.prefix + this.getAdmins().getFirst().getDisplayName());
+        }
+        this.updatePlayersHUD(map);
+        Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> {
+            this.teleportToGroupWorld(p);
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(p);
             mcPlayer.setVisible();
-        }, 20*5);
-
+        }, 100L);
     }
 
     public void addAdmin(Player p) {
-        if (!this.joueurs.contains(p)) addJoueur(p);
-        if (!this.admins.contains(p)) this.admins.add(p);
-        if (mineralcontest.communityVersion)
-            sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_is_now_group_admin.toString(), p));
-        teleportToGroupWorld(p);
-
+        if (!this.joueurs.contains(p)) {
+            this.addJoueur(p);
+        }
+        if (!this.admins.contains(p)) {
+            this.admins.add(p);
+        }
+        if (mineralcontest.communityVersion) {
+            this.sendToadmin(mineralcontest.prefixPrive + Lang.translate(Lang.player_is_now_group_admin.toString(), p));
+        }
+        this.teleportToGroupWorld(p);
     }
 
     public int getPlayerCount() {
-        return getPlayers().size();
+        return this.getPlayers().size();
     }
 
     public void retirerJoueur(Player joueur) {
-
         this.joueurs.remove(joueur);
         this.admins.remove(joueur);
         this.joueursInvites.remove(joueur);
-
         joueur.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.you_left_the_group.toString(), this));
-
         MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-        if(mcPlayer != null) {
+        if (mcPlayer != null) {
             mcPlayer.setGroupe(null);
         }
-
-        // On met à jour tous les HUD
-        HashMap<ScoreboardFields, String> map = new HashMap<>();
-        map.put(ScoreboardFields.SCOREBOARD_PLAYER_COUNT, ScoreboardAPI.prefix + getPlayerCount() + "");
-        if(getAdmins().size() > 0) map.put(ScoreboardFields.SCOREBOARD_ADMINS, ScoreboardAPI.prefix + getAdmins().getFirst().getDisplayName());
-
-        updatePlayersHUD(map);
+        HashMap<ScoreboardFields, String> map = new HashMap<ScoreboardFields, String>();
+        map.put(ScoreboardFields.SCOREBOARD_PLAYER_COUNT, ScoreboardAPI.prefix + this.getPlayerCount() + "");
+        if (this.getAdmins().size() > 0) {
+            map.put(ScoreboardFields.SCOREBOARD_ADMINS, ScoreboardAPI.prefix + this.getAdmins().getFirst().getDisplayName());
+        }
+        this.updatePlayersHUD(map);
     }
 
-
     public LinkedList<Player> getAdmins() {
-        LinkedList<Player> liste_admin = new LinkedList<>(admins);
-
-        liste_admin.removeIf((admin) -> {
-            MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(admin);
-           if(mcPlayer == null) return false;
-           else {
-               return !mcPlayer.isInPlugin();
-           }
+        LinkedList<Player> liste_admin = new LinkedList<Player>(this.admins);
+        liste_admin.removeIf(admin -> {
+            MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer((Player)admin);
+            if (mcPlayer == null) {
+                return false;
+            }
+            return !mcPlayer.isInPlugin();
         });
-
         return liste_admin;
     }
 
-    /**
-     * Sauvegarde les membres du groupe ayant été déconnecté, avec leur position
-     *
-     * @param p
-     */
     public void addDisconnectedPlayer(Player p, Location oldPlayerLocation) {
-        /*Pair<String, Location> playerInfo = new Pair<>(getPlayerTeam(p).getNomEquipe(), p.getLocation());
-        retirerJoueur(p);
-        if (!havePlayerDisconnected(p)) disconnectedPlayers.put(p.getUniqueId(), playerInfo);*/
-
-        Equipe oldPlayerTeam = getPlayerTeam(p);
-        CouplePlayer oldPlayerDeathTime = partie.getArene().getDeathZone().getPlayerInfo(p);
-
-
-        DisconnectedPlayer joueur = new DisconnectedPlayer(p.getUniqueId(), oldPlayerTeam, this, oldPlayerDeathTime, oldPlayerLocation, p, getGame().getPlayerBonusManager().getListeBonusJoueur(p), getKitManager().getPlayerKit(p));
-
-
-        if (mapVote != null) getMapVote().removePlayerVote(p);
-        getGame().removePlayerReady(p);
-
-        getGame().removePlayerReady(p);
-        getGame().groupe.getPlayers().remove(p);
-
-        if (!havePlayerDisconnected(p)) {
-            disconnectedPlayers.add(joueur);
+        Equipe oldPlayerTeam = this.getPlayerTeam(p);
+        CouplePlayer oldPlayerDeathTime = this.partie.getArene().getDeathZone().getPlayerInfo(p);
+        DisconnectedPlayer joueur = new DisconnectedPlayer(p.getUniqueId(), oldPlayerTeam, this, oldPlayerDeathTime, oldPlayerLocation, p, this.getGame().getPlayerBonusManager().getListeBonusJoueur(p), this.getKitManager().getPlayerKit(p));
+        if (this.mapVote != null) {
+            this.getMapVote().removePlayerVote(p);
+        }
+        this.getGame().removePlayerReady(p);
+        this.getGame().removePlayerReady(p);
+        this.getGame().groupe.getPlayers().remove(p);
+        if (!this.havePlayerDisconnected(p)) {
+            this.disconnectedPlayers.add(joueur);
             Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + " Disconnected location: " + oldPlayerLocation);
         }
-
-
-        if(!havePlayerDisconnected(p)) p.sendMessage(ChatColor.GOLD + "" + joueur);
-        retirerJoueur(p);
+        if (!this.havePlayerDisconnected(p)) {
+            p.sendMessage(ChatColor.GOLD + "" + joueur);
+        }
+        this.retirerJoueur(p);
     }
 
     public DisconnectedPlayer getDisconnectedPlayerInfo(Player p) {
-        for (DisconnectedPlayer disconnectedPlayer : disconnectedPlayers)
-            if (disconnectedPlayer.getPlayerUUID().equals(p.getUniqueId())) return disconnectedPlayer;
+        for (DisconnectedPlayer disconnectedPlayer : this.disconnectedPlayers) {
+            if (!disconnectedPlayer.getPlayerUUID().equals(p.getUniqueId())) continue;
+            return disconnectedPlayer;
+        }
         return null;
     }
 
-
-    /**
-     * Reconnecte un joueur, on le re TP dans sa position initiale, et dans son équipe
-     *
-     * @param p
-     */
     public void playerHaveReconnected(Player p) {
-        if (havePlayerDisconnected(p)) {
-
-
-
-
-            // On applique le pvp
+        if (this.havePlayerDisconnected(p)) {
             PlayerUtils.applyPVPtoPlayer(p);
-
             DisconnectedPlayer infoJoueur = this.getDisconnectedPlayerInfo(p);
-
             try {
-                // On traite maintenant les différent les informations
-
-                // On remet le joueur dans son groupe
                 if (infoJoueur.getOldPlayerGroupe() != null) {
-                    if (p.isOp()) infoJoueur.getOldPlayerGroupe().addAdmin(p);
-                    else infoJoueur.getOldPlayerGroupe().addJoueur(p);
-
-                    // On remet le joueur dans son équipe
-                    if (infoJoueur.getOldPlayerTeam() != null)
+                    if (p.isOp()) {
+                        infoJoueur.getOldPlayerGroupe().addAdmin(p);
+                    } else {
+                        infoJoueur.getOldPlayerGroupe().addJoueur(p);
+                    }
+                    if (infoJoueur.getOldPlayerTeam() != null) {
                         infoJoueur.getOldPlayerTeam().addPlayerToTeam(p, false);
-
-                    // Si le joueur était mort, on le remets
+                    }
                     if (infoJoueur.wasPlayerDead()) {
                         CouplePlayer deathTime = new CouplePlayer(p, infoJoueur.getOldPlayerDeathTime().getValeur());
                         Groupe playerGroup = infoJoueur.getOldPlayerGroupe();
-                        if (playerGroup.getGame() != null)
-                            if (playerGroup.getGame().getArene() != null)
-                                if (playerGroup.getGame().getArene().getDeathZone() != null)
-                                    playerGroup.getGame().getArene().getDeathZone().add(deathTime);
-
+                        if (playerGroup.getGame() != null && playerGroup.getGame().getArene() != null && playerGroup.getGame().getArene().getDeathZone() != null) {
+                            playerGroup.getGame().getArene().getDeathZone().add(deathTime);
+                        }
                     }
-
-                    if (infoJoueur.getKit() != null) getKitManager().setPlayerKit(p, infoJoueur.getKit());
+                    if (infoJoueur.getKit() != null) {
+                        this.getKitManager().setPlayerKit(p, infoJoueur.getKit());
+                    }
                     p.getInventory().clear();
-
-
-                    // Si le joueur est mineur, on doit mettre les barrieres tout en haut
-                    if(infoJoueur.getKit() instanceof Mineur) {
-                        // On lui ajoute les barrières, on block la première ligne
-                        for (int index = 9; index < 18; ++index)
+                    if (infoJoueur.getKit() instanceof Mineur) {
+                        for (int index = 9; index < 18; ++index) {
                             p.getInventory().setItem(index, Mineur.getBarrierItem());
+                        }
                     }
-
-                    for (ItemStack item : infoJoueur.getOldPlayerInventory())
-                        if(item.getType() != Material.BARRIER)
-                            p.getInventory().addItem(item);
-
-
+                    for (ItemStack item : infoJoueur.getOldPlayerInventory()) {
+                        if (item.getType() == Material.BARRIER) continue;
+                        p.getInventory().addItem(new ItemStack[]{item});
+                    }
                     p.teleport(infoJoueur.getOldPlayerLocation());
-
-
-                    PlayerBonus playerBonusManager = getGame().getPlayerBonusManager();
+                    PlayerBonus playerBonusManager = this.getGame().getPlayerBonusManager();
                     playerBonusManager.setPlayerBonusList(p, infoJoueur.getBonus());
-
                     playerBonusManager.triggerEnabledBonusOnReconnect(p);
-
-                    // On le supprime de la liste des déco
-                    disconnectedPlayers.remove(infoJoueur);
-
+                    this.disconnectedPlayers.remove(infoJoueur);
                     MCPlayerReconnectEvent event = new MCPlayerReconnectEvent(mineralcontest.plugin.getMCPlayer(p));
                     event.callEvent();
-
-                    // SI il n'y a plus personne dans la liste, on relance la partie!
-                    //if (disconnectedPlayers.isEmpty()) partie.resumeGame();
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
     }
 
-    /**
-     * Retourne VRAI si le joueur s'était déjà déconnecté
-     *
-     * @param p
-     */
     public boolean havePlayerDisconnected(Player p) {
-
-        for (DisconnectedPlayer disconnectedPlayer : disconnectedPlayers) {
-            if (disconnectedPlayer.getPlayerUUID().equals(p.getUniqueId())) return true;
+        for (DisconnectedPlayer disconnectedPlayer : this.disconnectedPlayers) {
+            if (!disconnectedPlayer.getPlayerUUID().equals(p.getUniqueId())) continue;
+            return true;
         }
         return false;
     }
 
     private void teleportToGroupWorld(Player p) {
-        if(getMonde() != null && !p.getWorld().equals(getMonde()))
-            PlayerUtils.teleportPlayer(p, getMonde(), getGame().getArene().getCoffre().getLocation());
+        if (this.getMonde() != null && !p.getWorld().equals((Object)this.getMonde())) {
+            PlayerUtils.teleportPlayer(p, this.getMonde(), this.getGame().getArene().getCoffre().getLocation());
+        }
     }
 
     public void setNether(World nether) {
         this.nether = nether;
     }
 
-
-
-
-
-    private void updatePlayersHUD(ScoreboardFields champs, String valeur){
-        for(Player joueur : getPlayers()){
+    private void updatePlayersHUD(ScoreboardFields champs, String valeur) {
+        for (Player joueur : this.getPlayers()) {
             ScoreboardAPI.updateField(joueur, champs, valeur);
         }
     }
 
-    private void updatePlayersHUD(Map<ScoreboardFields, String> valeurs){
-        for(Player joueur : getPlayers()){
-            for(Map.Entry<ScoreboardFields, String> _donnes : valeurs.entrySet()){
+    private void updatePlayersHUD(Map<ScoreboardFields, String> valeurs) {
+        for (Player joueur : this.getPlayers()) {
+            for (Map.Entry<ScoreboardFields, String> _donnes : valeurs.entrySet()) {
                 ScoreboardAPI.updateField(joueur, _donnes.getKey(), _donnes.getValue());
             }
         }
+    }
+
+    protected void setGameWorld(World gameWorld) {
+        this.gameWorld = gameWorld;
+    }
+
+    public KitManager getKitManager() {
+        return this.kitManager;
+    }
+
+    public SpectatorManager getSpectatorManager() {
+        return this.spectatorManager;
     }
 }
 

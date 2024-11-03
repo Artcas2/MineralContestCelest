@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class ParachuteBlock {
-
     private Location location;
     private Material material;
 
@@ -15,7 +14,7 @@ public class ParachuteBlock {
     }
 
     public Location getLocation() {
-        return location;
+        return this.location;
     }
 
     public void setLocation(Location location) {
@@ -23,7 +22,7 @@ public class ParachuteBlock {
     }
 
     public Material getMaterial() {
-        return material;
+        return this.material;
     }
 
     public void setMaterial(Material material) {
@@ -34,10 +33,8 @@ public class ParachuteBlock {
         return new ParachuteBlock(b.getLocation(), b.getType());
     }
 
-    /**
-     * Permet de supprimer un bloc
-     */
     public void remove() {
         this.location.getBlock().setType(Material.AIR);
     }
 }
+

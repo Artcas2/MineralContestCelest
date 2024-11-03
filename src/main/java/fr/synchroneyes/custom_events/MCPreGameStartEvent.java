@@ -1,10 +1,10 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import org.bukkit.event.Cancellable;
 
-public class MCPreGameStartEvent  extends MCEvent implements Cancellable {
-
+public class MCPreGameStartEvent extends MCEvent implements Cancellable {
     private boolean cancelled;
     private Game partie;
 
@@ -13,16 +13,15 @@ public class MCPreGameStartEvent  extends MCEvent implements Cancellable {
     }
 
     public Game getPartie() {
-        return partie;
+        return this.partie;
     }
 
-    @Override
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
-    @Override
     public void setCancelled(boolean b) {
-        cancelled = b;
+        this.cancelled = b;
     }
 }
+

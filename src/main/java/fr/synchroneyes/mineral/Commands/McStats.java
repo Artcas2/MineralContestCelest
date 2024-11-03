@@ -7,11 +7,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class McStats extends CommandTemplate {
-
     public McStats() {
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(GROUP_REQUIRED);
-        accessCommande.add(GAME_ENDED);
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(15);
     }
 
     @Override
@@ -31,11 +30,10 @@ public class McStats extends CommandTemplate {
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
-
+        Player joueur = (Player)commandSender;
         Game partie = mineralcontest.getPlayerGame(joueur);
-
         joueur.openInventory(partie.getMenuStatistiques());
         return false;
     }
 }
+

@@ -1,8 +1,9 @@
 package fr.synchroneyes.mineral.Scoreboard;
 
-import org.bukkit.entity.Player;
-
+import fr.synchroneyes.mineral.Scoreboard.BoardPage;
+import fr.synchroneyes.mineral.Scoreboard.ScoreboardUtil;
 import java.util.HashMap;
+import org.bukkit.entity.Player;
 
 public class SimpleRankedPage implements BoardPage {
     private String title;
@@ -15,6 +16,7 @@ public class SimpleRankedPage implements BoardPage {
 
     @Override
     public void update(Player p) {
-        ScoreboardUtil.rankedSidebarDisplay(p, title, content);   
+        ScoreboardUtil.rankedSidebarDisplay(p, this.title, this.content);
     }
 }
+

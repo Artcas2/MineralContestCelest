@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class EnableDisableChickenItem extends RefereeItemTemplate {
-
     public EnableDisableChickenItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -17,13 +16,16 @@ public class EnableDisableChickenItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null) return;
-
+        if (groupe == null) {
+            return;
+        }
         boolean chickenEnabled = groupe.getGame().getArene().chickenWaves.isEnabled();
         groupe.getGame().getArene().chickenWaves.setEnabled(!chickenEnabled);
-
-        if (chickenEnabled) joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_disabled.toString());
-        else joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_enabled.toString());
+        if (chickenEnabled) {
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_disabled.toString());
+        } else {
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_enabled.toString());
+        }
     }
 
     @Override
@@ -41,3 +43,4 @@ public class EnableDisableChickenItem extends RefereeItemTemplate {
         return Material.ORANGE_CONCRETE;
     }
 }
+

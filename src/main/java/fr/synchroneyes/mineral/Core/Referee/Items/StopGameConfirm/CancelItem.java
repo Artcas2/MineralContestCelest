@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class CancelItem extends RefereeItemTemplate {
-
     public CancelItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -32,3 +31,4 @@ public class CancelItem extends RefereeItemTemplate {
         return Material.RED_CONCRETE;
     }
 }
+

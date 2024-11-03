@@ -5,19 +5,15 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-
 public class ArenaChestStat extends MeilleurStatistic {
-
-    // Tableau representant un joueur avec le nombre de coffre d'arène ouvert
-
     @Override
     public void perform(Player p, Object target) {
-        if (!infoJoueurs.containsKey(p)) infoJoueurs.put(p, 0);
-
-        int nombreDeCoffreOuvertActuellement = infoJoueurs.get(p);
-        infoJoueurs.replace(p, nombreDeCoffreOuvertActuellement + 1);
+        if (!this.infoJoueurs.containsKey(p)) {
+            this.infoJoueurs.put(p, 0);
+        }
+        int nombreDeCoffreOuvertActuellement = (Integer)this.infoJoueurs.get(p);
+        this.infoJoueurs.replace(p, nombreDeCoffreOuvertActuellement + 1);
     }
-
 
     @Override
     public String getHighestPlayerTitle() {
@@ -26,7 +22,7 @@ public class ArenaChestStat extends MeilleurStatistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return Lang.stats_arena_chest_subtitle.toString().replace("%d", getHighestPlayerValue() + "");
+        return Lang.stats_arena_chest_subtitle.toString().replace("%d", this.getHighestPlayerValue() + "");
     }
 
     @Override
@@ -34,14 +30,9 @@ public class ArenaChestStat extends MeilleurStatistic {
         return Material.CHEST;
     }
 
-
-    /**
-     * Cette statistique est utilisable seulement si des coffres ont été ouvert
-     *
-     * @return
-     */
     @Override
     public boolean isStatUsable() {
-        return (!infoJoueurs.isEmpty());
+        return !this.infoJoueurs.isEmpty();
     }
 }
+

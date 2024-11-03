@@ -5,37 +5,26 @@ import fr.synchroneyes.mineral.Core.Coffre.Animations;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestAnimation;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
 import fr.synchroneyes.mineral.Translation.Lang;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class CoffreParachute extends AutomatedChestAnimation {
-
-    private ArenaChestContentGenerator generator;
-
+    private ArenaChestContentGenerator generator = new ArenaChestContentGenerator(null);
     private AutomatedChestManager automatedChestManager;
+    int minItems;
+    int maxItems;
 
-    // Variable contenant le nombre minimum & maximum d'items à générer
-    int minItems, maxItems;
-
-    /**
-     * Constructeur, permet de donner en paramètre le nom de l'inventaire ainsi que la taille
-     */
     public CoffreParachute(AutomatedChestManager manager) {
-        // On veut 5 lignes
-        super(5 * 9, manager);
-        generator = new ArenaChestContentGenerator(null);
+        super(45, manager);
         this.automatedChestManager = manager;
     }
-
 
     public void setMinItems(int minItems) {
         this.minItems = minItems;
     }
-
 
     public void setMaxItems(int maxItems) {
         this.maxItems = maxItems;
@@ -53,12 +42,10 @@ public class CoffreParachute extends AutomatedChestAnimation {
 
     @Override
     public void actionToPerformBeforeSpawn() {
-
     }
 
     @Override
     public void actionToPerformAfterAnimationOver() {
-
     }
 
     @Override
@@ -80,7 +67,9 @@ public class CoffreParachute extends AutomatedChestAnimation {
     public ItemStack getWaitingItemMaterial() {
         ItemStack item = new ItemStack(Material.RED_STAINED_GLASS_PANE, 1);
         ItemMeta meta = item.getItemMeta();
-        if (meta != null) meta.setDisplayName(" ");
+        if (meta != null) {
+            meta.setDisplayName(" ");
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -89,7 +78,9 @@ public class CoffreParachute extends AutomatedChestAnimation {
     public ItemStack getUsedItemMaterial() {
         ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE, 1);
         ItemMeta meta = item.getItemMeta();
-        if (meta != null) meta.setDisplayName(" ");
+        if (meta != null) {
+            meta.setDisplayName(" ");
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -106,7 +97,7 @@ public class CoffreParachute extends AutomatedChestAnimation {
 
     @Override
     public int getAnimationTime() {
-        return automatedChestManager.getGroupe().getParametresPartie().getCVAR("drop_opening_time").getValeurNumerique();
+        return this.automatedChestManager.getGroupe().getParametresPartie().getCVAR("drop_opening_time").getValeurNumerique();
     }
 
     @Override
@@ -116,11 +107,12 @@ public class CoffreParachute extends AutomatedChestAnimation {
 
     @Override
     public List<ItemStack> genererContenuCoffre() {
-
-        LinkedList<ItemStack> items = new LinkedList<>();
+        LinkedList<ItemStack> items = new LinkedList<ItemStack>();
         try {
-            for (ItemStack item : generator.generateAirDropInventory(minItems, maxItems).getContents())
-                if (item != null) items.add(item);
+            for (ItemStack item : this.generator.generateAirDropInventory(this.minItems, this.maxItems).getContents()) {
+                if (item == null) continue;
+                items.add(item);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -132,3 +124,4 @@ public class CoffreParachute extends AutomatedChestAnimation {
         return false;
     }
 }
+

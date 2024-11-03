@@ -24,23 +24,26 @@ public enum ChatColorString {
     private String valeurEN;
     private ChatColor couleur;
 
-    ChatColorString(ChatColor chatcolor, String string, String valeurEN) {
-        this.valeur = string;
+    private ChatColorString(ChatColor chatcolor, String string2, String valeurEN) {
+        this.valeur = string2;
         this.couleur = chatcolor;
         this.valeurEN = valeurEN;
     }
 
     public static String toString(ChatColor c) {
-        for (ChatColorString colorString : ChatColorString.values())
-            if (colorString.couleur.equals(c)) return colorString.valeur;
-
+        for (ChatColorString colorString : ChatColorString.values()) {
+            if (!colorString.couleur.equals((Object)c)) continue;
+            return colorString.valeur;
+        }
         return "";
     }
 
     public static String toStringEN(ChatColor c) {
-        for (ChatColorString colorString : ChatColorString.values())
-            if (colorString.couleur.equals(c)) return colorString.valeurEN;
-
+        for (ChatColorString colorString : ChatColorString.values()) {
+            if (!colorString.couleur.equals((Object)c)) continue;
+            return colorString.valeurEN;
+        }
         return "";
     }
 }
+

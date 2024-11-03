@@ -39,14 +39,11 @@ public class AjouterVieSupplementaire extends ConsumableItem {
 
     @Override
     public void onItemUse() {
-
         int nombreDeCoeur = 3;
-
         double currentMaxHealth = this.joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-        currentMaxHealth += nombreDeCoeur * 2;
-
-        if (currentMaxHealth >= 40) currentMaxHealth = 40;
-
+        if ((currentMaxHealth += (double)(nombreDeCoeur * 2)) >= 40.0) {
+            currentMaxHealth = 40.0;
+        }
         this.joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(currentMaxHealth);
         this.joueur.setHealth(currentMaxHealth);
     }
@@ -54,7 +51,6 @@ public class AjouterVieSupplementaire extends ConsumableItem {
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("self_more_health");
-
     }
-
 }
+

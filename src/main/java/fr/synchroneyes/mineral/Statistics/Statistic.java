@@ -1,46 +1,20 @@
 package fr.synchroneyes.mineral.Statistics;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-/**
- * Cette classe permet de gérer les statistiques d'une partie
- */
 public abstract class Statistic {
+    public abstract void perform(Player var1, Object var2);
 
-
-    /**
-     * Tableau "associatif" permettant de stocker la valeur d'un joueur ainsi que sa valeur
-     */
-
-    public abstract void perform(Player p, Object target);
-
-
-    /**
-     * Méthode permettant de retourner le meilleur joueur de la statistique
-     *
-     * @return meilleur joueur
-     */
     public abstract Player getHighestPlayer();
 
-    /**
-     * Méthode permettant de retourner le pire joueur de la statistique
-     *
-     * @return pire joueur
-     */
     public abstract Player getLowestPlayer();
 
-    /**
-     * Récuperer les titres des "grades"
-     *
-     * @return titre
-     */
     public abstract String getHighestPlayerTitle();
 
     public abstract String getLowerPlayerTitle();
@@ -49,16 +23,9 @@ public abstract class Statistic {
 
     public abstract String getLowestItemSubTitle();
 
-
-    /**
-     * Récuperer les icones des stats
-     *
-     * @return icone
-     */
     public abstract Material getHighestPlayerIcon();
 
     public abstract Material getLowestPlayerIcon();
-
 
     public abstract int getHighestPlayerValue();
 
@@ -66,81 +33,52 @@ public abstract class Statistic {
 
     public abstract boolean isLowestValueRequired();
 
-
-    /**
-     * Retourne si la statistique est utilisable (ex: StatKill, il faut qu'il y ai eu au moins un kill/suicide)
-     *
-     * @return
-     */
     public abstract boolean isStatUsable();
 
-
-    /**
-     * Transforme l'event en un item
-     *
-     * @return item
-     */
     private ItemStack getLowestItemStack() {
-        ItemStack item = new ItemStack(getLowestPlayerIcon());
+        ItemStack item = new ItemStack(this.getLowestPlayerIcon());
         ItemMeta itemMeta = item.getItemMeta();
-
         if (itemMeta != null) {
-            itemMeta.setDisplayName(getLowerPlayerTitle());
-            List<String> description = new LinkedList<>();
-            description.add("> " + getLowestPlayer().getDisplayName());
-            if (getLowestItemSubTitle() != null) description.add(getLowestItemSubTitle());
-
-
+            itemMeta.setDisplayName(this.getLowerPlayerTitle());
+            LinkedList<String> description = new LinkedList<String>();
+            description.add("> " + this.getLowestPlayer().getDisplayName());
+            if (this.getLowestItemSubTitle() != null) {
+                description.add(this.getLowestItemSubTitle());
+            }
             itemMeta.setLore(description);
-
             item.setItemMeta(itemMeta);
         }
-
         return item;
     }
 
-    /**
-     * Transforme l'event en un item
-     *
-     * @return item
-     */
     private ItemStack getHighestItemStack() {
-        ItemStack item = new ItemStack(getHighestPlayerIcon());
+        ItemStack item = new ItemStack(this.getHighestPlayerIcon());
         ItemMeta itemMeta = item.getItemMeta();
-
         if (itemMeta != null) {
-            itemMeta.setDisplayName(getHighestPlayerTitle());
-            List<String> description = new LinkedList<>();
-            if(getHighestPlayer() != null)
-                description.add("> " + getHighestPlayer().getDisplayName());
-
-            if(getHighestPlayer() != null )
-                if (getHighestItemSubTitle() != null) description.add(getHighestItemSubTitle());
+            itemMeta.setDisplayName(this.getHighestPlayerTitle());
+            LinkedList<String> description = new LinkedList<String>();
+            if (this.getHighestPlayer() != null) {
+                description.add("> " + this.getHighestPlayer().getDisplayName());
+            }
+            if (this.getHighestPlayer() != null && this.getHighestItemSubTitle() != null) {
+                description.add(this.getHighestItemSubTitle());
+            }
             itemMeta.setLore(description);
-
             item.setItemMeta(itemMeta);
         }
         return item;
     }
 
-
-    /**
-     * Transforme la statistique en items
-     *
-     * @return
-     */
     public List<ItemStack> toItemStack() {
-        List<ItemStack> items = new ArrayList<>();
-
-        if (!isStatUsable()) return items;
-
-
-        // On ajoute le moins bon des stats SI le moins bon n'est pas le même que le meilleur!
-        if (isLowestValueRequired() && !getLowestPlayer().equals(getHighestPlayer())) items.add(getLowestItemStack());
-        items.add(getHighestItemStack());
-
+        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+        if (!this.isStatUsable()) {
+            return items;
+        }
+        if (this.isLowestValueRequired() && !this.getLowestPlayer().equals((Object)this.getHighestPlayer())) {
+            items.add(this.getLowestItemStack());
+        }
+        items.add(this.getHighestItemStack());
         return items;
     }
-
-
 }
+

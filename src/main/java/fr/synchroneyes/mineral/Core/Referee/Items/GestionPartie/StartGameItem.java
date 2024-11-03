@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class StartGameItem extends RefereeItemTemplate {
-
     public StartGameItem(Object target, InventoryTemplate inventaireSource) {
         super(target, inventaireSource);
     }
@@ -17,11 +16,15 @@ public class StartGameItem extends RefereeItemTemplate {
     @Override
     public void performClick(Player joueur) {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
-        if (groupe == null) return;
-        if (groupe.getGame() == null) return;
-
-        if (mineralcontest.isInMineralContestHub(joueur)) return;
-
+        if (groupe == null) {
+            return;
+        }
+        if (groupe.getGame() == null) {
+            return;
+        }
+        if (mineralcontest.isInMineralContestHub(joueur)) {
+            return;
+        }
         if (!groupe.getGame().isGameStarted()) {
             try {
                 groupe.getGame().demarrerPartie(true);
@@ -48,3 +51,4 @@ public class StartGameItem extends RefereeItemTemplate {
         return Material.GREEN_CONCRETE;
     }
 }
+

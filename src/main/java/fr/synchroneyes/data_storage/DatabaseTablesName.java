@@ -1,8 +1,5 @@
 package fr.synchroneyes.data_storage;
 
-/**
- * Classe listant le nom des tables en base de donnée
- */
 public enum DatabaseTablesName {
     game("game", "CREATE TABLE IF NOT EXISTS `mineral_game` ( `id` int(11) NOT NULL, `uid` varchar(255) NOT NULL, `gamestate` enum('started','ended') NOT NULL, `date_start` timestamp NOT NULL DEFAULT current_timestamp(), `date_end` timestamp NULL DEFAULT NULL, `map` varchar(255) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"),
     players("players", "CREATE TABLE IF NOT EXISTS `mineral_players` ( `id` int(11) NOT NULL, `uuid` text NOT NULL, `onlinemode` tinyint(1) NOT NULL, `name` text NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; ALTER TABLE `mineral_players` ADD PRIMARY KEY (`id`); ALTER TABLE `mineral_players` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;"),
@@ -17,17 +14,18 @@ public enum DatabaseTablesName {
     private final String tableName;
     private final String db_content;
 
-    DatabaseTablesName(String s, String db_content) {
+    private DatabaseTablesName(String s, String db_content) {
         this.tableName = s;
         this.db_content = db_content;
     }
 
     public String toString() {
         String prefix = "mineral_";
-        return prefix + tableName;
+        return prefix + this.tableName;
     }
 
     public String getCreationQuery() {
-        return db_content;
+        return this.db_content;
     }
 }
+

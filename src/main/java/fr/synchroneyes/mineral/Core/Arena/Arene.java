@@ -11,73 +11,49 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.Utils.Player.PlayerUtils;
 import fr.synchroneyes.mineral.Utils.Radius;
 import fr.synchroneyes.mineral.mineralcontest;
-import lombok.Getter;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Bat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.LinkedList;
-import java.util.List;
-
-/*
-    Classe représentant une arène
- */
 public class Arene {
-
-    /*
-        Une arène contient:
-            - Un coffre
-            - Une zone de spawn
-            - Une deathZone (même si on meurt en dehors)
-            - Un contour ??
-     */
-
     private Location teleportSpawn;
-    //private CoffreAvecCooldown coffre;
-
-    // Coffre de l'arène avec animation
     private AutomatedChestAnimation coffreArene;
-
     private boolean allowTeleport;
     private DeathZone deathZone;
-    private int MAX_TIME_BETWEEN_CHEST = 0; // mins
+    private int MAX_TIME_BETWEEN_CHEST = 0;
     private int MIN_TIME_BETWEEN_CHEST = 0;
-
-    @Getter
     private int TIME_BEFORE_CHEST = 0;
-
-    // Temps restant necessaire avant d'annoncer l'arrivée du coffre
     private int TIMELEFT_REQUIRED_BEFORE_WARNING = 0;
-
-    private double TELEPORT_TIME_LEFT = 0;
-    private double TELEPORT_TIME_LEFT_VAR = 0;
+    private double TELEPORT_TIME_LEFT = 0.0;
+    private double TELEPORT_TIME_LEFT_VAR = 0.0;
     private boolean CHEST_SPAWNED = false;
     private boolean CHEST_INITIALIZED = false;
     public boolean CHEST_USED = false;
     public int arenaRadius = 60;
     private BossBar teleportStatusBar;
-
     public Groupe groupe;
-
     public ChickenWaves chickenWaves;
-
-    // Liste des équipes à notifier avant l'apparition du coffre
     private List<Equipe> teamsToNotify;
-
-    // Liste des équipes à téléporter automatiquement à l'apparition du coffre
     private List<Equipe> teamsToAutomaticallyTeleport;
-
-    // Liste des équipes où; il faudra seulement TP le joueur qui fait /arene
     private List<Equipe> teamsToSingleTeleport;
 
     public boolean isChestSpawned() {
-        return CHEST_SPAWNED;
+        return this.CHEST_SPAWNED;
     }
 
     public void setChestSpawned(boolean CHEST_SPAWNED) {
@@ -88,71 +64,46 @@ public class Arene {
         this.groupe = g;
         this.deathZone = new DeathZone(g);
         this.chickenWaves = new ChickenWaves(this);
-
-
-        this.teamsToNotify = new LinkedList<>();
-        this.teamsToAutomaticallyTeleport = new LinkedList<>();
-        this.teamsToSingleTeleport = new LinkedList<>();
-
-        // Coffre d'arène avec animations
-        this.coffreArene = new CoffreArene(groupe.getAutomatedChestManager(), this);
-
+        this.teamsToNotify = new LinkedList<Equipe>();
+        this.teamsToAutomaticallyTeleport = new LinkedList<Equipe>();
+        this.teamsToSingleTeleport = new LinkedList<Equipe>();
+        this.coffreArene = new CoffreArene(this.groupe.getAutomatedChestManager(), this);
         try {
-            MAX_TIME_BETWEEN_CHEST = g.getParametresPartie().getCVAR("max_time_between_chests").getValeurNumerique();
-            MIN_TIME_BETWEEN_CHEST = g.getParametresPartie().getCVAR("min_time_between_chests").getValeurNumerique();
-            TELEPORT_TIME_LEFT = g.getParametresPartie().getCVAR("max_teleport_time").getValeurNumerique();
-            TELEPORT_TIME_LEFT_VAR = TELEPORT_TIME_LEFT;
-            TIMELEFT_REQUIRED_BEFORE_WARNING = g.getParametresPartie().getCVAR("arena_warn_chest_time").getValeurNumerique();
-
+            this.MAX_TIME_BETWEEN_CHEST = g.getParametresPartie().getCVAR("max_time_between_chests").getValeurNumerique();
+            this.MIN_TIME_BETWEEN_CHEST = g.getParametresPartie().getCVAR("min_time_between_chests").getValeurNumerique();
+            this.TELEPORT_TIME_LEFT_VAR = this.TELEPORT_TIME_LEFT = (double)g.getParametresPartie().getCVAR("max_teleport_time").getValeurNumerique();
+            this.TIMELEFT_REQUIRED_BEFORE_WARNING = g.getParametresPartie().getCVAR("arena_warn_chest_time").getValeurNumerique();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // If the min time is greater than the max time
-        if (MAX_TIME_BETWEEN_CHEST < MIN_TIME_BETWEEN_CHEST) {
-            int tmp = MIN_TIME_BETWEEN_CHEST;
-            MIN_TIME_BETWEEN_CHEST = MAX_TIME_BETWEEN_CHEST;
-            MAX_TIME_BETWEEN_CHEST = tmp;
+        if (this.MAX_TIME_BETWEEN_CHEST < this.MIN_TIME_BETWEEN_CHEST) {
+            int tmp = this.MIN_TIME_BETWEEN_CHEST;
+            this.MIN_TIME_BETWEEN_CHEST = this.MAX_TIME_BETWEEN_CHEST;
+            this.MAX_TIME_BETWEEN_CHEST = tmp;
         }
-
     }
 
-    /**
-     * Fonction permettant d'ajouter une équipe à notifier avant l'apparition du coffre
-     *
-     * @param equipe
-     */
     public void addTeamToNotify(Equipe equipe) {
-        if (!teamsToNotify.contains(equipe)) this.teamsToNotify.add(equipe);
-    }
-
-    /**
-     * Permet d'ajouter une équipe à téléporter de manière automatique
-     *
-     * @param equipe
-     */
-    public void addTeamToAutomatedTeleport(Equipe equipe) {
-        if (!teamsToAutomaticallyTeleport.contains(equipe)) teamsToAutomaticallyTeleport.add(equipe);
-    }
-
-    /**
-     * Permet d'ajouter une équipe où il faudra seulement téléporter le joueur qui fait /arene
-     *
-     * @param equipe
-     */
-    public void addTeamToSinglePlayerTeleport(Equipe equipe) {
-        if (!teamsToSingleTeleport.contains(equipe)) {
-            teamsToSingleTeleport.add(equipe);
+        if (!this.teamsToNotify.contains(equipe)) {
+            this.teamsToNotify.add(equipe);
         }
     }
 
-    /**
-     * Permet de vider la liste des équipes où il faut seulement TP un joueur
-     */
+    public void addTeamToAutomatedTeleport(Equipe equipe) {
+        if (!this.teamsToAutomaticallyTeleport.contains(equipe)) {
+            this.teamsToAutomaticallyTeleport.add(equipe);
+        }
+    }
+
+    public void addTeamToSinglePlayerTeleport(Equipe equipe) {
+        if (!this.teamsToSingleTeleport.contains(equipe)) {
+            this.teamsToSingleTeleport.add(equipe);
+        }
+    }
+
     public void clearSingleTeleportTeams() {
         this.teamsToSingleTeleport.clear();
     }
-
 
     public Location getTeleportSpawn() {
         return this.teleportSpawn;
@@ -162,303 +113,211 @@ public class Arene {
         return this.deathZone;
     }
 
-    // ON vide le contenu du coffre
     public void clear() {
-        if (this.coffreArene != null) this.coffreArene.getInventory().clear();
-        removePlayerTeleportBar();
+        if (this.coffreArene != null) {
+            this.coffreArene.getInventory().clear();
+        }
+        this.removePlayerTeleportBar();
         this.chickenWaves.setEnabled(false);
-
     }
 
     public void generateTimeBetweenChest() {
-
         try {
-            MAX_TIME_BETWEEN_CHEST = groupe.getParametresPartie().getCVAR("max_time_between_chests").getValeurNumerique();
-            MIN_TIME_BETWEEN_CHEST = groupe.getParametresPartie().getCVAR("min_time_between_chests").getValeurNumerique();
-            TIMELEFT_REQUIRED_BEFORE_WARNING = groupe.getParametresPartie().getCVAR("arena_warn_chest_time").getValeurNumerique();
-
+            this.MAX_TIME_BETWEEN_CHEST = this.groupe.getParametresPartie().getCVAR("max_time_between_chests").getValeurNumerique();
+            this.MIN_TIME_BETWEEN_CHEST = this.groupe.getParametresPartie().getCVAR("min_time_between_chests").getValeurNumerique();
+            this.TIMELEFT_REQUIRED_BEFORE_WARNING = this.groupe.getParametresPartie().getCVAR("arena_warn_chest_time").getValeurNumerique();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-        // If the min time is greater than the max time
-        if (MAX_TIME_BETWEEN_CHEST < MIN_TIME_BETWEEN_CHEST) {
-            int tmp = MIN_TIME_BETWEEN_CHEST;
-            MIN_TIME_BETWEEN_CHEST = MAX_TIME_BETWEEN_CHEST;
-            MAX_TIME_BETWEEN_CHEST = tmp;
+        if (this.MAX_TIME_BETWEEN_CHEST < this.MIN_TIME_BETWEEN_CHEST) {
+            int tmp = this.MIN_TIME_BETWEEN_CHEST;
+            this.MIN_TIME_BETWEEN_CHEST = this.MAX_TIME_BETWEEN_CHEST;
+            this.MAX_TIME_BETWEEN_CHEST = tmp;
         }
-
-
-        // On va générer une valeur comprise entre MAX_TIME et MIN_TIME en minute
-        // puis y ajouter des secondes
-        int time = (int) ((Math.random() * ((MAX_TIME_BETWEEN_CHEST - MIN_TIME_BETWEEN_CHEST) + 1)) + MIN_TIME_BETWEEN_CHEST);
+        int time = (int)(Math.random() * (double)(this.MAX_TIME_BETWEEN_CHEST - this.MIN_TIME_BETWEEN_CHEST + 1) + (double)this.MIN_TIME_BETWEEN_CHEST);
         time *= 60;
-        // On y ajoute des secondes (entre 1 et 59)
-        time += (int) ((Math.random() * ((59 - 1) + 1)) + 1);
-
-        TIME_BEFORE_CHEST = time;
-        TELEPORT_TIME_LEFT = TELEPORT_TIME_LEFT_VAR;
-        CHEST_INITIALIZED = true;
+        this.TIME_BEFORE_CHEST = time += (int)(Math.random() * 59.0 + 1.0);
+        this.TELEPORT_TIME_LEFT = this.TELEPORT_TIME_LEFT_VAR;
+        this.CHEST_INITIALIZED = true;
     }
-
-
-    // Supprime les mobs autour de l'arène
-    /*public void startAutoMobKill() {
-        new BukkitRunnable() {
-            public void run() {
-                try {
-                    if (groupe.getParametresPartie().getCVAR("enable_monster_in_protected_zone").getValeurNumerique() != 1) {
-                        for (Entity entite : groupe.getMonde().getEntities()) {
-                            if (entite instanceof Monster) {
-                                try {
-                                        entite.remove();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    Error.Report(e, groupe.getGame());
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    Error.Report(e, groupe.getGame());
-                }
-
-            }
-
-        }.runTaskTimer(mineralcontest.plugin, 0, 20);
-    }*/
 
     public void startAutoMobKill() {
-        new BukkitRunnable() {
-            @Override
+        new BukkitRunnable(){
+
             public void run() {
-
-                List<Entity> list_entity = groupe.getMonde().getEntities();
+                List<Entity> list_entity = Arene.this.groupe.getMonde().getEntities();
                 list_entity.removeIf(entite -> !(entite instanceof Monster));
-                list_entity.removeIf(entite -> !Radius.isBlockInRadius(coffreArene.getLocation(), entite.getLocation(), groupe.getParametresPartie().getCVAR("protected_zone_area_radius").getValeurNumerique()));
-
-                if(groupe.getParametresPartie().getCVAR("enable_monster_in_protected_zone").getValeurNumerique() != 1) {
-                    for(Entity entite : list_entity) {
-
-                        // On est dans le rayon de l'arène
-                        // On doit vérifier si on est dans les vagues de poulet
-                        if(groupe.getGame().getArene().chickenWaves.isFromChickenWave((LivingEntity) entite)) {
-                            // Si oui, on ne fait rien
+                list_entity.removeIf(entite -> !Radius.isBlockInRadius(Arene.this.coffreArene.getLocation(), entite.getLocation(), Arene.this.groupe.getParametresPartie().getCVAR("protected_zone_area_radius").getValeurNumerique()));
+                if (Arene.this.groupe.getParametresPartie().getCVAR("enable_monster_in_protected_zone").getValeurNumerique() != 1) {
+                    for (Entity entite2 : list_entity) {
+                        if (Arene.this.groupe.getGame().getArene().chickenWaves.isFromChickenWave((LivingEntity)entite2)) {
                             return;
                         }
-
-                        // On vérifie maintenant si c'est une chauve souris!
-                        if(entite instanceof Bat) {
+                        if (entite2 instanceof Bat) {
                             return;
                         }
-
-                        // On vérifie maintenant si c'est le boss!
-                        if(groupe.getGame().getBossManager().isThisEntityABoss((LivingEntity) entite)) {
+                        if (Arene.this.groupe.getGame().getBossManager().isThisEntityABoss((LivingEntity)entite2)) {
                             return;
                         }
-                        // On vérifie maintenant si c'est spawn par un boss!
-                        if(groupe.getGame().getBossManager().isThisEntitySpawnedByBoss(entite)) {
-                                return;
+                        if (Arene.this.groupe.getGame().getBossManager().isThisEntitySpawnedByBoss(entite2)) {
+                            return;
                         }
-                        Bukkit.getLogger().info("Removing entity: " + entite.getName());
-                        entite.remove();
+                        Bukkit.getLogger().info("Removing entity: " + entite2.getName());
+                        entite2.remove();
                     }
                 }
             }
-        }.runTaskTimer(mineralcontest.plugin, 0, 40);
+        }.runTaskTimer((Plugin)mineralcontest.plugin, 0L, 40L);
     }
 
-    /**
-     * Permet d'informer les équipes que le coffre va arriver !
-     */
     private void notifyTeams() {
-        for (Equipe equipe : teamsToNotify)
-            equipe.sendMessage(mineralcontest.prefixTeamChat + Lang.translate(Lang.arena_chest_will_spawn_in.toString(), groupe));
-
-        teamsToNotify.clear();
+        for (Equipe equipe : this.teamsToNotify) {
+            equipe.sendMessage(mineralcontest.prefixTeamChat + Lang.translate(Lang.arena_chest_will_spawn_in.toString(), this.groupe));
+        }
+        this.teamsToNotify.clear();
     }
 
-    /**
-     * Permet de téléporter les équipes qui ont acheté le bonus de TP auto à l'arène
-     */
     public void automaticallyTeleportTeams() {
-        // Pour chaque équipe
-        for (Equipe equipe : teamsToAutomaticallyTeleport)
-            // Pour chaque joueur de l'équipe
-            for (Player membre : equipe.getJoueurs())
-                PlayerUtils.teleportPlayer(membre, getTeleportSpawn().getWorld(), getTeleportSpawn());
-
-        teamsToAutomaticallyTeleport.clear();
+        for (Equipe equipe : this.teamsToAutomaticallyTeleport) {
+            for (Player membre : equipe.getJoueurs()) {
+                PlayerUtils.teleportPlayer(membre, this.getTeleportSpawn().getWorld(), this.getTeleportSpawn());
+            }
+        }
+        this.teamsToAutomaticallyTeleport.clear();
     }
 
-
-    // Gère le coffre d'arene
     public void startArena() {
+        this.generateTimeBetweenChest();
+        new BukkitRunnable(){
 
-        generateTimeBetweenChest();
-        // Coffre initialisé
-        new BukkitRunnable() {
             public void run() {
-
-                if (groupe.getGame().isGameStarted() && !groupe.getGame().isGamePaused()) {
+                if (Arene.this.groupe.getGame().isGameStarted() && !Arene.this.groupe.getGame().isGamePaused()) {
                     try {
-
-
-                        // Si le coffre est initialisé et n'est pas encore apparu
-                        if (CHEST_INITIALIZED) {
-                            // Le coffre n'est pas encore disponible
-                            if (TIME_BEFORE_CHEST > 0) {
-
-                                // On appelle l'event qui annonce un tick passé
-                                MCArenaChestTickEvent mcArenaChestTickEvent = new MCArenaChestTickEvent(TIME_BEFORE_CHEST, groupe.getGame());
-                                Bukkit.getPluginManager().callEvent(mcArenaChestTickEvent);
-
-
-                                TIME_BEFORE_CHEST--;
-                                if (TIME_BEFORE_CHEST == TIMELEFT_REQUIRED_BEFORE_WARNING)
-                                    notifyTeams();
+                        if (Arene.this.CHEST_INITIALIZED) {
+                            if (Arene.this.TIME_BEFORE_CHEST > 0) {
+                                MCArenaChestTickEvent mcArenaChestTickEvent = new MCArenaChestTickEvent(Arene.this.TIME_BEFORE_CHEST, Arene.this.groupe.getGame());
+                                Bukkit.getPluginManager().callEvent((Event)mcArenaChestTickEvent);
+                                Arene.this.TIME_BEFORE_CHEST--;
+                                if (Arene.this.TIME_BEFORE_CHEST == Arene.this.TIMELEFT_REQUIRED_BEFORE_WARNING) {
+                                    Arene.this.notifyTeams();
+                                }
                             } else {
-                                // LE coffre doit apparaitre !
-                                coffreArene.getLocation().getBlock().setType(Material.AIR);
-                                coffreArene.spawn();
-                                MCArenaChestSpawnEvent mcArenaChestSpawnEvent = new MCArenaChestSpawnEvent(groupe.getGame());
-                                Bukkit.getPluginManager().callEvent(mcArenaChestSpawnEvent);
-
+                                Arene.this.coffreArene.getLocation().getBlock().setType(Material.AIR);
+                                Arene.this.coffreArene.spawn();
+                                MCArenaChestSpawnEvent mcArenaChestSpawnEvent = new MCArenaChestSpawnEvent(Arene.this.groupe.getGame());
+                                Bukkit.getPluginManager().callEvent((Event)mcArenaChestSpawnEvent);
                             }
-
                         }
-
-                        // SI le coffre a été utilisé, on regenère un temps
-                        if (CHEST_USED) {
-                            CHEST_SPAWNED = false;
-                            disableTeleport();
-                            TELEPORT_TIME_LEFT = TELEPORT_TIME_LEFT_VAR;
-                            CHEST_USED = false;
+                        if (Arene.this.CHEST_USED) {
+                            Arene.this.CHEST_SPAWNED = false;
+                            Arene.this.disableTeleport();
+                            Arene.this.TELEPORT_TIME_LEFT = Arene.this.TELEPORT_TIME_LEFT_VAR;
+                            Arene.this.CHEST_USED = false;
                         }
-
-                        // Les joueurs disposent de 15 sec pour se Tp une fois le TP actif
-
-                        if (getCoffre().isChestSpawned() && isTeleportAllowed()) {
-                            updateTeleportBar();
-                            TELEPORT_TIME_LEFT--;
-
-                            if (TELEPORT_TIME_LEFT <= 0) {
-                                disableTeleport();
-                                removePlayerTeleportBar();
-                                TELEPORT_TIME_LEFT = TELEPORT_TIME_LEFT_VAR;
+                        if (Arene.this.getCoffre().isChestSpawned() && Arene.this.isTeleportAllowed()) {
+                            Arene.this.updateTeleportBar();
+                            Arene.access$610(Arene.this);
+                            if (Arene.this.TELEPORT_TIME_LEFT <= 0.0) {
+                                Arene.this.disableTeleport();
+                                Arene.this.removePlayerTeleportBar();
+                                Arene.this.TELEPORT_TIME_LEFT = Arene.this.TELEPORT_TIME_LEFT_VAR;
                             }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
                 }
-
-
             }
-        }.runTaskTimer(mineralcontest.plugin, 0, 20);
-
+        }.runTaskTimer((Plugin)mineralcontest.plugin, 0L, 20L);
     }
 
     public boolean isTeleportAllowed() {
         return this.allowTeleport;
     }
 
-
-    /**
-     * Permet de savoir si une équipe peut utiliser le single teleport ou non
-     *
-     * @param e
-     * @return
-     */
     public boolean canTeamUseSingleTeleport(Equipe e) {
-        return teamsToSingleTeleport.contains(e);
+        return this.teamsToSingleTeleport.contains(e);
     }
-
 
     public void enableTeleport() {
         String separator = ChatColor.GOLD + "----------------";
-        for (Player online : groupe.getPlayers()) {
+        for (Player online : this.groupe.getPlayers()) {
             online.sendMessage(separator);
             online.sendMessage(mineralcontest.prefixGlobal + Lang.arena_chest_spawned.toString());
             online.sendMessage(separator);
         }
-        //online.sendTitle(ChatColor.GREEN + Lang.translate(Lang.arena_chest_spawned.toString()), Lang.translate(Lang.arena_teleport_now_enabled.toString()), 20, 20*3, 20);
-
         this.allowTeleport = true;
-        createTeleportBar();
+        this.createTeleportBar();
     }
 
     private void createTeleportBar() {
-        if (teleportStatusBar == null)
-            teleportStatusBar = Bukkit.createBossBar(Lang.arena_teleport_now_enabled.toString(), BarColor.BLUE, BarStyle.SOLID);
+        if (this.teleportStatusBar == null) {
+            this.teleportStatusBar = Bukkit.createBossBar((String)Lang.arena_teleport_now_enabled.toString(), (BarColor)BarColor.BLUE, (BarStyle)BarStyle.SOLID, (BarFlag[])new BarFlag[0]);
+        }
     }
 
     public void removePlayerTeleportBar() {
-        if (teleportStatusBar != null) teleportStatusBar.removeAll();
+        if (this.teleportStatusBar != null) {
+            this.teleportStatusBar.removeAll();
+        }
     }
 
     public void updateTeleportBar() {
-        createTeleportBar();
-        double status = (TELEPORT_TIME_LEFT / TELEPORT_TIME_LEFT_VAR);
-        teleportStatusBar.setProgress(status);
-
-        for (Player player : groupe.getPlayers()) {
-            teleportStatusBar.removePlayer(player);
-            teleportStatusBar.addPlayer(player);
+        this.createTeleportBar();
+        double status = this.TELEPORT_TIME_LEFT / this.TELEPORT_TIME_LEFT_VAR;
+        this.teleportStatusBar.setProgress(status);
+        for (Player player : this.groupe.getPlayers()) {
+            this.teleportStatusBar.removePlayer(player);
+            this.teleportStatusBar.addPlayer(player);
         }
     }
 
     public void disableTeleport() {
         String separator = ChatColor.GOLD + "----------------";
-
-        TELEPORT_TIME_LEFT = TELEPORT_TIME_LEFT_VAR;
-
-        if (allowTeleport) {
-            for (Player online : groupe.getPlayers()) {
+        this.TELEPORT_TIME_LEFT = this.TELEPORT_TIME_LEFT_VAR;
+        if (this.allowTeleport) {
+            for (Player online : this.groupe.getPlayers()) {
                 online.sendMessage(separator);
                 online.sendMessage(mineralcontest.prefixGlobal + Lang.arena_teleport_now_disabled.toString());
                 online.sendMessage(separator);
             }
-
         }
-        removePlayerTeleportBar();
-
-        clearSingleTeleportTeams();
+        this.removePlayerTeleportBar();
+        this.clearSingleTeleportTeams();
         this.allowTeleport = false;
-
     }
 
-
     public void setTeleportSpawn(Location z) {
-        if (mineralcontest.debug)
+        if (mineralcontest.debug) {
             mineralcontest.plugin.getLogger().info(mineralcontest.prefixGlobal + Lang.arena_spawn_added.toString());
+        }
         this.teleportSpawn = z;
     }
 
-    // Set le coffre de l'arène
     public void setCoffre(Location position) {
-
         if (position == null) {
             Bukkit.getLogger().severe("Position is null !");
         }
         this.coffreArene.setChestLocation(position);
-        if (position.getBlock() != null) position.getBlock().setType(Material.AIR);
-
-        groupe.getAutomatedChestManager().replace(CoffreArene.class, coffreArene);
-        //if (mineralcontest.debug)
-            mineralcontest.plugin.getLogger().info(mineralcontest.prefixGlobal + Lang.arena_chest_added.toString());
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (position.getBlock() != null) {
+            position.getBlock().setType(Material.AIR);
         }
-
+        this.groupe.getAutomatedChestManager().replace(CoffreArene.class, this.coffreArene);
+        mineralcontest.plugin.getLogger().info(mineralcontest.prefixGlobal + Lang.arena_chest_added.toString());
     }
 
     public AutomatedChestAnimation getCoffre() {
         return this.coffreArene;
     }
 
+    public int getTIME_BEFORE_CHEST() {
+        return this.TIME_BEFORE_CHEST;
+    }
 
+    static /* synthetic */ double access$610(Arene x0) {
+        double d = x0.TELEPORT_TIME_LEFT;
+        x0.TELEPORT_TIME_LEFT = d - 1.0;
+        return d;
+    }
 }
+

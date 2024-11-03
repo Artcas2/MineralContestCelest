@@ -1,36 +1,29 @@
 package fr.synchroneyes.world_downloader.Items;
 
+import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class ItemInterface {
-
-
     public abstract Material getItemMaterial();
 
     public abstract String getNomInventaire();
 
     public abstract String getDescriptionInventaire();
 
-    public abstract void performClick(Player joueur);
+    public abstract void performClick(Player var1);
 
     public ItemStack toItemStack() {
-        ItemStack item = new ItemStack(getItemMaterial(), 1);
+        ItemStack item = new ItemStack(this.getItemMaterial(), 1);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(getNomInventaire());
-
-        List<String> description = new ArrayList<>();
-        description.add(getDescriptionInventaire());
-
+        itemMeta.setDisplayName(this.getNomInventaire());
+        ArrayList<String> description = new ArrayList<String>();
+        description.add(this.getDescriptionInventaire());
         itemMeta.setLore(description);
-
         item.setItemMeta(itemMeta);
         return item;
     }
-
 }
+

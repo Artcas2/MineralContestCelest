@@ -9,34 +9,26 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class StartVote extends CommandTemplate {
-
     public StartVote() {
-        this.accessCommande.add(PLAYER_COMMAND);
-        this.accessCommande.add(GROUP_REQUIRED);
-        this.accessCommande.add(GROUP_ADMIN);
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(2);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-
         Game groupGame = playerGroup.getGame();
         if (groupGame.isGameStarted() || groupGame.isGamePaused() || groupGame.isPreGame()) {
             commandSender.sendMessage(mineralcontest.prefixErreur + Lang.game_already_started.toString());
             return false;
         }
-
-
         playerGroup.initVoteMap();
-
-
-        if (!joueur.getWorld().equals(mineralcontest.plugin.pluginWorld)) {
+        if (!joueur.getWorld().equals((Object)mineralcontest.plugin.pluginWorld)) {
             commandSender.sendMessage(mineralcontest.prefixErreur + Lang.error_command_can_only_be_used_hub_world.toString());
             return false;
         }
-
-
         return false;
     }
 
@@ -44,7 +36,6 @@ public class StartVote extends CommandTemplate {
     public String getCommand() {
         return "startvote";
     }
-
 
     @Override
     public String getDescription() {
@@ -56,3 +47,4 @@ public class StartVote extends CommandTemplate {
         return "";
     }
 }
+

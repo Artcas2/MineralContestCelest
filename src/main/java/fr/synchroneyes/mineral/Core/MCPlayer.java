@@ -2,380 +2,269 @@ package fr.synchroneyes.mineral.Core;
 
 import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mineral.Core.Game.Game;
-import fr.synchroneyes.mineral.Core.Player.BaseItem.PlayerBaseItem;
+import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.Kits.KitAbstract;
 import fr.synchroneyes.mineral.Teams.Equipe;
 import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
 import fr.synchroneyes.mineral.Utils.Player.HUD.BaseHUD;
 import fr.synchroneyes.mineral.Utils.Player.HUD.PlayerHUD;
 import fr.synchroneyes.mineral.mineralcontest;
-import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.*;
+import java.util.HashMap;
+import java.util.UUID;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 
-import javax.swing.*;
-import java.util.HashMap;
-
-
-/**
- * Classe représentant un joueur du plugin
- * Cette classe contient toutes les informations nécessaire afin de représenter un joueur
- */
 public class MCPlayer {
-
-    // Groupe du joueur
-    @Getter
     private Groupe groupe;
-
-    // Partie du joueur
-    @Getter @Setter
     private Game partie;
-
-    // Le joueur possède une équipe
-    @Getter
     private Equipe equipe;
-
-    // La maison du joueur (liée au joueur)
-    @Getter
     private House maison;
-
-    // Joueur
-    @Getter
     private Player joueur;
-
-    // ID Stocké en base de donnée pour le joueur
-    @Getter @Setter
     private int databasePlayerId = 0;
-
-    // Variable stockant le nombre de point rapporté par le joueur
-    @Getter @Setter
     private int score_brought = 0;
-
-    // Variable stockant le nombre de point que le joueur a fait perdre aux autres équipes
-    @Getter @Setter
     private int score_lost = 0;
-
     private HashMap<World, Location> player_world_locations;
-
-
     private PlayerHUD hud;
-
     private boolean isInPlugin = true;
-
-    @Getter @Setter
     private KitAbstract kit;
 
-    /**
-     * Constructeur, prend un joueur en paramètre
-     * @param joueur
-     */
     public MCPlayer(Player joueur) {
         this.joueur = joueur;
-        this.player_world_locations = new HashMap<>();
+        this.player_world_locations = new HashMap();
         this.hud = new BaseHUD(this);
     }
 
-
-    public void setVisible(){
-        if(this.groupe != null){
-            for(Player joueur : this.groupe.getPlayers()) {
-                if(!joueur.getUniqueId().equals(this.joueur.getUniqueId())) {
-                    this.joueur.showPlayer(mineralcontest.plugin, joueur);
-                    joueur.showPlayer(mineralcontest.plugin, this.joueur);
-                }
+    public void setVisible() {
+        if (this.groupe != null) {
+            for (Player joueur : this.groupe.getPlayers()) {
+                if (joueur.getUniqueId().equals(this.joueur.getUniqueId())) continue;
+                this.joueur.showPlayer((Plugin)mineralcontest.plugin, joueur);
+                joueur.showPlayer((Plugin)mineralcontest.plugin, this.joueur);
             }
         }
-
     }
 
-    public void setInvisible(){
-
-        Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> {
-            if(this.groupe != null){
-                for(Player joueur : this.groupe.getPlayers()) {
-                    if(!joueur.getUniqueId().equals(this.joueur.getUniqueId())) {
-                        this.joueur.hidePlayer(mineralcontest.plugin, joueur);
-                        joueur.hidePlayer(mineralcontest.plugin, this.joueur);
-                    }
-
+    public void setInvisible() {
+        Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> {
+            if (this.groupe != null) {
+                for (Player joueur : this.groupe.getPlayers()) {
+                    if (joueur.getUniqueId().equals(this.joueur.getUniqueId())) continue;
+                    this.joueur.hidePlayer((Plugin)mineralcontest.plugin, joueur);
+                    joueur.hidePlayer((Plugin)mineralcontest.plugin, this.joueur);
                 }
             }
-        }, 20);
-
-
+        }, 20L);
     }
 
-    /**
-     * Méthode permettant d'affecter le groupe ainsi que la partie du joueur
-     * @param groupe
-     */
     public void setGroupe(Groupe groupe) {
         this.groupe = groupe;
-
-        if(groupe != null) this.partie = groupe.getGame();
+        if (groupe != null) {
+            this.partie = groupe.getGame();
+        }
     }
 
-    /**
-     * Méthode permettant d'affecter une équipe à un joueur
-     * @param equipe
-     */
     public void setEquipe(Equipe equipe) {
         this.equipe = equipe;
         this.maison = equipe.getMaison();
     }
 
-    /**
-     * Méthode permettant d'affecter une maison à un joueur
-     * @param house
-     */
     public void setMaison(House house) {
         this.maison = house;
         this.equipe = house.getTeam();
     }
 
-    /* ---------------------------------------- */
-
-    /**
-     * Méthode permettant de passer au travers de l'écran de mort
-     */
     public void cancelDeathEvent() {
-
-        // On met les niveaux de vie & faim du joueur à fond
-        setMaxHealth();
-        setMaxFood();
-
-        // On ouvre son inventaire 1 tick plus tard
-        Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> {
-            this.joueur.openInventory(this.joueur.getInventory());
-
-            // Et un tick plus tard, on le ferme
-            Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> this.joueur.closeInventory(), 1);
-
-        }, 1);
-
-
+        this.setMaxHealth();
+        this.setMaxFood();
+        Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> {
+            this.joueur.openInventory((Inventory)this.joueur.getInventory());
+            Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> this.joueur.closeInventory(), 1L);
+        }, 1L);
     }
 
-    /**
-     * Méthode permettant de mettre la vie à fond du joueur
-     */
     public void setMaxHealth() {
-        double maxPlayerHealth = (joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null) ? joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() : 20;
+        double maxPlayerHealth = this.joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null ? this.joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() : 20.0;
         this.joueur.setHealth(maxPlayerHealth);
     }
 
-    /**
-     * Méthode permettant de mettre la nourriture au max du joueur
-     */
     public void setMaxFood() {
         int maxHungerLevel = 20;
         this.joueur.setFoodLevel(maxHungerLevel);
     }
 
-    /**
-     * Méthode permettant de retirer toutes les effets de potions du joueur
-     */
     public void clearPlayerPotionEffects() {
-        for (PotionEffect potion : joueur.getActivePotionEffects())
-            joueur.removePotionEffect(potion.getType());
+        for (PotionEffect potion : this.joueur.getActivePotionEffects()) {
+            this.joueur.removePotionEffect(potion.getType());
+        }
     }
 
-    /**
-     * Méthode permettant de clear l'inventaire du joueur
-     */
     public void clearInventory() {
-        joueur.getInventory().clear();
+        this.joueur.getInventory().clear();
     }
 
-
-    /**
-     * Méthode permettant de donner les items de base au joueur
-     */
     public void giveBaseItems() {
-        if(groupe != null) groupe.getPlayerBaseItem().giveItemsToPlayer(this.joueur);
+        if (this.groupe != null) {
+            this.groupe.getPlayerBaseItem().giveItemsToPlayer(this.joueur);
+        }
     }
 
-    /**
-     *
-     */
     public void teleportToHouse() {
-       if(maison != null) this.joueur.teleport(maison.getHouseLocation());
+        if (this.maison != null) {
+            this.joueur.teleport(this.maison.getHouseLocation());
+        }
     }
 
-    /**
-     * Méthode permettant de jouer des feux d'artifices du un joueur
-     */
     public void playFireworks(Color couleur) {
-        Firework firework = joueur.getWorld().spawn(joueur.getLocation(), Firework.class);
+        Firework firework = (Firework)this.joueur.getWorld().spawn(this.joueur.getLocation(), Firework.class);
         FireworkMeta fireworkMeta = firework.getFireworkMeta();
-
-        // On ajoute un effet
-        fireworkMeta.addEffect(FireworkEffect.builder()
-                .flicker(true)
-                .trail(true)
-                .withColor(couleur)
-                .withFade(Color.WHITE)
-                .build()
-
-        );
-
+        fireworkMeta.addEffect(FireworkEffect.builder().flicker(true).trail(true).withColor(couleur).withFade(Color.WHITE).build());
         fireworkMeta.setPower(1);
         firework.setFireworkMeta(fireworkMeta);
     }
 
-    /**
-     * Méthode permettant d'envoyer un message privé
-     * @param message
-     */
     public void sendPrivateMessage(String message) {
         this.joueur.sendMessage(mineralcontest.prefixPrive + message);
     }
 
-
-    /**
-     * Méthode permettant d'ajouter le nombre de point apporté par le joueur
-     * @param score
-     */
     public void addPlayerScore(int score) {
         this.score_brought += score;
     }
 
-    /**
-     * Méthode permettant d'ajouter le nombre de point que le joueur a fait perdre aux autres joueurs
-     * @param score
-     */
     public void addPlayerScorePenalityToOtherTeams(int score) {
         this.score_lost += score;
     }
-
 
     public void resetPlayerScores() {
         this.score_lost = 0;
         this.score_brought = 0;
     }
 
-    /**
-     * Méthode permettant de définir la position d'un joueur dans un monde
-     * @param w
-     * @param l
-     */
-    public void setPlayerWorldLocation(World w, Location l){
-
-        if(!joueur.isOnGround()) return;
-
-        if(player_world_locations.containsKey(w)) {
-            player_world_locations.replace(w, l);
+    public void setPlayerWorldLocation(World w, Location l) {
+        if (!this.joueur.isOnGround()) {
+            return;
+        }
+        if (this.player_world_locations.containsKey(w)) {
+            this.player_world_locations.replace(w, l);
         } else {
-            player_world_locations.put(w, l);
+            this.player_world_locations.put(w, l);
         }
     }
 
-    /**
-     * Méthode permettant de récuperer la position d'un joueur dans un monde
-     * @param w
-     * @return
-     */
-    public Location getPLayerLocationFromWorld(World w){
-        return player_world_locations.getOrDefault(w, null);
+    public Location getPLayerLocationFromWorld(World w) {
+        return this.player_world_locations.getOrDefault(w, null);
     }
 
     public boolean isInPlugin() {
-        return isInPlugin;
+        return this.isInPlugin;
     }
 
     public void setInPlugin(boolean inPlugin) {
-        isInPlugin = inPlugin;
+        this.isInPlugin = inPlugin;
     }
 
-    /**
-     * Méthode permettant de déconnecter un joueur du plugin
-     */
     public void disconnectPlayer() {
-
-
-
-        // On traite les actions de son groupe
-        if(getGroupe() != null) {
-
-            Groupe groupe = getGroupe();
-
-            // On l'ajoute à la liste des personnes déconnectée
-            groupe.addDisconnectedPlayer(joueur, joueur.getLocation());
-
-
-
-            if(groupe.getGame() != null) {
-                // Si le joueur est dans un groupe, on le retire des joueurs prêts
-                groupe.getGame().removePlayerReady(joueur);
-
-                // On le retire des arbitres
-                groupe.getGame().removeReferee(joueur, false);
+        if (this.getGroupe() != null) {
+            Groupe groupe = this.getGroupe();
+            groupe.addDisconnectedPlayer(this.joueur, this.joueur.getLocation());
+            if (groupe.getGame() != null) {
+                groupe.getGame().removePlayerReady(this.joueur);
+                groupe.getGame().removeReferee(this.joueur, false);
             }
-
-
-
-            // On le retire des admins
-            groupe.removeAdmin(joueur);
-
-            // On le retire des joueurs
-            groupe.removePlayer(joueur);
-
-
-            // On le retire de son équipe si il en a une
-            if(getEquipe() != null) {
-                getEquipe().removePlayer(this.joueur);
+            groupe.removeAdmin(this.joueur);
+            groupe.removePlayer(this.joueur);
+            if (this.getEquipe() != null) {
+                this.getEquipe().removePlayer(this.joueur);
             }
-
-            // SI une game est en cours
-            if(getPartie().isGameStarted()) {
-
-                // On ferme la porte
-                getMaison().getPorte().forceCloseDoor();
+            if (this.getPartie().isGameStarted()) {
+                this.getMaison().getPorte().forceCloseDoor();
             }
-
-
         }
-
-        // On retire le joueur de la liste des joueurs connecté au plugin
-        mineralcontest.plugin.removePlayer(joueur);
-
-        // On affiche un message
-        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + joueur.getDisplayName() + " s'est déconnecté");
+        mineralcontest.plugin.removePlayer(this.joueur);
+        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + this.joueur.getDisplayName() + " s'est d\u00e9connect\u00e9");
     }
 
-    /**
-     * Méthode permettant de reconnecter un joueur déconnecté
-     * @param disconnectedPlayer
-     */
     public void reconnectPlayer(DisconnectedPlayer disconnectedPlayer) {
-
-        // ON le remet dans son groupe
-        if(disconnectedPlayer.getOldPlayerGroupe() != null) {
-            Player joueur = Bukkit.getPlayer(disconnectedPlayer.getPlayerUUID());
+        if (disconnectedPlayer.getOldPlayerGroupe() != null) {
+            Player joueur = Bukkit.getPlayer((UUID)disconnectedPlayer.getPlayerUUID());
             disconnectedPlayer.getOldPlayerGroupe().playerHaveReconnected(joueur);
         }
     }
 
-    /**
-     * Méthode permettant de retourner vrai si l'inventaire du joueur est plein
-     * @return
-     */
     public boolean isInventoryFull() {
-        int inventorySize = joueur.getInventory().getSize();
+        int inventorySize = this.joueur.getInventory().getSize();
         int item_count = 0;
-
-        for(ItemStack item : joueur.getInventory().getContents())
-            if(item != null) ++item_count;
-
+        for (ItemStack item : this.joueur.getInventory().getContents()) {
+            if (item == null) continue;
+            ++item_count;
+        }
         return item_count == inventorySize;
     }
 
+    public Groupe getGroupe() {
+        return this.groupe;
+    }
 
+    public Game getPartie() {
+        return this.partie;
+    }
+
+    public void setPartie(Game partie) {
+        this.partie = partie;
+    }
+
+    public Equipe getEquipe() {
+        return this.equipe;
+    }
+
+    public House getMaison() {
+        return this.maison;
+    }
+
+    public Player getJoueur() {
+        return this.joueur;
+    }
+
+    public int getDatabasePlayerId() {
+        return this.databasePlayerId;
+    }
+
+    public void setDatabasePlayerId(int databasePlayerId) {
+        this.databasePlayerId = databasePlayerId;
+    }
+
+    public int getScore_brought() {
+        return this.score_brought;
+    }
+
+    public void setScore_brought(int score_brought) {
+        this.score_brought = score_brought;
+    }
+
+    public int getScore_lost() {
+        return this.score_lost;
+    }
+
+    public void setScore_lost(int score_lost) {
+        this.score_lost = score_lost;
+    }
+
+    public KitAbstract getKit() {
+        return this.kit;
+    }
+
+    public void setKit(KitAbstract kit) {
+        this.kit = kit;
+    }
 }
 

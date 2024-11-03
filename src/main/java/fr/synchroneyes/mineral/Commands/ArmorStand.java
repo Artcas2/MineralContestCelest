@@ -26,14 +26,11 @@ public class ArmorStand extends CommandTemplate {
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-
-
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Location spawnLocation = joueur.getLocation();
-
         ArmorStandUtility.createArmorStandWithColoredLeather(spawnLocation, "Test", Color.RED, Material.GOLDEN_SWORD);
         joueur.sendMessage("spawned!");
-
         return false;
     }
 }
+

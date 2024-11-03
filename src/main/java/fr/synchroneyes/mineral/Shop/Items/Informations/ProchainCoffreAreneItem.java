@@ -24,7 +24,6 @@ public class ProchainCoffreAreneItem extends ConsumableItem {
         return Material.BOOK;
     }
 
-
     @Override
     public boolean isEnabledOnRespawn() {
         return false;
@@ -43,17 +42,14 @@ public class ProchainCoffreAreneItem extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         int tempsRestant = playerGroup.getGame().getArene().getTIME_BEFORE_CHEST();
-
         String tempsRestantText = Lang.shopitem_next_arenachest_onitemuse.toString();
         tempsRestantText = tempsRestantText.replace("%time", TimeConverter.intToString(tempsRestant));
-
-        joueur.sendMessage(mineralcontest.prefixPrive + tempsRestantText);
+        this.joueur.sendMessage(mineralcontest.prefixPrive + tempsRestantText);
     }
-
 
     @Override
     public int getPrice() {
@@ -62,6 +58,7 @@ public class ProchainCoffreAreneItem extends ConsumableItem {
 
     @Override
     public void onPlayerBonusAdded() {
-        onItemUse();
+        this.onItemUse();
     }
 }
+

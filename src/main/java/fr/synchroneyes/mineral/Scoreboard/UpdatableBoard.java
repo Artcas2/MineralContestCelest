@@ -1,34 +1,32 @@
 package fr.synchroneyes.mineral.Scoreboard;
 
+import fr.synchroneyes.mineral.Scoreboard.Board;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class UpdatableBoard extends Board {
-    private List<Player> players;
-
-    public UpdatableBoard() {
-        this.players = new ArrayList<>();
-    }
+    private List<Player> players = new ArrayList<Player>();
 
     @Override
     public void startDisplay(Player p) {
-        players.add(p);
-        update(p);
+        this.players.add(p);
+        this.update(p);
     }
 
     @Override
     public void stopDisplay(Player p) {
-        players.remove(p);
+        this.players.remove(p);
         p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
     }
 
     public void update() {
-        for (Player p : players)
-            update(p);
+        for (Player p : this.players) {
+            this.update(p);
+        }
     }
 
-    protected abstract void update(Player p);
+    protected abstract void update(Player var1);
 }
+

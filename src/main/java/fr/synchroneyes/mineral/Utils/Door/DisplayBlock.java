@@ -14,7 +14,6 @@ public class DisplayBlock {
     private BlockData blockData;
 
     public DisplayBlock(Block baseBlock) {
-
         try {
             this.baseBlock = baseBlock;
             this.position = baseBlock.getLocation();
@@ -24,36 +23,30 @@ public class DisplayBlock {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
-
 
     public Block getBlock() {
-        return baseBlock;
+        return this.baseBlock;
     }
 
-
     public Location getPosition() {
-        return position;
+        return this.position;
     }
 
     public void display() {
-
-
         try {
-            position.getBlock().setType(materiel);
-            position.getBlock().setBlockData(baseBlock.getBlockData());
-            position.getBlock().getState().setData(this.data);
-            position.getBlock().setBlockData(this.blockData);
-            position.getBlock().getState().update();
+            this.position.getBlock().setType(this.materiel);
+            this.position.getBlock().setBlockData(this.baseBlock.getBlockData());
+            this.position.getBlock().getState().setData(this.data);
+            this.position.getBlock().setBlockData(this.blockData);
+            this.position.getBlock().getState().update();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-    public void hide() {
 
-        position.getBlock().setType(Material.AIR);
+    public void hide() {
+        this.position.getBlock().setType(Material.AIR);
     }
 }
+

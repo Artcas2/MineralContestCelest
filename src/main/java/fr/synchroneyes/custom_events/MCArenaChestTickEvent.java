@@ -1,15 +1,11 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.Game.Game;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 public class MCArenaChestTickEvent extends MCEvent {
-
     private Game game;
     private int timeLeft;
-
-
 
     public MCArenaChestTickEvent(int timeLeft, Game partie) {
         this.timeLeft = timeLeft;
@@ -17,11 +13,11 @@ public class MCArenaChestTickEvent extends MCEvent {
     }
 
     public Game getGame() {
-        return game;
+        return this.game;
     }
 
     public int getTimeLeft() {
-        return timeLeft;
+        return this.timeLeft;
     }
-
 }
+

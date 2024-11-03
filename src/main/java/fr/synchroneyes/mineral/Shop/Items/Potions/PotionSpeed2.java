@@ -16,12 +16,10 @@ public class PotionSpeed2 extends PotionItem {
         return new String[]{Lang.shopitem_speed2_desc.toString()};
     }
 
-
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("speed2_potion");
     }
-
 
     @Override
     public PotionEffectType getPotionType() {
@@ -38,3 +36,4 @@ public class PotionSpeed2 extends PotionItem {
         return 5;
     }
 }
+

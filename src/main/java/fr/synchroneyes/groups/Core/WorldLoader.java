@@ -2,6 +2,7 @@ package fr.synchroneyes.groups.Core;
 
 import fr.synchroneyes.custom_events.MCWorldLoadedEvent;
 import fr.synchroneyes.file_manager.FileList;
+import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.groups.Utils.Etats;
 import fr.synchroneyes.groups.Utils.FileManager.FileCopy;
 import fr.synchroneyes.mineral.Core.Coffre.Coffres.CoffreArene;
@@ -13,72 +14,58 @@ import fr.synchroneyes.mineral.Shop.NPCs.BonusSeller;
 import fr.synchroneyes.mineral.Shop.ShopManager;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Difficulty;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 public class WorldLoader {
-
     private Groupe groupe;
     private String nomMonde;
     private Location spawnLocation;
-
-    // default spawn location if none set
-    protected static int defaultX = 999999, defaultY = 150, defaultZ = 999999;
+    protected static int defaultX = 999999;
+    protected static int defaultY = 150;
+    protected static int defaultZ = 999999;
+    private static String folder_name = mineralcontest.plugin.getDataFolder() + File.separator + "worlds" + File.separator;
 
     public WorldLoader(Groupe g) {
         this.groupe = g;
     }
 
-    private static String folder_name = mineralcontest.plugin.getDataFolder() + File.separator + "worlds" + File.separator;
-
-    /**
-     * Fonction appelé à l'exterieur permettant de demander à charger le monde
-     *
-     * @param nomMap      - Nom de la map a charger
-     * @param identifiant - Identifiant unique du groupe qui demande le chargement
-     * @return monde - Le monde chargé
-     */
     public World chargerMonde(String nomMap, String identifiant) throws Exception {
+        File[] maps;
         File dossierMaps = new File(folder_name);
-
-        File[] maps = dossierMaps.listFiles();
-
-        for (File map : maps)
-            if (map.isDirectory())
-                if (nomMap.equalsIgnoreCase(map.getName())) {
-                    return doChargerMonde(nomMap, identifiant);
-                }
+        for (File map : maps = dossierMaps.listFiles()) {
+            if (!map.isDirectory() || !nomMap.equalsIgnoreCase(map.getName())) continue;
+            return this.doChargerMonde(nomMap, identifiant);
+        }
         return null;
     }
 
-    /**
-     * Fonction permettant de charger le monde
-     *
-     * @param nomMap      - Nom de la map à charger
-     * @param identifiant - Identifiant unique du groupe qui demande le chargement
-     * @return monde - Le monde chargé
-     */
     private World doChargerMonde(String nomMap, String identifiant) throws Exception {
         String server_executable_path = System.getProperty("user.dir") + File.separator;
         File dossierMondeACopier = new File(folder_name + nomMap);
         this.nomMonde = nomMap;
-
         String nomMondeDossier = server_executable_path + nomMap + "_" + identifiant;
-
         File repertoireServer = new File(nomMondeDossier);
-
         try {
             FileCopy.copyDirectoryContent(dossierMondeACopier, repertoireServer);
             File uidDat = new File(dossierMondeACopier, "uid.dat");
@@ -86,370 +73,238 @@ public class WorldLoader {
             if (!level_dat_new.exists()) {
                 level_dat_new.createNewFile();
             }
-
             uidDat.delete();
-
-
             WorldCreator wc = new WorldCreator(nomMap + "_" + identifiant);
-
-
             World createdWorld = Bukkit.getServer().createWorld(wc);
             createdWorld.setDifficulty(Difficulty.NORMAL);
-
-
-
-            lireConfigurationPartie();
-            lireFichierMonde(nomMondeDossier, createdWorld);
-            lireFichierConfigurationContenuCoffreArene(nomMondeDossier, createdWorld);
-
-
+            this.lireConfigurationPartie();
+            this.lireFichierMonde(nomMondeDossier, createdWorld);
+            this.lireFichierConfigurationContenuCoffreArene(nomMondeDossier, createdWorld);
             if (this.spawnLocation != null) {
                 this.spawnLocation.setWorld(createdWorld);
             } else {
-                this.spawnLocation = new Location(createdWorld, defaultX, defaultY, defaultZ);
+                this.spawnLocation = new Location(createdWorld, (double)defaultX, (double)defaultY, (double)defaultZ);
             }
-
-
             createdWorld.setSpawnLocation(this.spawnLocation);
             createdWorld.setAutoSave(false);
-
-            MCWorldLoadedEvent mcWorldLoadedEvent = new MCWorldLoadedEvent(nomMap, createdWorld, groupe);
-            Bukkit.getPluginManager().callEvent(mcWorldLoadedEvent);
-
+            MCWorldLoadedEvent mcWorldLoadedEvent = new MCWorldLoadedEvent(nomMap, createdWorld, this.groupe);
+            Bukkit.getPluginManager().callEvent((Event)mcWorldLoadedEvent);
             return createdWorld;
         } catch (IOException ioe) {
             ioe.printStackTrace();
+            return null;
         }
-
-
-        return null;
-
     }
 
+    protected void chargerMondeThreade(final String nomMap, final Groupe groupe) {
+        File[] maps;
+        BukkitRunnable chargementMap = new BukkitRunnable(){
 
-    /**
-     * Permet de charger un monde dans un thread séparé
-     *
-     * @param nomMap - nom de la map à charger
-     * @param groupe - groupe jouant cette carte
-     */
-    protected void chargerMondeThreade(String nomMap, Groupe groupe) {
-
-        BukkitRunnable chargementMap = new BukkitRunnable() {
-            @Override
             public void run() {
                 try {
-
-
-                    World mondeCharge = doChargerMonde(nomMap, groupe.getIdentifiant());
-
+                    World mondeCharge = WorldLoader.this.doChargerMonde(nomMap, groupe.getIdentifiant());
                     mondeCharge.setAutoSave(false);
                     groupe.setGameWorld(mondeCharge);
                     groupe.getGame().setGameEnded(false);
                     groupe.getGame().setGameStarted(false);
                     groupe.setEtat(Etats.ATTENTE_DEBUT_PARTIE);
-
                     Location worldSpawnLocation = mondeCharge.getSpawnLocation();
-
                     try {
-                        if (worldSpawnLocation.getX() == WorldLoader.defaultX && worldSpawnLocation.getY() == WorldLoader.defaultY && worldSpawnLocation.getZ() == WorldLoader.defaultZ)
+                        if (worldSpawnLocation.getX() == (double)defaultX && worldSpawnLocation.getY() == (double)defaultY && worldSpawnLocation.getZ() == (double)defaultZ) {
                             worldSpawnLocation = groupe.getGame().getArene().getCoffre().getLocation();
+                        }
                     } catch (Exception e) {
                         worldSpawnLocation = mondeCharge.getSpawnLocation();
                     }
-
-
                     for (Player joueur : groupe.getPlayers()) {
                         joueur.getInventory().clear();
-
-                        // Si le joueur est un arbitre, on lui donne le livre
-                        if (groupe.getGame().isReferee(joueur))
+                        if (groupe.getGame().isReferee(joueur)) {
                             joueur.getInventory().setItemInMainHand(Referee.getRefereeItem());
-
-                            // Sinon, on lui donne le livre de selection d'équipe!
-                        else if (groupe.getParametresPartie().getCVAR("mp_randomize_team").getValeurNumerique() == 0) {
+                        } else if (groupe.getParametresPartie().getCVAR("mp_randomize_team").getValeurNumerique() == 0) {
                             joueur.getInventory().setItemInMainHand(Game.getTeamSelectionItem());
-
                         }
                         joueur.teleport(worldSpawnLocation);
                         joueur.sendMessage(mineralcontest.prefixPrive + Lang.set_yourself_as_ready_to_start_game.toString());
                     }
-
-                    groupe.setMapName(nomMonde);
-
-
-                    if (groupe.getMapVote() != null) groupe.getMapVote().clearVotes();
-
-
+                    groupe.setMapName(WorldLoader.this.nomMonde);
+                    if (groupe.getMapVote() != null) {
+                        groupe.getMapVote().clearVotes();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         };
-
-
         File dossierMaps = new File(folder_name);
-
-        File[] maps = dossierMaps.listFiles();
-
-        for (File map : maps)
-            if (map.isDirectory())
-                if (nomMap.equalsIgnoreCase(map.getName())) {
-                    CompletableFuture.runAsync(() -> {
-                        // method call or code to be asynch.
-                        chargementMap.runTask(mineralcontest.plugin);
-                    });
-
-
-                    break;
-                }
+        for (File map : maps = dossierMaps.listFiles()) {
+            if (!map.isDirectory() || !nomMap.equalsIgnoreCase(map.getName())) continue;
+            CompletableFuture.runAsync(() -> chargementMap.runTask((Plugin)mineralcontest.plugin));
+            break;
+        }
     }
 
     public void supprimerMonde(World world) {
         String nomMonde = world.getName();
         try {
             FileUtils.deleteDirectory(new File(System.getProperty("user.dir") + File.separator + nomMonde));
-
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-
     }
 
     private void lireFichierMonde(String nomDossier, World monde) throws Exception {
+        boolean spawnNPC;
         String nomFichierConfig = "mc_world_settings.yml";
-
-        for (Entity entity : monde.getEntities())
-            if (entity instanceof Villager) entity.remove();
-
+        for (Entity entity : monde.getEntities()) {
+            if (!(entity instanceof Villager)) continue;
+            entity.remove();
+        }
         boolean loadNPC = true;
-
-        // Variable utilisée pour vérifier les coffres présent dans un rayon de X bloc autour du spawn
         int rayonDeBloc = 20;
-
-        // Liste contenant tous les blocks étant des coffres, utilisé pour autoriser leur ouverture
-        List<Block> chestToAdd = new ArrayList<>();
-
-
+        ArrayList<Block> chestToAdd = new ArrayList<Block>();
         File fichierConfigMonde = new File(nomDossier + File.separator + nomFichierConfig);
-
         if (!fichierConfigMonde.exists()) {
             throw new Exception(nomFichierConfig + " doesnt exists in world folder. Can't load world settings");
         }
-
-        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(fichierConfigMonde);
-
-
-        ConfigurationSection arene, houses, npcs, settings;
-        arene = yamlConfiguration.getConfigurationSection("arena");
-        houses = yamlConfiguration.getConfigurationSection("house");
-        npcs = yamlConfiguration.getConfigurationSection("npcs");
-        settings = yamlConfiguration.getConfigurationSection("settings");
-
-
-
-        if (arene == null)
+        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration((File)fichierConfigMonde);
+        ConfigurationSection arene = yamlConfiguration.getConfigurationSection("arena");
+        ConfigurationSection houses = yamlConfiguration.getConfigurationSection("house");
+        ConfigurationSection npcs = yamlConfiguration.getConfigurationSection("npcs");
+        ConfigurationSection settings = yamlConfiguration.getConfigurationSection("settings");
+        if (arene == null) {
             throw new Exception("Unable to load \"arena\" section from " + nomFichierConfig + ". World file settings is not correct.");
-        if (houses == null)
+        }
+        if (houses == null) {
             throw new Exception("Unable to load \"house\" section from " + nomFichierConfig + ". World file settings is not correct.");
-
-        if (npcs == null)
+        }
+        if (npcs == null) {
             loadNPC = false;
-
-        if (settings == null)
+        }
+        if (settings == null) {
             throw new Exception("Unable to load \"npcs\" section from " + nomFichierConfig + ". World file settings is not correct.");
-
-
-        boolean spawnNPC = (groupe.getParametresPartie().getCVAR("enable_kits").getValeurNumerique() == 1);
-
+        }
+        boolean bl = spawnNPC = this.groupe.getParametresPartie().getCVAR("enable_kits").getValeurNumerique() == 1;
         if (yamlConfiguration.getConfigurationSection("default_spawn") == null) {
-            spawnLocation = null;
+            this.spawnLocation = null;
         } else {
             ConfigurationSection spawn_loc = yamlConfiguration.getConfigurationSection("default_spawn");
-            Location loc = null;
+            Object loc = null;
             if (spawn_loc.get("x") != null) {
                 this.spawnLocation = new Location(null, Double.parseDouble(spawn_loc.get("x").toString()), Double.parseDouble(spawn_loc.get("y").toString()), Double.parseDouble(spawn_loc.get("z").toString()));
             }
         }
-
         ConfigurationSection arena_chest = yamlConfiguration.getConfigurationSection("arena.chest");
-        Location chestLocation = new Location(monde, Double.parseDouble(arena_chest.get("x").toString()),
-                Double.parseDouble(arena_chest.get("y").toString()),
-                Double.parseDouble(arena_chest.get("z").toString()));
-
+        Location chestLocation = new Location(monde, Double.parseDouble(arena_chest.get("x").toString()), Double.parseDouble(arena_chest.get("y").toString()), Double.parseDouble(arena_chest.get("z").toString()));
         ConfigurationSection arena_teleport = yamlConfiguration.getConfigurationSection("arena.teleport");
-        Location teleportLocation = new Location(monde, Double.parseDouble(arena_teleport.get("x").toString()),
-                Double.parseDouble(arena_teleport.get("y").toString()),
-                Double.parseDouble(arena_teleport.get("z").toString()));
-
-        Game partie = groupe.getGame();
-
+        Location teleportLocation = new Location(monde, Double.parseDouble(arena_teleport.get("x").toString()), Double.parseDouble(arena_teleport.get("y").toString()), Double.parseDouble(arena_teleport.get("z").toString()));
+        Game partie = this.groupe.getGame();
         partie.getArene().setCoffre(chestLocation);
         partie.getArene().setTeleportSpawn(teleportLocation);
-
-        // chargements des équipes
         for (String nomEquipe : houses.getKeys(false)) {
-            String teamColorString = houses.get(nomEquipe + ".color").toString().replace("§", "");
-            ChatColor couleur = ChatColor.getByChar(teamColorString);
-
+            String teamColorString = houses.get(nomEquipe + ".color").toString().replace("\u00a7", "");
+            ChatColor couleur = ChatColor.getByChar((String)teamColorString);
             House nouvelleEquipe = new House(nomEquipe, couleur, this.groupe);
-
-            Location chestLoc = new Location(monde,
-                    Double.parseDouble(houses.get(nomEquipe + ".coffre.x").toString()),
-                    Double.parseDouble(houses.get(nomEquipe + ".coffre.y").toString()),
-                    Double.parseDouble(houses.get(nomEquipe + ".coffre.z").toString())
-            );
-
-
-            Location spawnLoc = new Location(monde,
-                    Double.parseDouble(houses.get(nomEquipe + ".spawn.x").toString()),
-                    Double.parseDouble(houses.get(nomEquipe + ".spawn.y").toString()),
-                    Double.parseDouble(houses.get(nomEquipe + ".spawn.z").toString())
-            );
-
+            Location chestLoc = new Location(monde, Double.parseDouble(houses.get(nomEquipe + ".coffre.x").toString()), Double.parseDouble(houses.get(nomEquipe + ".coffre.y").toString()), Double.parseDouble(houses.get(nomEquipe + ".coffre.z").toString()));
+            Location spawnLoc = new Location(monde, Double.parseDouble(houses.get(nomEquipe + ".spawn.x").toString()), Double.parseDouble(houses.get(nomEquipe + ".spawn.y").toString()), Double.parseDouble(houses.get(nomEquipe + ".spawn.z").toString()));
             for (String idPorte : houses.getConfigurationSection(nomEquipe + ".porte").getKeys(false)) {
                 ConfigurationSection configPorte = houses.getConfigurationSection(nomEquipe + ".porte");
-                Location locPorte = new Location(monde,
-                        Double.parseDouble(configPorte.get(idPorte + ".x").toString()),
-                        Double.parseDouble(configPorte.get(idPorte + ".y").toString()),
-                        Double.parseDouble(configPorte.get(idPorte + ".z").toString())
-                );
-
+                Location locPorte = new Location(monde, Double.parseDouble(configPorte.get(idPorte + ".x").toString()), Double.parseDouble(configPorte.get(idPorte + ".y").toString()), Double.parseDouble(configPorte.get(idPorte + ".z").toString()));
                 nouvelleEquipe.getPorte().addToDoor(locPorte.getBlock());
-
-
             }
-
-            // On vérifie partout autour du spawn si il y a des coffres dans un rayon de x blocs
-            chestToAdd.addAll(getNearbyBlocksByMaterial(Material.CHEST, spawnLoc, rayonDeBloc));
-
+            chestToAdd.addAll(WorldLoader.getNearbyBlocksByMaterial(Material.CHEST, spawnLoc, rayonDeBloc));
             nouvelleEquipe.setCoffreEquipe(chestLoc);
             nouvelleEquipe.setHouseLocation(spawnLoc);
-            if (mineralcontest.debug)
-                groupe.sendToadmin(mineralcontest.prefixPrive + "L'équipe " + couleur + nomEquipe + ChatColor.WHITE + " a bien été crée");
-            groupe.getGame().addEquipe(nouvelleEquipe);
+            if (mineralcontest.debug) {
+                this.groupe.sendToadmin(mineralcontest.prefixPrive + "L'\u00e9quipe " + couleur + nomEquipe + ChatColor.WHITE + " a bien \u00e9t\u00e9 cr\u00e9e");
+            }
+            this.groupe.getGame().addEquipe(nouvelleEquipe);
         }
-
-        // Pour chaque bloc récupéré
-        for (Block block : chestToAdd)
-            // Si le bloc n'est pas déjà sauvegardé
-            if (!partie.isThisChestAlreadySaved(block))
-                // On autorise son ouverture
-                partie.addAChest(block);
-
-        if (!chestToAdd.isEmpty())
+        for (Block block : chestToAdd) {
+            if (partie.isThisChestAlreadySaved(block)) continue;
+            partie.addAChest(block);
+        }
+        if (!chestToAdd.isEmpty()) {
             Bukkit.getLogger().info(mineralcontest.prefix + " Allowed " + chestToAdd.size() + " chests to be opened");
-
-
-        ShopManager shopManager = groupe.getGame().getShopManager();
-        // On charge les NPCS
-
+        }
+        ShopManager shopManager = this.groupe.getGame().getShopManager();
         if (loadNPC) {
             for (String idNpc : npcs.getKeys(false)) {
                 ConfigurationSection npc = npcs.getConfigurationSection(idNpc);
-                Location npcLocation = new Location(monde, 0, 0, 0);
-
-                npcLocation.setX(Float.parseFloat(npc.get("x").toString()));
-                npcLocation.setY(Float.parseFloat(npc.get("y").toString()));
-                npcLocation.setZ(Float.parseFloat(npc.get("z").toString()));
-
+                Location npcLocation = new Location(monde, 0.0, 0.0, 0.0);
+                npcLocation.setX((double)Float.parseFloat(npc.get("x").toString()));
+                npcLocation.setY((double)Float.parseFloat(npc.get("y").toString()));
+                npcLocation.setZ((double)Float.parseFloat(npc.get("z").toString()));
                 npcLocation.setYaw(Float.parseFloat(npc.get("yaw").toString()));
                 npcLocation.setPitch(Float.parseFloat(npc.get("pitch").toString()));
-
                 BonusSeller vendeur = ShopManager.creerVendeur(npcLocation);
-
                 shopManager.ajouterVendeur(vendeur);
                 vendeur.spawn();
-
             }
         }
-
-
-        // Chargement des paramètres de la carte
-        groupe.getParametresPartie().setCVARValeur("mp_set_playzone_radius", settings.get("mp_set_playzone_radius").toString());
-        groupe.getParametresPartie().setCVARValeur("protected_zone_area_radius", settings.get("protected_zone_area_radius").toString());
-
-
-        groupe.getGame().isGameInitialized = true;
-        groupe.setEtat(Etats.ATTENTE_DEBUT_PARTIE);
-
+        this.groupe.getParametresPartie().setCVARValeur("mp_set_playzone_radius", settings.get("mp_set_playzone_radius").toString());
+        this.groupe.getParametresPartie().setCVARValeur("protected_zone_area_radius", settings.get("protected_zone_area_radius").toString());
+        this.groupe.getGame().isGameInitialized = true;
+        this.groupe.setEtat(Etats.ATTENTE_DEBUT_PARTIE);
     }
 
-    /**
-     * Maintenant on charge les paramètrees par défaut et non ceux de la map
-     */
     private void lireConfigurationPartie() {
-        GameSettings parametres = groupe.getParametresPartie();
+        YamlConfiguration yamlConfiguration;
+        ConfigurationSection config;
+        GameSettings parametres = this.groupe.getParametresPartie();
         String nomFichierConfig = "mc_game_settings.yml";
-        //File fichierConfigPartie = new File(nomDossier + File.separator + nomFichierConfig);
         File fichierConfigPartie = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_game.toString());
-
-        // Si le fichier de la map n'existe pas, on charge le fichier par défaut
         if (!fichierConfigPartie.exists()) {
-            groupe.sendToadmin(mineralcontest.prefixAdmin + Lang.error_cant_load_game_settings_file.toString());
+            this.groupe.sendToadmin(mineralcontest.prefixAdmin + Lang.error_cant_load_game_settings_file.toString());
             fichierConfigPartie = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_game.toString());
         }
-
-        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(fichierConfigPartie);
-        ConfigurationSection config = yamlConfiguration.getConfigurationSection("config");
-        if (config == null) {
-            groupe.sendToadmin(mineralcontest.prefixAdmin + Lang.error_cant_load_game_settings_file.toString());
+        if ((config = (yamlConfiguration = YamlConfiguration.loadConfiguration((File)fichierConfigPartie)).getConfigurationSection("config")) == null) {
+            this.groupe.sendToadmin(mineralcontest.prefixAdmin + Lang.error_cant_load_game_settings_file.toString());
             return;
         }
-
         for (String section : config.getKeys(false)) {
             for (String variable : config.getConfigurationSection(section).getKeys(false)) {
                 try {
-                    parametres.setCVARValeur(variable, (String) config.get(section + "." + variable));
-                } catch (Exception e) {
-                    //groupe.sendToadmin(mineralcontest.prefixErreur + "Setting " + variable + " doesnt exists");
-                    //e.printStackTrace();
-                }
+                    parametres.setCVARValeur(variable, (String)config.get(section + "." + variable));
+                } catch (Exception exception) {}
             }
         }
-
-        groupe.sendToadmin(mineralcontest.prefixGroupe + "Les paramètres de la carte ont bien été chargé!");
-
-
+        this.groupe.sendToadmin(mineralcontest.prefixGroupe + "Les param\u00e8tres de la carte ont bien \u00e9t\u00e9 charg\u00e9!");
     }
 
     private void lireFichierConfigurationContenuCoffreArene(String nomDossier, World monde) {
-        // mc_arena_chest_content
-        GameSettings parametres = groupe.getParametresPartie();
+        GameSettings parametres = this.groupe.getParametresPartie();
         String nomFichierConfig = "mc_arena_chest_content.yml";
         File fichierConfigPartie = new File(nomDossier + File.separator + nomFichierConfig);
-
-        // Si le fichier de config n'existe pas, on charge celui par défaut
-        if (!fichierConfigPartie.exists())
+        if (!fichierConfigPartie.exists()) {
             fichierConfigPartie = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_arena_chest.toString());
-
+        }
         try {
-            CoffreArene coffreArene = (CoffreArene) groupe.getGame().getArene().getCoffre();
+            CoffreArene coffreArene = (CoffreArene)this.groupe.getGame().getArene().getCoffre();
             coffreArene.getArenaChestContentGenerator().initialize(fichierConfigPartie);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     private static ChatColor toChatColor(String v) {
-        for (ChatColor couleur : ChatColor.values())
+        for (ChatColor couleur : ChatColor.values()) {
             Bukkit.getLogger().info(couleur.getChar() + " == v: " + v);
+        }
         return null;
     }
 
     private static List<Block> getNearbyBlocksByMaterial(Material itemMaterial, Location location, int radius) {
-        List<Block> blocks = new ArrayList<Block>();
-        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
-            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
-                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+        ArrayList<Block> blocks = new ArrayList<Block>();
+        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; ++x) {
+            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; ++y) {
+                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; ++z) {
                     Block block = location.getWorld().getBlockAt(x, y, z);
-                    if (block.getType().equals(itemMaterial))
-                        blocks.add(block);
+                    if (!block.getType().equals((Object)itemMaterial)) continue;
+                    blocks.add(block);
                 }
             }
         }
         return blocks;
     }
 }
+

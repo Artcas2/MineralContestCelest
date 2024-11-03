@@ -1,8 +1,7 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.Game.Game;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 public class MCArenaChestSpawnEvent extends MCEvent {
     private Game game;
@@ -12,7 +11,7 @@ public class MCArenaChestSpawnEvent extends MCEvent {
     }
 
     public Game getGame() {
-        return game;
+        return this.game;
     }
-
 }
+

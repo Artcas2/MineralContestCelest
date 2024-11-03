@@ -6,10 +6,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SelectDeathAnimationCommand extends CommandTemplate {
-
     public SelectDeathAnimationCommand() {
-        accessCommande.add(PLAYER_COMMAND);
-        accessCommande.add(GROUP_REQUIRED);
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
     }
 
     @Override
@@ -19,7 +18,7 @@ public class SelectDeathAnimationCommand extends CommandTemplate {
 
     @Override
     public String getDescription() {
-        return "Permet de sélectionner une animation de mort";
+        return "Permet de s\u00e9lectionner une animation de mort";
     }
 
     @Override
@@ -29,9 +28,9 @@ public class SelectDeathAnimationCommand extends CommandTemplate {
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        // On sait que le joueur fait partie du plugin
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         mineralcontest.plugin.deathAnimationManager.openMenuSelection(joueur);
         return false;
     }
 }
+

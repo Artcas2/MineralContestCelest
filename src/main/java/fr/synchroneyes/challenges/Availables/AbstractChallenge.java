@@ -1,16 +1,11 @@
 package fr.synchroneyes.challenges.Availables;
 
-
 import fr.synchroneyes.challenges.ChallengeManager;
 import fr.synchroneyes.challenges.Rewards.AbstractReward;
 import fr.synchroneyes.mineral.Core.MCPlayer;
 import org.bukkit.event.Listener;
 
-/**
- * Classe représentant un succès à faire
- */
 public abstract class AbstractChallenge implements Listener {
-
     private MCPlayer player;
     private ChallengeManager manager;
 
@@ -18,35 +13,20 @@ public abstract class AbstractChallenge implements Listener {
         this.manager = manager;
     }
 
-    /**
-     * Retourne le nom du succès
-     * @return
-     */
     public abstract String getNom();
 
-
-    /**
-     * Permet de retourner ce qu'il faut faire pour réaliser le succès
-     * @return
-     */
     public abstract String getObjectifTexte();
 
-
-    /**
-     * Permet de retourner la récompense pour un joueur
-     * @return
-     */
     public abstract AbstractReward getReward();
 
-
     public void setAchievementCompleted(MCPlayer mcPlayer) {
-        AbstractReward abstractReward = getReward();
+        AbstractReward abstractReward = this.getReward();
         abstractReward.setJoueur(mcPlayer.getJoueur());
         abstractReward.rewardPlayer();
     }
 
     public MCPlayer getPlayer() {
-        return player;
+        return this.player;
     }
 
     public void setPlayer(MCPlayer player) {
@@ -54,8 +34,7 @@ public abstract class AbstractChallenge implements Listener {
     }
 
     public ChallengeManager getManager() {
-        return manager;
+        return this.manager;
     }
-
-
 }
+

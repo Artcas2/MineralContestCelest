@@ -25,3 +25,4 @@ public class BonusPermanent extends Category {
         return new String[0];
     }
 }
+

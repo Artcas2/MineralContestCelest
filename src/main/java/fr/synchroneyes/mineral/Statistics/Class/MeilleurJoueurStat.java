@@ -5,20 +5,18 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-/**
- * Enregistre les points rapporté par un joueur à son équipe
- */
 public class MeilleurJoueurStat extends MeilleurStatistic {
     @Override
     public void perform(Player p, Object target) {
-
-        if (!(target instanceof Integer)) return;
-
-        int nbPointAjoute = (Integer) target;
-        if (!infoJoueurs.containsKey(p)) infoJoueurs.put(p, 0);
-
-        int nbPointsRapporteTotal = infoJoueurs.get(p);
-        infoJoueurs.replace(p, nbPointsRapporteTotal + nbPointAjoute);
+        if (!(target instanceof Integer)) {
+            return;
+        }
+        int nbPointAjoute = (Integer)target;
+        if (!this.infoJoueurs.containsKey(p)) {
+            this.infoJoueurs.put(p, 0);
+        }
+        int nbPointsRapporteTotal = (Integer)this.infoJoueurs.get(p);
+        this.infoJoueurs.replace(p, nbPointsRapporteTotal + nbPointAjoute);
     }
 
     @Override
@@ -28,7 +26,7 @@ public class MeilleurJoueurStat extends MeilleurStatistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return Lang.stats_mostpoints_subtitle.toString().replace("%d", getHighestPlayerValue() + "");
+        return Lang.stats_mostpoints_subtitle.toString().replace("%d", this.getHighestPlayerValue() + "");
     }
 
     @Override
@@ -36,3 +34,4 @@ public class MeilleurJoueurStat extends MeilleurStatistic {
         return Material.DIAMOND;
     }
 }
+

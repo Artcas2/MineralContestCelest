@@ -1,17 +1,16 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.PlayerPermissionChangeEvent;
+import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-
 public class PermissionCheckerLoop implements Runnable {
-
     int secondsDelay = 2;
-
-
     private JavaPlugin plugin;
 
     public PermissionCheckerLoop(JavaPlugin plugin, int delayBetweenEachCheck) {
@@ -19,44 +18,32 @@ public class PermissionCheckerLoop implements Runnable {
         this.secondsDelay = delayBetweenEachCheck;
     }
 
-    // Variable qui définit le temps entre chaque vérif
-
     @Override
     public synchronized void run() {
-        // Liste des joueurs avec les perms d'admin <Joueur, boolean estOP>
-        HashMap<Player, Boolean> playerCurrentPerm = new HashMap<>();
-
-        for (Player online_player : plugin.getServer().getOnlinePlayers())
+        final HashMap<Player, Boolean> playerCurrentPerm = new HashMap<Player, Boolean>();
+        for (Player online_player : this.plugin.getServer().getOnlinePlayers()) {
             playerCurrentPerm.put(online_player, online_player.isOp());
+        }
+        new BukkitRunnable(){
 
-        new BukkitRunnable() {
-            @Override
             public synchronized void run() {
-                // On regarde chaque joueur
-                for (Player online_player : plugin.getServer().getOnlinePlayers()) {
-
-                    // Si le joueur est déjà stocké dans nos joueurs
+                for (Player online_player : PermissionCheckerLoop.this.plugin.getServer().getOnlinePlayers()) {
                     if (playerCurrentPerm.containsKey(online_player)) {
-
-                        boolean currentSavedOp = playerCurrentPerm.get(online_player);
-
-                        // Si la valeur stocké dans notre liste est différente, ça veut dire qu'il a changé de permission !
-                        if (!playerCurrentPerm.get(online_player).equals(online_player.isOp())) {
-                            PlayerPermissionChangeEvent event = new PlayerPermissionChangeEvent(online_player, opToString(currentSavedOp), opToString(online_player.isOp()));
-                            Bukkit.getPluginManager().callEvent(event);
-                            playerCurrentPerm.replace(online_player, online_player.isOp());
-                        }
-
-                    } else {
-                        // Le joueur n'est pas stocké, on l'ajoute
-                        playerCurrentPerm.put(online_player, online_player.isOp());
+                        boolean currentSavedOp = (Boolean)playerCurrentPerm.get(online_player);
+                        if (((Boolean)playerCurrentPerm.get(online_player)).equals(online_player.isOp())) continue;
+                        PlayerPermissionChangeEvent event = new PlayerPermissionChangeEvent(online_player, PermissionCheckerLoop.this.opToString(currentSavedOp), PermissionCheckerLoop.this.opToString(online_player.isOp()));
+                        Bukkit.getPluginManager().callEvent((Event)event);
+                        playerCurrentPerm.replace(online_player, online_player.isOp());
+                        continue;
                     }
+                    playerCurrentPerm.put(online_player, online_player.isOp());
                 }
             }
-        }.runTaskTimer(plugin, 0, secondsDelay * 20);
+        }.runTaskTimer((Plugin)this.plugin, 0L, (long)(this.secondsDelay * 20));
     }
 
     public String opToString(boolean op) {
-        return (op) ? "op" : "non_op";
+        return op ? "op" : "non_op";
     }
 }
+

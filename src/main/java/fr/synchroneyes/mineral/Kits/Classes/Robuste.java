@@ -11,19 +11,9 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
-/**
- * Classe robuste, 15 coeurs, -15% de dégat, -15% de vitesse
- */
 public class Robuste extends KitAbstract {
-
-    // Le nombre de coeur qu'un joueur doit avoir en utilisant cette classe
     private double nombreCoeur = 15.0;
-
-    // Le pourcentage de réduction des dégats effecutés par le joueur
     private double pourcentageReductionDegats = 15.0;
-
-    // Le pourcentage de réduction de vitesse du joueur
-
     private double pourcentageReductionVitesse = 15.0;
 
     @Override
@@ -41,79 +31,40 @@ public class Robuste extends KitAbstract {
         return Material.GOLDEN_CHESTPLATE;
     }
 
-
-    /**
-     * Méthode appelée lors de la selection de ce kit par le joueur
-     *
-     * @param event
-     */
     @EventHandler
     public void onKitSelected(PlayerKitSelectedEvent event) {
-        if (!isPlayerUsingThisKit(event.getPlayer())) return;
-        setPlayerEffects(event.getPlayer());
+        if (!this.isPlayerUsingThisKit(event.getPlayer())) {
+            return;
+        }
+        this.setPlayerEffects(event.getPlayer());
     }
 
-    /**
-     * Méthode appelée lors du respawn d'un jouuer
-     *
-     * @param event
-     */
     @EventHandler
     public void onPlayerRespawn(MCPlayerRespawnEvent event) {
-        if (!isPlayerUsingThisKit(event.getJoueur())) return;
-
-        setPlayerEffects(event.getJoueur());
+        if (!this.isPlayerUsingThisKit(event.getJoueur())) {
+            return;
+        }
+        this.setPlayerEffects(event.getJoueur());
     }
 
-
-    /**
-     * Evenement appelé lors du démarrage de la game
-     *
-     * @param event
-     */
     @EventHandler
     public void onGameStart(MCGameStartedEvent event) {
         Game partie = event.getGame();
-
-        // Pour chaque joueur de la partie
         for (Player joueur : partie.groupe.getPlayers()) {
-            // On vérifie si ils ont ce kit
-            if (isPlayerUsingThisKit(joueur)) {
-                setPlayerEffects(joueur);
-            }
+            if (!this.isPlayerUsingThisKit(joueur)) continue;
+            this.setPlayerEffects(joueur);
         }
-
     }
 
-
-    /**
-     * Fonction permettant d'ajouter à un joueur, les effets de  ce  kit
-     *
-     * @param joueur
-     */
     private void setPlayerEffects(Player joueur) {
-
-        // On récupère la vitesse de base d'un joueur
         double currentSpeed = 0.2f;
-
-        // Valeur des dégats infligé de base
         double currentDamage = 1.0;
-
-        // On met le joueur à 15 coeurs
-        joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(nombreCoeur * 2);
-
-        // On calcule sa nouvelle vitesse
-        double newSpeed = currentSpeed - (currentSpeed * pourcentageReductionVitesse / 100);
-
-        // On calcule ses nouveaux dégats
-        double newDamage = currentDamage - (currentDamage * pourcentageReductionDegats / 100);
-
-        // On lui affecte les nouvelles valeurs
+        joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.nombreCoeur * 2.0);
+        double newSpeed = currentSpeed - currentSpeed * this.pourcentageReductionVitesse / 100.0;
+        double newDamage = currentDamage - currentDamage * this.pourcentageReductionDegats / 100.0;
         joueur.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(newDamage);
-
-        joueur.setWalkSpeed((float) newSpeed);
-
+        joueur.setWalkSpeed((float)newSpeed);
         joueur.setHealth(joueur.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
     }
-
 }
+

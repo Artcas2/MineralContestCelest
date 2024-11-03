@@ -8,10 +8,11 @@ import org.bukkit.entity.Player;
 public class MostParachuteHitStat extends MeilleurStatistic {
     @Override
     public void perform(Player p, Object target) {
-        if (!infoJoueurs.containsKey(p)) infoJoueurs.put(p, 0);
-
-        int nbHit = infoJoueurs.get(p);
-        infoJoueurs.replace(p, nbHit + 1);
+        if (!this.infoJoueurs.containsKey(p)) {
+            this.infoJoueurs.put(p, 0);
+        }
+        int nbHit = (Integer)this.infoJoueurs.get(p);
+        this.infoJoueurs.replace(p, nbHit + 1);
     }
 
     @Override
@@ -21,7 +22,7 @@ public class MostParachuteHitStat extends MeilleurStatistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return Lang.stats_parachute_hit_subtitle.toString().replace("%d", getHighestPlayerValue() + "");
+        return Lang.stats_parachute_hit_subtitle.toString().replace("%d", this.getHighestPlayerValue() + "");
     }
 
     @Override
@@ -29,3 +30,4 @@ public class MostParachuteHitStat extends MeilleurStatistic {
         return Material.FLETCHING_TABLE;
     }
 }
+

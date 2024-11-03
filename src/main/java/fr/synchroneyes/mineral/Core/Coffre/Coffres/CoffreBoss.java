@@ -3,27 +3,19 @@ package fr.synchroneyes.mineral.Core.Coffre.Coffres;
 import fr.synchroneyes.mineral.Core.Coffre.Animations;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestAnimation;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class CoffreBoss extends AutomatedChestAnimation {
-
-
     private List<ItemStack> items;
 
-    /**
-     * Constructeur, permet de donner en paramètre le nom de l'inventaire ainsi que la taille
-     * @param manager
-     */
     public CoffreBoss(List<ItemStack> items, AutomatedChestManager manager) {
         super(54, manager);
         this.items = items;
     }
-
 
     @Override
     public int playNoteOnTick() {
@@ -37,12 +29,10 @@ public class CoffreBoss extends AutomatedChestAnimation {
 
     @Override
     public void actionToPerformBeforeSpawn() {
-
     }
 
     @Override
     public void actionToPerformAfterAnimationOver() {
-
     }
 
     @Override
@@ -108,3 +98,4 @@ public class CoffreBoss extends AutomatedChestAnimation {
         return true;
     }
 }
+

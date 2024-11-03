@@ -44,26 +44,21 @@ public class Boussole extends PermanentItem {
 
     @Override
     public void onItemUse() {
+        Game partie;
+        House equipeJoueur;
         ItemStack boussole = new ItemStack(Material.COMPASS);
         ItemMeta meta = boussole.getItemMeta();
-        meta.setDisplayName(ChatColor.RESET + Lang.translate(getNomItem()));
-
+        meta.setDisplayName(ChatColor.RESET + Lang.translate(this.getNomItem()));
         boussole.setItemMeta(meta);
-
-
-        if (mineralcontest.getPlayerGame(joueur) != null) {
-            Game partie = mineralcontest.getPlayerGame(joueur);
-            House equipeJoueur = partie.getPlayerHouse(joueur);
-
-            if (equipeJoueur != null) joueur.setCompassTarget(equipeJoueur.getHouseLocation());
+        if (mineralcontest.getPlayerGame(this.joueur) != null && (equipeJoueur = (partie = mineralcontest.getPlayerGame(this.joueur)).getPlayerHouse(this.joueur)) != null) {
+            this.joueur.setCompassTarget(equipeJoueur.getHouseLocation());
         }
-
-        joueur.getInventory().addItem(boussole);
+        this.joueur.getInventory().addItem(new ItemStack[]{boussole});
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("compass");
     }
-
 }
+

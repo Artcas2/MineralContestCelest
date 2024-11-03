@@ -8,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class MapItem extends RefereeItemTemplate {
-
     private Groupe groupe;
 
     public MapItem(String customName, Groupe playerGroup, InventoryTemplate inventaireSource) {
@@ -18,19 +17,18 @@ public class MapItem extends RefereeItemTemplate {
 
     @Override
     public void performClick(Player joueur) {
-
-        groupe.getMapVote().enregistrerVoteJoueur(customName, joueur);
+        this.groupe.getMapVote().enregistrerVoteJoueur(this.customName, joueur);
         joueur.closeInventory();
     }
 
     @Override
     public String getNomItem() {
-        return customName;
+        return this.customName;
     }
 
     @Override
     public String getDescriptionItem() {
-        return Lang.vote_map.toString().replace("%map%", customName);
+        return Lang.vote_map.toString().replace("%map%", this.customName);
     }
 
     @Override
@@ -38,3 +36,4 @@ public class MapItem extends RefereeItemTemplate {
         return Material.WRITABLE_BOOK;
     }
 }
+

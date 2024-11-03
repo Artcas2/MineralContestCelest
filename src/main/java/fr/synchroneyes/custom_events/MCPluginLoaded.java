@@ -1,12 +1,9 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.custom_plugins.CustomPlugin;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
 
 public class MCPluginLoaded extends MCEvent {
-
     private CustomPlugin plugin;
 
     public MCPluginLoaded(CustomPlugin plugin) {
@@ -14,6 +11,7 @@ public class MCPluginLoaded extends MCEvent {
     }
 
     public CustomPlugin getPlugin() {
-        return plugin;
+        return this.plugin;
     }
 }
+

@@ -6,8 +6,6 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 
 public class AutoLingot extends PermanentItem {
-
-
     @Override
     public String getNomItem() {
         return Lang.shopitem_auto_ingots_title.toString();
@@ -25,13 +23,11 @@ public class AutoLingot extends PermanentItem {
 
     @Override
     public void onItemUse() {
-
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("permanent_auto_cook_ore");
-
     }
 
     @Override
@@ -39,3 +35,4 @@ public class AutoLingot extends PermanentItem {
         return false;
     }
 }
+

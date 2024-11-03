@@ -14,24 +14,22 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 
 public class BucketEvent implements Listener {
-
     @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) throws Exception {
-        if (MapBuilder.getInstance().isBuilderModeEnabled) return;
+        if (MapBuilder.getInstance().isBuilderModeEnabled) {
+            return;
+        }
         World currentWorld = event.getPlayer().getWorld();
         if (mineralcontest.isAMineralContestWorld(currentWorld)) {
             boolean allowedToBePlaced = true;
             Player p = event.getPlayer();
             Game partie = mineralcontest.getWorldGame(currentWorld);
-
             if (partie == null) {
                 event.setCancelled(true);
                 p.sendMessage(mineralcontest.prefixPrive + Lang.block_not_allowed_to_be_placed.toString());
                 return;
             }
-
             GameSettings settings = partie.groupe.getParametresPartie();
-
             if (Radius.isBlockInRadius(partie.getArene().getCoffre().getLocation(), event.getPlayer().getLocation(), partie.getArene().arenaRadius)) {
                 if (settings.getCVAR("mp_enable_block_adding").getValeurNumerique() == 1) {
                     BlockManager blockManager = BlockManager.getInstance();
@@ -44,7 +42,6 @@ public class BucketEvent implements Listener {
                     allowedToBePlaced = false;
                 }
             }
-
             if (!allowedToBePlaced) {
                 event.setCancelled(true);
                 p.sendMessage(mineralcontest.prefixPrive + Lang.block_not_allowed_to_be_placed.toString());
@@ -52,3 +49,4 @@ public class BucketEvent implements Listener {
         }
     }
 }
+

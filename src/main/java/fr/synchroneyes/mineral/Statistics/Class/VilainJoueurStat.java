@@ -5,19 +5,18 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-/**
- * Enregistre les dépots de points négatif pour les autres équipes
- */
 public class VilainJoueurStat extends MeilleurStatistic {
     @Override
     public void perform(Player p, Object target) {
-        if (!(target instanceof Integer)) return;
-
-        int nbPointAjoute = (Integer) target;
-        if (!infoJoueurs.containsKey(p)) infoJoueurs.put(p, 0);
-
-        int nbPointsRapporteTotal = infoJoueurs.get(p);
-        infoJoueurs.replace(p, nbPointsRapporteTotal + nbPointAjoute);
+        if (!(target instanceof Integer)) {
+            return;
+        }
+        int nbPointAjoute = (Integer)target;
+        if (!this.infoJoueurs.containsKey(p)) {
+            this.infoJoueurs.put(p, 0);
+        }
+        int nbPointsRapporteTotal = (Integer)this.infoJoueurs.get(p);
+        this.infoJoueurs.replace(p, nbPointsRapporteTotal + nbPointAjoute);
     }
 
     @Override
@@ -27,7 +26,7 @@ public class VilainJoueurStat extends MeilleurStatistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return Lang.stats_mostpoints_taken_subtitle.toString().replace("%d", getHighestPlayerValue() + "");
+        return Lang.stats_mostpoints_taken_subtitle.toString().replace("%d", this.getHighestPlayerValue() + "");
     }
 
     @Override
@@ -35,3 +34,4 @@ public class VilainJoueurStat extends MeilleurStatistic {
         return Material.REDSTONE;
     }
 }
+

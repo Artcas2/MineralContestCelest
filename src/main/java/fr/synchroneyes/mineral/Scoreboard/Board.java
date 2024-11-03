@@ -1,16 +1,17 @@
 package fr.synchroneyes.mineral.Scoreboard;
 
+import java.util.Collection;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-
 public abstract class Board {
-    public abstract void startDisplay(Player p);
+    public abstract void startDisplay(Player var1);
 
-    public abstract void stopDisplay(Player p);
+    public abstract void stopDisplay(Player var1);
 
     public void startDisplay(Collection<Player> players) {
-        for (Player p : players)
+        for (Player p : players) {
             this.startDisplay(p);
+        }
     }
 }
+

@@ -1,14 +1,11 @@
 package fr.synchroneyes.mineral.Utils;
 
 import fr.synchroneyes.mineral.Exception.MaterialNotInRangeException;
+import java.util.LinkedList;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.LinkedList;
-
 public class Range {
-
-
     int min = Integer.MIN_VALUE;
     int max = Integer.MIN_VALUE;
     Material nom;
@@ -23,11 +20,11 @@ public class Range {
     }
 
     public boolean isFilled() {
-        return (nom != null && max != Integer.MIN_VALUE && min != Integer.MIN_VALUE);
+        return this.nom != null && this.max != Integer.MIN_VALUE && this.min != Integer.MIN_VALUE;
     }
 
     public int getMin() {
-        return min;
+        return this.min;
     }
 
     public void setMin(int min) {
@@ -35,7 +32,7 @@ public class Range {
     }
 
     public int getMax() {
-        return max;
+        return this.max;
     }
 
     public void setMax(int max) {
@@ -43,7 +40,7 @@ public class Range {
     }
 
     public Material getMaterial() {
-        return nom;
+        return this.nom;
     }
 
     public void setMaterial(Material nom) {
@@ -51,23 +48,23 @@ public class Range {
     }
 
     public boolean isInRange(int valeur) {
-        return (min <= valeur && valeur < max);
+        return this.min <= valeur && valeur < this.max;
     }
+
     public static Material getInsideRange(Range[] r, int valeur) throws MaterialNotInRangeException {
         for (Range interval : r) {
-            if (interval.isInRange(valeur))
-                return interval.nom;
+            if (!interval.isInRange(valeur)) continue;
+            return interval.nom;
         }
-
         throw new MaterialNotInRangeException();
     }
 
     public static ItemStack getRandomItemFromLinkedList(LinkedList<Range> items, int itemNumber) {
-        for (Range item : items)
-            if (item.isInRange(itemNumber))
-                return new ItemStack(item.getMaterial(), 1);
+        for (Range item : items) {
+            if (!item.isInRange(itemNumber)) continue;
+            return new ItemStack(item.getMaterial(), 1);
+        }
         return null;
     }
-
-
 }
+

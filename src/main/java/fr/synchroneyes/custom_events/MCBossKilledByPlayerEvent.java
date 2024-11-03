@@ -1,14 +1,11 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.Boss.Boss;
-import lombok.Getter;
 import org.bukkit.entity.Player;
 
-public class MCBossKilledByPlayerEvent extends MCEvent{
-
-    @Getter
+public class MCBossKilledByPlayerEvent extends MCEvent {
     private Boss boss;
-    @Getter
     private Player player;
 
     public MCBossKilledByPlayerEvent(Boss boss, Player player) {
@@ -16,4 +13,12 @@ public class MCBossKilledByPlayerEvent extends MCEvent{
         this.player = player;
     }
 
+    public Boss getBoss() {
+        return this.boss;
+    }
+
+    public Player getPlayer() {
+        return this.player;
+    }
 }
+

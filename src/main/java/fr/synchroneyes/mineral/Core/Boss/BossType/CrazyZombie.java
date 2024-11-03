@@ -5,43 +5,46 @@ import fr.synchroneyes.mineral.Core.Boss.Boss;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.DeathAnimations.Animations.HalloweenHurricaneAnimation;
-import fr.synchroneyes.mineral.Statistics.Class.BossKiller;
 import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.Effect;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
+import org.bukkit.entity.ZombieVillager;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class CrazyZombie extends Boss {
-
     private int maxSbire = 5;
-
-    private List<LivingEntity> list_sbire;
-
+    private List<LivingEntity> list_sbire = new ArrayList<LivingEntity>();
     private int currentAnnouncementId = 0;
-
     private boolean lastAnnouncementPlayed = false;
-
-    public CrazyZombie() {
-        list_sbire = new ArrayList<>();
-    }
 
     @Override
     public void onBossRemove() {
-        for(LivingEntity sbire : list_sbire)
+        for (LivingEntity sbire : this.list_sbire) {
             sbire.remove();
+        }
     }
-
 
     @Override
     public String getName() {
@@ -50,12 +53,12 @@ public class CrazyZombie extends Boss {
 
     @Override
     public double getSanteMax() {
-        return 500;
+        return 500.0;
     }
 
     @Override
     public double getDegatsParAttaque() {
-        return 10;
+        return 10.0;
     }
 
     @Override
@@ -74,29 +77,22 @@ public class CrazyZombie extends Boss {
 
     @Override
     public List<ItemStack> getKillRewards() {
-        List<ItemStack> items = new LinkedList<>();
-
-        // On donne 5 émeraudes
-        for(int i = 0; i < 5; ++i)
+        int i;
+        LinkedList<ItemStack> items = new LinkedList<ItemStack>();
+        for (i = 0; i < 5; ++i) {
             items.add(new ItemStack(Material.EMERALD, 1));
-
-        // 15 diams
-        for(int i = 0; i < 15; ++i)
+        }
+        for (i = 0; i < 15; ++i) {
             items.add(new ItemStack(Material.DIAMOND, 1));
-
-        // 20 or
-        for(int i = 0; i < 4; ++i)
+        }
+        for (i = 0; i < 4; ++i) {
             items.add(new ItemStack(Material.GOLD_INGOT, 5));
-
-        // 30 fer
-        for(int i = 0; i < 3; ++i)
+        }
+        for (i = 0; i < 3; ++i) {
             items.add(new ItemStack(Material.IRON_INGOT, 10));
-
-
-
+        }
         return items;
     }
-
 
     @Override
     public boolean shouldEntityGlow() {
@@ -115,40 +111,25 @@ public class CrazyZombie extends Boss {
 
     @Override
     public void doMobSpecialAttack() {
-
-        if(list_sbire.size() >= maxSbire) return;
-
-
-        int nb_sbire_genere = 3;
-
-
-        for(int i = 0; i < nb_sbire_genere; ++i) {
-
-            if(list_sbire.size() >= maxSbire) break;
-
-            ZombieVillager zombieVillager = this.addSbire(this.entity.getLocation());
-            list_sbire.add(zombieVillager);
-            this.spawnedEntities.add(zombieVillager);
-
+        if (this.list_sbire.size() >= this.maxSbire) {
+            return;
         }
-
+        int nb_sbire_genere = 3;
+        for (int i = 0; i < nb_sbire_genere && this.list_sbire.size() < this.maxSbire; ++i) {
+            ZombieVillager zombieVillager = this.addSbire(this.entity.getLocation());
+            this.list_sbire.add((LivingEntity)zombieVillager);
+            this.spawnedEntities.add(zombieVillager);
+        }
         this.entity.getWorld().strikeLightningEffect(this.entity.getLocation());
         this.entity.getWorld().playEffect(this.entity.getLocation(), Effect.END_GATEWAY_SPAWN, 1);
-
-        // On veut également "avertir" les joueurs proche de lui
-        // On récupère les joueurs autour de lui
-        List<Entity> joueurs = this.entity.getNearbyEntities(getRayonDetectionJoueur(),getRayonDetectionJoueur(),getRayonDetectionJoueur());
-        // On retire ce qui n'est pas un joueur
+        List<Entity> joueurs = this.entity.getNearbyEntities((double)this.getRayonDetectionJoueur(), (double)this.getRayonDetectionJoueur(), (double)this.getRayonDetectionJoueur());
         joueurs.removeIf(entity1 -> !(entity1 instanceof Player));
-
         int duree_effet = 5;
-
-        for(Entity joueur : joueurs) {
-            Player j = (Player) joueur;
-            j.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20*duree_effet, 5));
-            j.sendTitle(ChatColor.GREEN + getName(), getRandomInfectionMessage(), 20, 20*duree_effet/2, 20);
+        for (Entity joueur : joueurs) {
+            Player j = (Player)joueur;
+            j.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20 * duree_effet, 5));
+            j.sendTitle(ChatColor.GREEN + this.getName(), this.getRandomInfectionMessage(), 20, 20 * duree_effet / 2, 20);
         }
-
     }
 
     @Override
@@ -163,140 +144,75 @@ public class CrazyZombie extends Boss {
 
     @Override
     public void defineCustomAttributes() {
-        this.entity.getAttribute(Attribute.GENERIC_ATTACK_KNOCKBACK).setBaseValue(2);
+        this.entity.getAttribute(Attribute.GENERIC_ATTACK_KNOCKBACK).setBaseValue(2.0);
     }
 
     @Override
     public void onBossDeath() {
-
-        for(LivingEntity sbire : list_sbire)
-            sbire.setHealth(0);
-
+        for (LivingEntity sbire : this.list_sbire) {
+            sbire.setHealth(0.0);
+        }
         HalloweenHurricaneAnimation animationMort = new HalloweenHurricaneAnimation();
-        animationMort.playAnimation(entity);
-
-
+        animationMort.playAnimation((LivingEntity)this.entity);
     }
 
     @Override
     public void onBossSpawn() {
-        // On veut jouer un son lors de son apparitio à tous les joueurs
-        // Et temporairement les aveugler
-        List<Player> joueurs_cible = entity.getWorld().getPlayers();
-
+        List<Player> joueurs_cible = this.entity.getWorld().getPlayers();
         int duree_annonce = 5;
-
-        // Pour chaque joueur du monde
-        for(Player joueur : joueurs_cible) {
-            // On joue un son
-            joueur.playSound(joueur.getLocation(), Sound.AMBIENT_CAVE, 1,1);
-
-            // On en joue un second un peu après
-            Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> joueur.playSound(joueur.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1,1), 20);
-
-            // On aveugle temporairement le joueur pendant 3 secondes
-            joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duree_annonce*20, 10));
-            joueur.sendMessage(ChatColor.GOLD + "???: " + ChatColor.RESET + "Je suis " + getName() + ", venez m'affronter dans l'arène !");
-
-            // On envoie un titre
-            joueur.sendTitle(ChatColor.RED + getName(), "Venez m'affronter dans l'arène. Si vous survivez à mon premier sbire...", 20, 20*duree_annonce, 20);
+        for (Player joueur : joueurs_cible) {
+            joueur.playSound(joueur.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 1.0f);
+            Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> joueur.playSound(joueur.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1.0f, 1.0f), 20L);
+            joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duree_annonce * 20, 10));
+            joueur.sendMessage(ChatColor.GOLD + "???: " + ChatColor.RESET + "Je suis " + this.getName() + ", venez m'affronter dans l'ar\u00e8ne !");
+            joueur.sendTitle(ChatColor.RED + this.getName(), "Venez m'affronter dans l'ar\u00e8ne. Si vous survivez \u00e0 mon premier sbire...", 20, 20 * duree_annonce, 20);
         }
-
-        // On s'assure que le zombie est adulte
-        if(entity instanceof Zombie) {
-            Zombie zombie = (Zombie) entity;
+        if (this.entity instanceof Zombie) {
+            Zombie zombie = (Zombie)this.entity;
             zombie.setAdult();
         }
-
-        // On fait apparaitre un sbire sur chaque personne d'une équipe
-        Groupe groupe = getChestManager().getGroupe();
-
-        // Pour chaque Maison
-        for(House maison : groupe.getGame().getHouses()) {
-            // On récupère un joueur aléatoire
+        Groupe groupe = this.getChestManager().getGroupe();
+        for (House maison : groupe.getGame().getHouses()) {
             int team_member_cout = maison.getTeam().getJoueurs().size();
-            if(team_member_cout > 0){
-                Player joueurAleatoire = maison.getTeam().getJoueurs().get(new Random().nextInt(team_member_cout));
-                // Et on spawn un sbire sur lui
-                addSbire(joueurAleatoire.getLocation());
-            }
-
-
+            if (team_member_cout <= 0) continue;
+            Player joueurAleatoire = maison.getTeam().getJoueurs().get(new Random().nextInt(team_member_cout));
+            this.addSbire(joueurAleatoire.getLocation());
         }
     }
 
     @Override
     protected void performAnnouncement() {
-        String[] titres = new String[]{
-                ChatColor.RED + "ERROR",
-                ChatColor.BLUE + "Etrange ...",
-                ChatColor.GREEN + "Sensation de déjà vu...",
-                ChatColor.GOLD + " ### ATTENTION ###"
-        };
-
-        String[] messages = new String[]{
-                "Encore un bug causé par ce débile de Synchro...",
-                "Pourquoi le temps " + ChatColor.RED + "n'avance pas" + ChatColor.RESET + "? Il fait encore noir..",
-                "J'ai un mauvais préssentiment...",
-                "Une quantité " + ChatColor.RED + "importante d'électricité" + ChatColor.RESET + " a été détectée sous " + ChatColor.RED + "l'arène..."
-        };
-
-        // On récupère la liste des joueurs
-        List<Player> joueurs = this.getChestManager().getGroupe().getPlayers();
-
-        // Dans le cas où on est pas sur la dernière annonce, un simple titre suffit (+ message chat)
-        if(this.currentAnnouncementId != messages.length) {
-            // Pour chaque joueur
-            for(Player joueur : joueurs){
-                // On envoit un titre
-                joueur.sendTitle(titres[this.currentAnnouncementId], messages[currentAnnouncementId], 20, 20*5, 20);
-                // On envoit un message dans le chat
+        String[] titres = new String[]{ChatColor.RED + "ERROR", ChatColor.BLUE + "Etrange ...", ChatColor.GREEN + "Sensation de d\u00e9j\u00e0 vu...", ChatColor.GOLD + " ### ATTENTION ###"};
+        String[] messages = new String[]{"Encore un bug caus\u00e9 par ce d\u00e9bile de Synchro...", "Pourquoi le temps " + ChatColor.RED + "n'avance pas" + ChatColor.RESET + "? Il fait encore noir..", "J'ai un mauvais pr\u00e9ssentiment...", "Une quantit\u00e9 " + ChatColor.RED + "importante d'\u00e9lectricit\u00e9" + ChatColor.RESET + " a \u00e9t\u00e9 d\u00e9tect\u00e9e sous " + ChatColor.RED + "l'ar\u00e8ne..."};
+        LinkedList<Player> joueurs = this.getChestManager().getGroupe().getPlayers();
+        if (this.currentAnnouncementId != messages.length) {
+            for (Player joueur : joueurs) {
+                joueur.sendTitle(titres[this.currentAnnouncementId], messages[this.currentAnnouncementId], 20, 100, 20);
                 joueur.sendMessage(ChatColor.GOLD + "???: " + ChatColor.RESET + messages[this.currentAnnouncementId]);
-
-                // On aveugle le joueur temporairement
-                joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 7*20, 50));
-
-                joueur.playSound(joueur.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1,1);
-
+                joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 50));
+                joueur.playSound(joueur.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
-
-            // On incrémente le compteur
-            this.currentAnnouncementId++;
+            ++this.currentAnnouncementId;
             return;
         }
-
-        // Sinon, on est sur la dernière annonce ...
-        // Si elle a déjà été jouée, on s'arrête là
-        if(this.lastAnnouncementPlayed) return;
-
-        // On fait apparaitre un effet de particule sur le coffre d'arène, bleu
+        if (this.lastAnnouncementPlayed) {
+            return;
+        }
         Game partie = this.getChestManager().getGroupe().getGame();
         Location coffreArene = partie.getArene().getCoffre().getLocation();
-
-
-        // On joue un nuage bleu pendant 2 minutes
-        AreaEffectCloud effet_bleu_nuage = (AreaEffectCloud) coffreArene.getWorld().spawnEntity(coffreArene, EntityType.AREA_EFFECT_CLOUD);
+        AreaEffectCloud effet_bleu_nuage = (AreaEffectCloud)coffreArene.getWorld().spawnEntity(coffreArene, EntityType.AREA_EFFECT_CLOUD);
         effet_bleu_nuage.setColor(Color.BLUE);
-        // 2 * 60 secondes * 20 ticks
-        effet_bleu_nuage.setDuration(2 * 60 * 20);
-
-        // On joue un nuage noir pendant 2 minutes
-        AreaEffectCloud effet_noir_nuage = (AreaEffectCloud) coffreArene.getWorld().spawnEntity(coffreArene, EntityType.AREA_EFFECT_CLOUD);
+        effet_bleu_nuage.setDuration(2400);
+        AreaEffectCloud effet_noir_nuage = (AreaEffectCloud)coffreArene.getWorld().spawnEntity(coffreArene, EntityType.AREA_EFFECT_CLOUD);
         effet_noir_nuage.setColor(Color.BLACK);
-        // 2 * 60 secondes * 20 ticks
-        effet_bleu_nuage.setDuration(2 * 60 * 20);
-
-        // On averti les joueurs
-        for(Player joueur : joueurs) {
-            joueur.playSound(joueur.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1,1);
-            joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 7*20, 20));
-            joueur.sendTitle(ChatColor.RED + "/!\\ ANOMALIE DETECTEE /!\\", "Rendez-vous vite dans l'arène, j'ai peur de ce qui peut s'y passer...", 20, 5*50, 20);
-            joueur.sendMessage(ChatColor.GOLD + "???: " + ChatColor.RESET + "Rendez-vous vite dans l'arène, j'ai peur de ce qui peut s'y passer...");
+        effet_bleu_nuage.setDuration(2400);
+        for (Player joueur : joueurs) {
+            joueur.playSound(joueur.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1.0f, 1.0f);
+            joueur.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 20));
+            joueur.sendTitle(ChatColor.RED + "/!\\ ANOMALIE DETECTEE /!\\", "Rendez-vous vite dans l'ar\u00e8ne, j'ai peur de ce qui peut s'y passer...", 20, 250, 20);
+            joueur.sendMessage(ChatColor.GOLD + "???: " + ChatColor.RESET + "Rendez-vous vite dans l'ar\u00e8ne, j'ai peur de ce qui peut s'y passer...");
         }
-
         this.lastAnnouncementPlayed = true;
-
-
     }
 
     @Override
@@ -307,51 +223,35 @@ public class CrazyZombie extends Boss {
     @Override
     public void onPlayerKilled(Player p) {
         HalloweenHurricaneAnimation animationMort = new HalloweenHurricaneAnimation();
-        animationMort.playAnimation(p);
-
-        mineralcontest.broadcastMessage(ChatColor.RED + getName() + ChatColor.RESET + ": " + p.getDisplayName() + "a succombé face à ma force légendaire. À qui le tour?");
+        animationMort.playAnimation((LivingEntity)p);
+        mineralcontest.broadcastMessage(ChatColor.RED + this.getName() + ChatColor.RESET + ": " + p.getDisplayName() + "a succomb\u00e9 face \u00e0 ma force l\u00e9gendaire. \u00c0 qui le tour?");
     }
 
-
-    /**
-     * Fonction retournant un message random
-     * @return
-     */
     private String getRandomInfectionMessage() {
-        String[] messages = {
-                "Tu me donne envie de vomir",
-                "Ma beauté t'ébloui?",
-                "Mes copains sont là pour toi",
-                "C'est tout ce que t'as?",
-                "Bats toi comme un homme",
-                "Sombre bloc de bouse",
-                "Même Herobrine fait mieux que toi"
-        };
-
+        String[] messages = new String[]{"Tu me donne envie de vomir", "Ma beaut\u00e9 t'\u00e9bloui?", "Mes copains sont l\u00e0 pour toi", "C'est tout ce que t'as?", "Bats toi comme un homme", "Sombre bloc de bouse", "M\u00eame Herobrine fait mieux que toi"};
         return messages[new Random().nextInt(messages.length)];
     }
 
     private ZombieVillager addSbire(Location position) {
-        ZombieVillager zombieSbire = (ZombieVillager) this.entity.getWorld().spawnEntity(position, EntityType.ZOMBIE_VILLAGER);
-        if(zombieSbire.isBaby())zombieSbire.setAdult();
+        final ZombieVillager zombieSbire = (ZombieVillager)this.entity.getWorld().spawnEntity(position, EntityType.ZOMBIE_VILLAGER);
+        if (zombieSbire.isBaby()) {
+            zombieSbire.setAdult();
+        }
         zombieSbire.setCustomNameVisible(true);
         zombieSbire.setCustomName("Sbire");
-        zombieSbire.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(getSanteMax()/3);
-        zombieSbire.setHealth(getSanteMax()/3);
+        zombieSbire.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.getSanteMax() / 3.0);
+        zombieSbire.setHealth(this.getSanteMax() / 3.0);
+        zombieSbire.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(this.getDegatsParAttaque() / 3.0);
+        new BukkitRunnable(){
 
-        zombieSbire.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(getDegatsParAttaque()/3);
-
-        new BukkitRunnable() {
-            @Override
             public void run() {
-                if(zombieSbire.isDead()) {
+                if (zombieSbire.isDead()) {
                     this.cancel();
                 }
-
-                zombieSbire.setCustomName("Sbire " + ((int)zombieSbire.getHealth()) + ChatColor.RED + "♥" + ChatColor.RESET);
+                zombieSbire.setCustomName("Sbire " + (int)zombieSbire.getHealth() + ChatColor.RED + "\u2665" + ChatColor.RESET);
             }
-        }.runTaskTimer(mineralcontest.plugin, 0, 5);
-
+        }.runTaskTimer((Plugin)mineralcontest.plugin, 0L, 5L);
         return zombieSbire;
     }
 }
+

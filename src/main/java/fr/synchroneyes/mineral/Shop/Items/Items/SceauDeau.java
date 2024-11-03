@@ -40,19 +40,16 @@ public class SceauDeau extends ConsumableItem {
 
     @Override
     public void onItemUse() {
-        ItemStack item = new ItemStack(getItemMaterial());
-
+        ItemStack item = new ItemStack(this.getItemMaterial());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.translate(getNomItem()));
-
+        meta.setDisplayName(Lang.translate(this.getNomItem()));
         item.setItemMeta(meta);
-
-        joueur.getInventory().addItem(item);
+        this.joueur.getInventory().addItem(new ItemStack[]{item});
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("water_bucket");
     }
-
 }
+

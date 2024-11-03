@@ -24,12 +24,12 @@ public class PommeDoree extends GameItem {
 
     @Override
     public void onItemUse() {
-        this.joueur.getInventory().addItem(new ItemStack(Material.GOLDEN_APPLE));
+        this.joueur.getInventory().addItem(new ItemStack[]{new ItemStack(Material.GOLDEN_APPLE)});
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("golden_apple");
     }
-
 }
+

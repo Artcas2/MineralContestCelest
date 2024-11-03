@@ -1,43 +1,35 @@
 package fr.synchroneyes.challenges.Rewards;
 
+import fr.synchroneyes.challenges.Rewards.AbstractReward;
 import fr.synchroneyes.mineral.Core.MCPlayer;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.LinkedList;
-import java.util.List;
+public class MultipleArticleReward extends AbstractReward {
+    private List<ItemStack> items = new LinkedList<ItemStack>();
 
-public class MultipleArticleReward extends AbstractReward{
-
-
-    private List<ItemStack> items;
-
-    public MultipleArticleReward() {
-        this.items = new LinkedList<>();
-    }
-
-    /**
-     * Méthode permettant d'ajouter un item
-     * @param itemStack
-     */
     public void addItem(ItemStack itemStack) {
         this.items.add(itemStack);
     }
 
     @Override
     public void giveToPlayer() {
-        World playerWorld = getJoueur().getWorld();
-        MCPlayer mcPlayer = getMcPlayer();
-
-        for(ItemStack item : items)
-            // On vérifie si son inventaire est plein. Si il est plein on le drop à côté de lui
-            if(getMcPlayer().isInventoryFull()) playerWorld.dropItemNaturally(getJoueur().getLocation(), item);
-            else mcPlayer.getJoueur().getInventory().addItem(item);
-
+        World playerWorld = this.getJoueur().getWorld();
+        MCPlayer mcPlayer = this.getMcPlayer();
+        for (ItemStack item : this.items) {
+            if (this.getMcPlayer().isInventoryFull()) {
+                playerWorld.dropItemNaturally(this.getJoueur().getLocation(), item);
+                continue;
+            }
+            mcPlayer.getJoueur().getInventory().addItem(new ItemStack[]{item});
+        }
     }
 
     @Override
     public String getRewardText() {
-        return "Vous avez reçu une récompense dans votre inventaire! Si votre inventaire est plein, les objets ont été déposés à côté de vous.";
+        return "Vous avez re\u00e7u une r\u00e9compense dans votre inventaire! Si votre inventaire est plein, les objets ont \u00e9t\u00e9 d\u00e9pos\u00e9s \u00e0 c\u00f4t\u00e9 de vous.";
     }
 }
+

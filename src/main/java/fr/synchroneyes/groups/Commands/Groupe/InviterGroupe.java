@@ -9,33 +9,26 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class InviterGroupe extends CommandTemplate {
-
     public InviterGroupe() {
-        super();
-        addArgument("nom du joueur", true);
-        constructArguments();
-
-        this.accessCommande.add(PLAYER_COMMAND);
-        this.accessCommande.add(GROUP_REQUIRED);
-        this.accessCommande.add(GROUP_ADMIN);
-        this.accessCommande.add(REQUIRE_GROUP_UNLOCKED);
-        accessCommande.add(REQUIRE_COMMUNITY_VERSION);
-        accessCommande.add(GAME_NOT_STARTED);
-
-
+        this.addArgument("nom du joueur", true);
+        this.constructArguments();
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(2);
+        this.accessCommande.add(7);
+        this.accessCommande.add(9);
+        this.accessCommande.add(12);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-
-        Player joueurInvite = Bukkit.getPlayer(args[0]);
+        Player joueurInvite = Bukkit.getPlayer((String)args[0]);
         if (joueurInvite == null) {
             joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_no_player_with_this_name.toString());
             return false;
         }
-
         playerGroup.inviterJoueur(joueurInvite);
         return false;
     }
@@ -44,7 +37,6 @@ public class InviterGroupe extends CommandTemplate {
     public String getCommand() {
         return "invitergroupe";
     }
-
 
     @Override
     public String getDescription() {
@@ -56,3 +48,4 @@ public class InviterGroupe extends CommandTemplate {
         return null;
     }
 }
+

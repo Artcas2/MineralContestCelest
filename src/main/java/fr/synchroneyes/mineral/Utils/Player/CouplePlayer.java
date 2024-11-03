@@ -22,5 +22,5 @@ public class CouplePlayer {
     public void setValeur(int v) {
         this.valeur = v;
     }
-
 }
+

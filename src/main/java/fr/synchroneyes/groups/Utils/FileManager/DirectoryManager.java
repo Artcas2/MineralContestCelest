@@ -7,9 +7,10 @@ public class DirectoryManager {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
-                deleteDirectory(file);
+                DirectoryManager.deleteDirectory(file);
             }
         }
         return directoryToBeDeleted.delete();
     }
 }
+

@@ -1,50 +1,43 @@
 package fr.synchroneyes.custom_events;
 
-import fr.synchroneyes.mineral.Core.Game.Game;
+import fr.synchroneyes.custom_events.MCEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 public class MCPlayerWorldChangeEvent extends MCEvent {
-
     private Location fromLocation;
     private World fromWorld;
-
     private Location toLocation;
     private World toWorld;
-
     private Player player;
 
     public MCPlayerWorldChangeEvent(Location from, Location to, Player player) {
         this.fromLocation = from;
         this.fromWorld = from.getWorld();
-
         this.toLocation = to;
         this.toWorld = to.getWorld();
-
         this.player = player;
     }
 
-
     public Location getFromLocation() {
-        return fromLocation;
+        return this.fromLocation;
     }
 
     public World getFromWorld() {
-        return fromWorld;
+        return this.fromWorld;
     }
 
     public Location getToLocation() {
-        return toLocation;
+        return this.toLocation;
     }
 
     public World getToWorld() {
-        return toWorld;
+        return this.toWorld;
     }
 
     public Player getPlayer() {
-        return player;
+        return this.player;
     }
 }
+

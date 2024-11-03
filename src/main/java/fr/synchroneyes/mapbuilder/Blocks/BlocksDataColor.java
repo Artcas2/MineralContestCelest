@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public enum BlocksDataColor {
-
     white("white", 0, ChatColor.WHITE),
     orange("orange", 1, ChatColor.GOLD),
     magenta("magenta", 2, ChatColor.LIGHT_PURPLE),
@@ -27,28 +26,24 @@ public enum BlocksDataColor {
     public int blockDataColor;
     public ChatColor chatColor;
 
-    BlocksDataColor(String color, int blockDataColor, ChatColor chatColor) {
+    private BlocksDataColor(String color, int blockDataColor, ChatColor chatColor) {
         this.blockDataColor = blockDataColor;
         this.color = color;
         this.chatColor = chatColor;
     }
 
     public ItemStack toItemStack() {
-        String itemStackName = color + "_concrete";
-        Material materialName = Material.valueOf(itemStackName.toUpperCase());
-
+        String itemStackName = this.color + "_concrete";
+        Material materialName = Material.valueOf((String)itemStackName.toUpperCase());
         return new ItemStack(materialName, 1);
     }
 
-
     public static BlocksDataColor fromItemName(String itemName) {
-
-        for (BlocksDataColor couleur : values()) {
-            if (itemName.contains(couleur.color))
-                return couleur;
+        for (BlocksDataColor couleur : BlocksDataColor.values()) {
+            if (!itemName.contains(couleur.color)) continue;
+            return couleur;
         }
         return black;
     }
-
-
 }
+

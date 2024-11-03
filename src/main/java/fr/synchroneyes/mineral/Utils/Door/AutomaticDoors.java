@@ -2,32 +2,20 @@ package fr.synchroneyes.mineral.Utils.Door;
 
 import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mineral.Teams.Equipe;
+import fr.synchroneyes.mineral.Utils.Door.DisplayBlock;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.LinkedList;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.LinkedList;
-
 public class AutomaticDoors {
-
-    // Le bloc du centre
-
-
     private Groupe groupe;
-
-    // On a une Liste de block
-    private LinkedList<DisplayBlock> porte;
-
-    LinkedList<Player> playerNearDoor;
-
+    private LinkedList<DisplayBlock> porte = new LinkedList();
+    LinkedList<Player> playerNearDoor = new LinkedList();
     private boolean estOuvert = false;
 
-
-    // Prend un bloc, et un rayon
     public AutomaticDoors(Equipe equipe, Groupe g) {
-        this.porte = new LinkedList<DisplayBlock>();
-        this.playerNearDoor = new LinkedList<Player>();
         this.groupe = g;
     }
 
@@ -37,88 +25,74 @@ public class AutomaticDoors {
         this.playerNearDoor.clear();
     }
 
-    // On initialise la pile de blocs
     public boolean addToDoor(Block b) {
-        // Pour chaque bloc de la porte
         boolean ajouter = false;
-        if (porte.size() == 0) {
-            porte.add(new DisplayBlock(b));
-            if (mineralcontest.debug)
-                mineralcontest.broadcastMessage(ChatColor.GREEN + "+ Le bloc selectionné a été ajouté", groupe);
+        if (this.porte.size() == 0) {
+            this.porte.add(new DisplayBlock(b));
+            if (mineralcontest.debug) {
+                mineralcontest.broadcastMessage(ChatColor.GREEN + "+ Le bloc selectionn\u00e9 a \u00e9t\u00e9 ajout\u00e9", this.groupe);
+            }
         } else {
-            for (DisplayBlock db : porte) {
-                if (db.getBlock().equals(b)) {
-                    porte.remove(db);
-                    if (mineralcontest.debug)
-                        mineralcontest.broadcastMessage(ChatColor.YELLOW + "- Le bloc selectionné a été supprimé", groupe);
-                } else {
-                    ajouter = true;
+            for (DisplayBlock db : this.porte) {
+                if (db.getBlock().equals((Object)b)) {
+                    this.porte.remove(db);
+                    if (!mineralcontest.debug) continue;
+                    mineralcontest.broadcastMessage(ChatColor.YELLOW + "- Le bloc selectionn\u00e9 a \u00e9t\u00e9 supprim\u00e9", this.groupe);
+                    continue;
                 }
+                ajouter = true;
             }
             if (ajouter) {
-                porte.add(new DisplayBlock(b));
-                if (mineralcontest.debug)
-                    mineralcontest.broadcastMessage(ChatColor.GREEN + "+ Le bloc selectionné a été ajouté à la porte", groupe);
+                this.porte.add(new DisplayBlock(b));
+                if (mineralcontest.debug) {
+                    mineralcontest.broadcastMessage(ChatColor.GREEN + "+ Le bloc selectionn\u00e9 a \u00e9t\u00e9 ajout\u00e9 \u00e0 la porte", this.groupe);
+                }
                 return true;
             }
-
             return true;
         }
-
         return true;
-
-
     }
 
-    // On initialise la pile de blocs
     public void openDoor() {
-        // Pour chaque bloc de la porte
-        if (playerNearDoor.size() > 0) {
-            // Pour chaque bloc de la porte
-
-            for (DisplayBlock db : porte) {
+        if (this.playerNearDoor.size() > 0) {
+            for (DisplayBlock db : this.porte) {
                 db.hide();
             }
             this.estOuvert = true;
         }
     }
 
-
     public void forceCloseDoor() {
-        playerNearDoor.clear();
-        closeDoor();
+        this.playerNearDoor.clear();
+        this.closeDoor();
     }
 
     public void closeDoor() {
-
-        // Si on a personne pres de la porte
-        if (playerNearDoor.size() == 0) {
-            // Pour chaque bloc de la porte
-
-            for (DisplayBlock db : porte) {
+        if (this.playerNearDoor.size() == 0) {
+            for (DisplayBlock db : this.porte) {
                 db.display();
             }
             this.estOuvert = false;
         }
-
     }
 
     public LinkedList<DisplayBlock> getPorte() {
-        return porte;
+        return this.porte;
     }
-
 
     public void playerIsNearDoor(Player joueur) {
         if (!this.playerNearDoor.contains(joueur) && !mineralcontest.getPlayerGame(joueur).getArene().getDeathZone().isPlayerDead(joueur)) {
             this.playerNearDoor.add(joueur);
-            openDoor();
+            this.openDoor();
         }
     }
 
     public void playerIsNotNearDoor(Player joueur) {
         if (this.playerNearDoor.contains(joueur)) {
             this.playerNearDoor.remove(joueur);
-            closeDoor();
+            this.closeDoor();
         }
     }
 }
+

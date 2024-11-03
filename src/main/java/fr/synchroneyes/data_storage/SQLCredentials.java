@@ -1,27 +1,18 @@
 package fr.synchroneyes.data_storage;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Classe permettant de stocker les informations de connexion à une base de donnée
- */
 public class SQLCredentials {
-
     private String hostname;
     private String database;
     private String username;
     private String password;
     private String port;
 
-
-
     public String getHostname() {
-        return hostname;
+        return this.hostname;
     }
 
     public SQLCredentials setHostname(String hostname) {
@@ -30,7 +21,7 @@ public class SQLCredentials {
     }
 
     public String getDatabase() {
-        return database;
+        return this.database;
     }
 
     public SQLCredentials setDatabase(String database) {
@@ -39,7 +30,7 @@ public class SQLCredentials {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public SQLCredentials setUsername(String username) {
@@ -48,7 +39,7 @@ public class SQLCredentials {
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public SQLCredentials setPassword(String password) {
@@ -57,7 +48,7 @@ public class SQLCredentials {
     }
 
     public String getPort() {
-        return port;
+        return this.port;
     }
 
     public SQLCredentials setPort(String port) {
@@ -66,7 +57,7 @@ public class SQLCredentials {
     }
 
     public Connection getConnection() throws SQLException {
-
-        return DriverManager.getConnection( "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.username, this.password);
+        return DriverManager.getConnection("jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.username, this.password);
     }
 }
+

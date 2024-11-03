@@ -10,122 +10,109 @@ import fr.synchroneyes.mapbuilder.Events.PlayerInteract;
 import fr.synchroneyes.mineral.Scoreboard.ScoreboardUtil;
 import fr.synchroneyes.mineral.Utils.BlockSaver;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Stack;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Stack;
-
 public class MapBuilder {
-
     private mineralcontest plugin = mineralcontest.plugin;
     private static MapBuilder instance;
     public boolean isBuilderModeEnabled = false;
     private CommandMap bukkitCommandMap;
-
     public static Stack<Stack<BlockSaver>> modifications;
-
-
     public static Monde monde;
 
     private MapBuilder() {
         instance = this;
-        //mineralcontest.debug = isBuilderModeEnabled;
-        modifications = new Stack<>();
-
-
-        if (isBuilderModeEnabled) enableMapBuilder();
-
+        modifications = new Stack();
+        if (this.isBuilderModeEnabled) {
+            MapBuilder.enableMapBuilder();
+        }
         try {
-            getPluginCommandMap();
+            this.getPluginCommandMap();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-        printToConsole("Loading custom maps module ...");
-        registerEvents();
-        registerCommands();
+        this.printToConsole("Loading custom maps module ...");
+        this.registerEvents();
+        this.registerCommands();
     }
 
-
     public static void enableMapBuilder() {
-        instance.isBuilderModeEnabled = true;
+        MapBuilder.instance.isBuilderModeEnabled = true;
         instance.enableMapBuilding();
         monde = new Monde();
-        Bukkit.broadcastMessage("MapBuilder mode enabled!");
+        Bukkit.broadcastMessage((String)"MapBuilder mode enabled!");
     }
 
     public static void disableMapBuilder() {
-        instance.isBuilderModeEnabled = false;
+        MapBuilder.instance.isBuilderModeEnabled = false;
         instance.disableMapBuilding();
     }
-
 
     private void getPluginCommandMap() throws NoSuchFieldException, IllegalAccessException {
         Field cmdMapField = SimplePluginManager.class.getDeclaredField("commandMap");
         cmdMapField.setAccessible(true);
-        this.bukkitCommandMap = (CommandMap) cmdMapField.get(Bukkit.getPluginManager());
+        this.bukkitCommandMap = (CommandMap)cmdMapField.get(Bukkit.getPluginManager());
     }
 
     public static MapBuilder getInstance() {
-        if (instance == null) return new MapBuilder();
+        if (instance == null) {
+            return new MapBuilder();
+        }
         return instance;
     }
 
-
     private void registerEvents() {
-        printToConsole("Registering events");
-        this.plugin.getServer().getPluginManager().registerEvents(new BlockPlaced(), plugin);
-        this.plugin.getServer().getPluginManager().registerEvents(new PlayerInteract(), plugin);
-
-
+        this.printToConsole("Registering events");
+        this.plugin.getServer().getPluginManager().registerEvents((Listener)new BlockPlaced(), (Plugin)this.plugin);
+        this.plugin.getServer().getPluginManager().registerEvents((Listener)new PlayerInteract(), (Plugin)this.plugin);
     }
 
     private void registerCommands() {
-        printToConsole("Registering commands");
-
-        this.bukkitCommandMap.register("", new mcteam());
-        this.bukkitCommandMap.register("", new mcarena());
-        this.bukkitCommandMap.register("", new mcbuild());
-        this.bukkitCommandMap.register("", new mcrevert());
-
+        this.printToConsole("Registering commands");
+        this.bukkitCommandMap.register("", (Command)new mcteam());
+        this.bukkitCommandMap.register("", (Command)new mcarena());
+        this.bukkitCommandMap.register("", (Command)new mcbuild());
+        this.bukkitCommandMap.register("", (Command)new mcrevert());
     }
 
-
     private void enableMapBuilding() {
-        isBuilderModeEnabled = true;
+        this.isBuilderModeEnabled = true;
         World game_world = mineralcontest.plugin.pluginWorld;
         int size = 1000000;
-
         if (game_world != null) {
             game_world.getWorldBorder().setCenter(mineralcontest.plugin.defaultSpawn);
-            game_world.getWorldBorder().setSize(size);
+            game_world.getWorldBorder().setSize((double)size);
             game_world.setDifficulty(Difficulty.PEACEFUL);
-
-            for (Player p : game_world.getPlayers())
+            for (Player p : game_world.getPlayers()) {
                 p.setGameMode(GameMode.CREATIVE);
+            }
         }
     }
 
     private void disableMapBuilding() {
-        isBuilderModeEnabled = false;
+        this.isBuilderModeEnabled = false;
         World game_world = mineralcontest.plugin.pluginWorld;
         int size = 1000000;
-
         if (game_world != null) {
             game_world.getWorldBorder().setCenter(mineralcontest.plugin.defaultSpawn);
-            game_world.getWorldBorder().setSize(size);
+            game_world.getWorldBorder().setSize((double)size);
             game_world.setDifficulty(Difficulty.NORMAL);
-
-            for (Player p : game_world.getPlayers())
+            for (Player p : game_world.getPlayers()) {
                 p.setGameMode(GameMode.SURVIVAL);
+            }
         }
     }
 
@@ -135,22 +122,24 @@ public class MapBuilder {
     }
 
     public void sendPlayersHUD() {
-
-        if (!isBuilderModeEnabled) return;
-
-        ArrayList<String> playerHudContents = new ArrayList<>();
+        if (!this.isBuilderModeEnabled) {
+            return;
+        }
+        ArrayList<String> playerHudContents = new ArrayList<String>();
         playerHudContents.add("MapBuiler mode enabled");
         playerHudContents.add(" ");
         playerHudContents.add("Type /build to get the build item");
-
         String[] hudContentAsArray = new String[playerHudContents.size()];
         int index = 0;
-        for (String hudcontent : playerHudContents) {
-            hudContentAsArray[index] = hudcontent;
-            index++;
+        Iterator iterator = playerHudContents.iterator();
+        while (iterator.hasNext()) {
+            String hudcontent;
+            hudContentAsArray[index] = hudcontent = (String)iterator.next();
+            ++index;
         }
-
-        for (Player player : plugin.pluginWorld.getPlayers())
+        for (Player player : this.plugin.pluginWorld.getPlayers()) {
             ScoreboardUtil.unrankedSidebarDisplay(player, hudContentAsArray);
+        }
     }
 }
+

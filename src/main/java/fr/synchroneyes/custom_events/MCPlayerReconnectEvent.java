@@ -1,13 +1,9 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.MCPlayer;
-import org.bukkit.entity.Player;
 
-/**
- * Event appelé lorsqu'un joueur se reconnecte au plugin
- */
-public class MCPlayerReconnectEvent extends MCEvent{
-
+public class MCPlayerReconnectEvent extends MCEvent {
     private MCPlayer player;
 
     public MCPlayerReconnectEvent(MCPlayer player) {
@@ -15,6 +11,7 @@ public class MCPlayerReconnectEvent extends MCEvent{
     }
 
     public MCPlayer getPlayer() {
-        return player;
+        return this.player;
     }
 }
+

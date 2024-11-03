@@ -8,39 +8,20 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Vote extends CommandTemplate {
-
     public Vote() {
-        super();
-        //addArgument("ID du biome", true);
-
-        this.accessCommande.add(PLAYER_COMMAND);
-        this.accessCommande.add(GROUP_REQUIRED);
-        this.accessCommande.add(GROUP_VOTE_STARTED);
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(6);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
         Bukkit.getLogger().severe("Player voted");
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Groupe playerGroupe = null;
         int mapVoter = -1;
-
         playerGroupe = mineralcontest.getPlayerGroupe(joueur);
         playerGroupe.getMapVote().getMenuVote().openInventory(joueur);
-        /*try {
-            mapVoter = Integer.parseInt(args[0]);
-
-            if (mapVoter < 0) throw new NumberFormatException();
-            playerGroupe = mineralcontest.getPlayerGroupe(joueur);
-            if (mapVoter >= playerGroupe.getMapVote().getMaps().size()) throw new NumberFormatException();
-
-        } catch (NumberFormatException nfe) {
-            commandSender.sendMessage(mineralcontest.prefixErreur + this.getUsage());
-            return false;
-        }*/
-
-        // On a plus qu'a enregistrer le vote
-        //playerGroupe.getMapVote().enregistrerVoteJoueur(mapVoter, joueur);
         return false;
     }
 
@@ -48,7 +29,6 @@ public class Vote extends CommandTemplate {
     public String getCommand() {
         return "vote";
     }
-
 
     @Override
     public String getDescription() {
@@ -60,3 +40,4 @@ public class Vote extends CommandTemplate {
         return null;
     }
 }
+

@@ -1,70 +1,60 @@
 package fr.synchroneyes.mineral.Core.Coffre;
 
 import fr.synchroneyes.custom_events.MCAutomatedChestTimeOverEvent;
-import lombok.Getter;
+import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestAnimation;
+import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
+import fr.synchroneyes.mineral.Core.Coffre.TimeChestOpening;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 
-public abstract class TimeChestAnimation extends AutomatedChestAnimation{
-
-
-    private int timeLeft;
-
-    @Getter
+public abstract class TimeChestAnimation extends AutomatedChestAnimation {
+    private int timeLeft = this.getChestAliveTime();
     private boolean canTimeBeReduced = false;
 
-    /**
-     * Constructeur, permet de donner en paramètre le nom de l'inventaire ainsi que la taille
-     *
-     * @param tailleInventaire - Taille de l'inventaire, doit-être un multiple de 7
-     * @param manager
-     */
     public TimeChestAnimation(int tailleInventaire, AutomatedChestManager manager) {
         super(tailleInventaire, manager);
-        this.timeLeft = getChestAliveTime();
     }
 
-    /**
-     * Définir en seconde le temps où un coffre doit rester avant de disparaitre
-     * @return
-     */
     public abstract int getChestAliveTime();
 
-    /**
-     * Définir à quel moment le timer doit démarrer
-     * @return
-     */
     public abstract TimeChestOpening getTimeTriggerAction();
 
-
     public void reduceChestTime() {
-        this.timeLeft--;
+        --this.timeLeft;
     }
 
     public int getTimeLeft() {
-        return timeLeft;
+        return this.timeLeft;
     }
 
-    /**
-     * Méthode appelée lors de la fin du timer de ce coffre
-     */
     public void deleteChest() {
-        MCAutomatedChestTimeOverEvent event = new MCAutomatedChestTimeOverEvent(this, getOpeningPlayer());
-        Bukkit.getPluginManager().callEvent(event);
+        MCAutomatedChestTimeOverEvent event = new MCAutomatedChestTimeOverEvent(this, this.getOpeningPlayer());
+        Bukkit.getPluginManager().callEvent((Event)event);
         this.getLocation().getBlock().setType(Material.AIR);
         this.isAnimationOver = true;
-        if(this.openingPlayer != null) openingPlayer.closeInventory();
+        if (this.openingPlayer != null) {
+            this.openingPlayer.closeInventory();
+        }
     }
 
     @Override
     public void spawn() {
-        if(getTimeTriggerAction() == TimeChestOpening.ON_SPAWN) this.canTimeBeReduced = true;
+        if (this.getTimeTriggerAction() == TimeChestOpening.ON_SPAWN) {
+            this.canTimeBeReduced = true;
+        }
         super.spawn();
     }
 
     @Override
     public void actionToPerformAfterAnimationOver() {
-        if(getTimeTriggerAction() == TimeChestOpening.AFTER_OPENING_ANIMATION) this.canTimeBeReduced = true;
+        if (this.getTimeTriggerAction() == TimeChestOpening.AFTER_OPENING_ANIMATION) {
+            this.canTimeBeReduced = true;
+        }
+    }
+
+    public boolean isCanTimeBeReduced() {
+        return this.canTimeBeReduced;
     }
 }
+

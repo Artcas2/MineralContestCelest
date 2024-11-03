@@ -1,16 +1,12 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 public class PlayerPermissionChangeEvent extends MCEvent {
-
     private Player player;
     private String oldPermission;
     private String newPermission;
-
-
 
     public PlayerPermissionChangeEvent(Player p, String old, String new_p) {
         this.player = p;
@@ -18,17 +14,16 @@ public class PlayerPermissionChangeEvent extends MCEvent {
         this.newPermission = new_p;
     }
 
-
     public Player getPlayer() {
-        return player;
+        return this.player;
     }
 
     public String getOldPermission() {
-        return oldPermission;
+        return this.oldPermission;
     }
 
     public String getNewPermission() {
-        return newPermission;
+        return this.newPermission;
     }
-
 }
+

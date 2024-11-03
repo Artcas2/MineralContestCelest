@@ -7,19 +7,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class QuitterGroupe extends CommandTemplate {
-
     public QuitterGroupe() {
-        super();
-        this.accessCommande.add(PLAYER_COMMAND);
-        this.accessCommande.add(GROUP_REQUIRED);
-        accessCommande.add(REQUIRE_COMMUNITY_VERSION);
-        accessCommande.add(GAME_NOT_STARTED);
-
+        this.accessCommande.add(4);
+        this.accessCommande.add(0);
+        this.accessCommande.add(9);
+        this.accessCommande.add(12);
     }
 
     @Override
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
-        Player joueur = (Player) commandSender;
+        Player joueur = (Player)commandSender;
         Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
         playerGroup.retirerJoueur(joueur);
         return false;
@@ -29,7 +26,6 @@ public class QuitterGroupe extends CommandTemplate {
     public String getCommand() {
         return "quittergroupe";
     }
-
 
     @Override
     public String getDescription() {
@@ -41,3 +37,4 @@ public class QuitterGroupe extends CommandTemplate {
         return null;
     }
 }
+

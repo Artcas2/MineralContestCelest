@@ -43,19 +43,15 @@ public class BatonKnockback extends ConsumableItem {
     public void onItemUse() {
         ItemStack baton = new ItemStack(Material.BLAZE_ROD);
         ItemMeta meta = baton.getItemMeta();
-
-        meta.setDisplayName(Lang.translate(getNomItem()));
+        meta.setDisplayName(Lang.translate(this.getNomItem()));
         meta.addEnchant(Enchantment.KNOCKBACK, 3, true);
         baton.setItemMeta(meta);
-
-
-        joueur.getInventory().addItem(baton);
+        this.joueur.getInventory().addItem(new ItemStack[]{baton});
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("knockback_stick");
     }
-
-
 }
+

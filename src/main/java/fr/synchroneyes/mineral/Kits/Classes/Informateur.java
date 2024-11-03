@@ -17,15 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 
-/**
- * L'informateur recoit des informations sur les prochains coffre & largage
- * Il ne peut pas les ouvrir
- */
 public class Informateur extends KitAbstract {
-
     private int timeLeftBeforeArenaWarn = 10;
     private int timeLeftBeforeDropWarn = 60;
-
 
     @Override
     public String getNom() {
@@ -42,82 +36,54 @@ public class Informateur extends KitAbstract {
         return Material.BOOK;
     }
 
-    /**
-     * Fonction appelée à chaque TICK
-     *
-     * @param event
-     */
     @EventHandler
     public void onArenaChestTick(MCArenaChestTickEvent event) {
-        // On récupère les joueurs de la partie
-        for (Player joueur : event.getGame().groupe.getPlayers())
-            // On vérifie si ils ont le kit
-            if (isPlayerUsingThisKit(joueur))
-                // On vérfie le temps restant
-                if (event.getTimeLeft() == timeLeftBeforeArenaWarn)
-                    joueur.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.arena_chest_will_spawn_in.toString(), event.getGame().groupe));
+        for (Player joueur : event.getGame().groupe.getPlayers()) {
+            if (!this.isPlayerUsingThisKit(joueur) || event.getTimeLeft() != this.timeLeftBeforeArenaWarn) continue;
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.arena_chest_will_spawn_in.toString(), event.getGame().groupe));
+        }
     }
 
-    /**
-     * Evenement appelé à chaque tick du airdrop, chaque seconde de la boucle de gestion des drops (timer, ...)
-     *
-     * @param event
-     */
     @EventHandler
     public void onAirDropTick(MCAirDropTickEvent event) {
-        // On récupère les joueurs de la partie
-        for (Player joueur : event.getGame().groupe.getPlayers())
-            // On vérifie si ils ont le kit
-            if (isPlayerUsingThisKit(joueur))
-                // On vérfie le temps restant
-                if (event.getTimeLeft() == timeLeftBeforeDropWarn)
-                    joueur.sendMessage(mineralcontest.prefixPrive + Lang.kit_spy_airdrop_will_spawn.toString());
+        for (Player joueur : event.getGame().groupe.getPlayers()) {
+            if (!this.isPlayerUsingThisKit(joueur) || event.getTimeLeft() != this.timeLeftBeforeDropWarn) continue;
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.kit_spy_airdrop_will_spawn.toString());
+        }
     }
 
     @EventHandler
     public void onAirdropSpawn(MCAirDropSpawnEvent event) {
         String chestLocationText = Lang.airdrop_subtitle.toString();
         Location nextDropLocation = event.getParachuteLocation();
-
         chestLocationText = chestLocationText.replace("%x", nextDropLocation.getBlockX() + "");
         chestLocationText = chestLocationText.replace("%z", nextDropLocation.getBlockZ() + "");
-
-        // On récupère les joueurs de la partie
-        for (Player joueur : event.getGame().groupe.getPlayers())
-            // On vérifie si ils ont le kit
-            if (isPlayerUsingThisKit(joueur))
-                joueur.sendMessage(mineralcontest.prefixPrive + chestLocationText);
+        for (Player joueur : event.getGame().groupe.getPlayers()) {
+            if (!this.isPlayerUsingThisKit(joueur)) continue;
+            joueur.sendMessage(mineralcontest.prefixPrive + chestLocationText);
+        }
     }
 
-
-    /**
-     * On va bloquer l'ouverture du coffre d'arène/airdrop
-     *
-     * @param event
-     */
     @EventHandler
     public void onChestOpen(InventoryOpenEvent event) {
-        if (!(event.getPlayer() instanceof Player)) return;
-
-        Player joueur = (Player) event.getPlayer();
-        if (!isPlayerUsingThisKit(joueur)) return;
-
+        AutomatedChestAnimation automatedChestAnimation;
+        if (!(event.getPlayer() instanceof Player)) {
+            return;
+        }
+        Player joueur = (Player)event.getPlayer();
+        if (!this.isPlayerUsingThisKit(joueur)) {
+            return;
+        }
         Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         Inventory inventaire = event.getInventory();
-
-
-        // On regarde si l'inventaire est celui d'un coffre automatique
-        if (playerGroup.getAutomatedChestManager().isThisAnAnimatedInventory(inventaire)) {
-
-            AutomatedChestAnimation automatedChestAnimation = playerGroup.getAutomatedChestManager().getFromInventory(inventaire);
-            if(automatedChestAnimation instanceof CoffreArene || automatedChestAnimation instanceof CoffreParachute) {
-                joueur.closeInventory();
-                playerGroup.getAutomatedChestManager().getFromInventory(inventaire).closeInventory();
-                event.setCancelled(true);
-            }
-
+        if (playerGroup.getAutomatedChestManager().isThisAnAnimatedInventory(inventaire) && ((automatedChestAnimation = playerGroup.getAutomatedChestManager().getFromInventory(inventaire)) instanceof CoffreArene || automatedChestAnimation instanceof CoffreParachute)) {
+            joueur.closeInventory();
+            playerGroup.getAutomatedChestManager().getFromInventory(inventaire).closeInventory();
+            event.setCancelled(true);
         }
     }
 }
+

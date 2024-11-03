@@ -1,8 +1,5 @@
 package fr.synchroneyes.mineral.Shop.NPCs;
 
-
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -12,105 +9,65 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
 
-
-/**
- * Classe permettant d'illustrer un NPC
- */
 public abstract class NPCTemplate {
-
     public static int id = 0;
-
-    // Permet d'avoir la NPC sur une map
-    @Getter
-    @Setter
     private Location emplacement;
-
     protected Inventory inventaire;
-
-    @Getter
     private Entity entity;
 
-
     public NPCTemplate(int nombreDeLigne) {
-        this.inventaire = Bukkit.createInventory(null, 9 * nombreDeLigne, getNomAffichage());
+        this.inventaire = Bukkit.createInventory(null, (int)(9 * nombreDeLigne), (String)this.getNomAffichage());
     }
 
-
-    /**
-     * Récupère le nom d'affichage
-     *
-     * @return
-     */
     public abstract String getNomAffichage();
 
-    /**
-     * Récupère le type de pnj à spawn
-     *
-     * @return
-     */
     public abstract Villager.Profession getNPCType();
 
+    public abstract void onNPCRightClick(Player var1);
 
-    /**
-     * Permet d'effectuer une fonction lors du clic droit sur un npc
-     *
-     * @param joueur
-     */
-    public abstract void onNPCRightClick(Player joueur);
+    public abstract void onNPCLeftClick(Player var1);
 
-    /**
-     * Permet d'effectuer une fonction lors du clic gauche sur un npc
-     *
-     * @param joueur
-     */
-    public abstract void onNPCLeftClick(Player joueur);
+    public abstract void onInventoryItemClick(Event var1);
 
-    /**
-     * Evenement a appeler en cas de click sur un item d'inventaire
-     *
-     * @param event
-     */
-    public abstract void onInventoryItemClick(Event event);
-
-    /**
-     * Fonction appelée afin d'obtenir l'inventaire lié au NPC
-     */
     public abstract Inventory getInventory();
 
-
-    /**
-     * Permet de faire apparaitre le NPC à la position enregistrée
-     **/
     public void spawn() {
-
-
-        if (this.entity != null) this.entity.remove();
-        if (this.emplacement == null) return;
-        if (this.emplacement.getWorld() == null) return;
-
-        // On récupère le monde où faire spawn l'entité
-        World monde = emplacement.getWorld();
-        Villager entitySpawned = monde.spawn(emplacement, Villager.class);
-
-
-        // On change les paramètres de l'entité
+        if (this.entity != null) {
+            this.entity.remove();
+        }
+        if (this.emplacement == null) {
+            return;
+        }
+        if (this.emplacement.getWorld() == null) {
+            return;
+        }
+        World monde = this.emplacement.getWorld();
+        Villager entitySpawned = (Villager)monde.spawn(this.emplacement, Villager.class);
         entitySpawned.setAI(false);
         entitySpawned.setAdult();
-        if (getNPCType() != null) entitySpawned.setProfession(getNPCType());
+        if (this.getNPCType() != null) {
+            entitySpawned.setProfession(this.getNPCType());
+        }
         entitySpawned.setInvulnerable(true);
         entitySpawned.setCustomNameVisible(true);
-        entitySpawned.setCustomName(getNomAffichage());
+        entitySpawned.setCustomName(this.getNomAffichage());
         entitySpawned.setCollidable(false);
         entitySpawned.setRemoveWhenFarAway(false);
         entitySpawned.setAgeLock(true);
         entitySpawned.setSilent(true);
-
         this.entity = entitySpawned;
-
-
-
-
     }
 
+    public Location getEmplacement() {
+        return this.emplacement;
+    }
 
+    public void setEmplacement(Location emplacement) {
+        this.emplacement = emplacement;
+    }
+
+    public Entity getEntity() {
+        return this.entity;
+    }
 }
+

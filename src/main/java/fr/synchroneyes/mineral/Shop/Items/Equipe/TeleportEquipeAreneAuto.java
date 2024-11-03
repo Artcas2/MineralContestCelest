@@ -42,19 +42,19 @@ public class TeleportEquipeAreneAuto extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         Equipe playerTeam = playerGroup.getPlayerTeam(this.joueur);
-        if (playerTeam == null) return;
-
+        if (playerTeam == null) {
+            return;
+        }
         playerGroup.getGame().getArene().addTeamToAutomatedTeleport(playerTeam);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("team_auto_teleport");
-
     }
-
 }
+

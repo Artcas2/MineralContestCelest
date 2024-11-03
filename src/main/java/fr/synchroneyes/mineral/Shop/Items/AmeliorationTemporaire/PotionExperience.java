@@ -6,8 +6,6 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 
 public class PotionExperience extends ConsumableItem {
-
-
     @Override
     public String getNomItem() {
         return Lang.shopitem_experience_title.toString();
@@ -41,13 +39,12 @@ public class PotionExperience extends ConsumableItem {
     @Override
     public void onItemUse() {
         int nombre_level = 1;
-        joueur.setLevel(joueur.getLevel() + nombre_level);
+        this.joueur.setLevel(this.joueur.getLevel() + nombre_level);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("self_experience");
-
     }
-
 }
+

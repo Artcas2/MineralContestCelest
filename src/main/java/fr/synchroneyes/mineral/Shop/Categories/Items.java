@@ -6,7 +6,6 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.Material;
 
 public class Items extends Category {
-
     public Items(BonusSeller npc) {
         super(npc);
     }
@@ -26,3 +25,4 @@ public class Items extends Category {
         return new String[0];
     }
 }
+

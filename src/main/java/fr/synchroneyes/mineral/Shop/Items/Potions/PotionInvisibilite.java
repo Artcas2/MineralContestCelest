@@ -6,7 +6,6 @@ import fr.synchroneyes.mineral.Translation.Lang;
 import org.bukkit.potion.PotionEffectType;
 
 public class PotionInvisibilite extends PotionItem {
-
     @Override
     public PotionEffectType getPotionType() {
         return PotionEffectType.INVISIBILITY;
@@ -22,7 +21,6 @@ public class PotionInvisibilite extends PotionItem {
         return 2;
     }
 
-
     @Override
     public String getNomItem() {
         return Lang.shopitem_invisibility_title.toString();
@@ -33,10 +31,9 @@ public class PotionInvisibilite extends PotionItem {
         return new String[]{Lang.shopitem_invisibility_desc.toString()};
     }
 
-
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("invisibility_potion");
     }
-
 }
+

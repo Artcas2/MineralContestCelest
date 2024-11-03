@@ -1,6 +1,7 @@
 package fr.synchroneyes.world_downloader.Inventories;
 
 import fr.synchroneyes.mineral.Translation.Lang;
+import fr.synchroneyes.world_downloader.Inventories.InventoryInterface;
 import fr.synchroneyes.world_downloader.Items.CancelMapDeletionItem;
 import fr.synchroneyes.world_downloader.Items.ConfirmMapDeletionItem;
 import fr.synchroneyes.world_downloader.WorldDownloader;
@@ -8,14 +9,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class ConfirmationSuppressionInventory extends InventoryInterface {
-
     private String nom_dossier;
 
     public ConfirmationSuppressionInventory(String nom_dossier) {
         super(false);
         this.nom_dossier = nom_dossier;
     }
-
 
     public void setNomDossier(String map) {
         this.nom_dossier = map;
@@ -24,8 +23,8 @@ public class ConfirmationSuppressionInventory extends InventoryInterface {
     @Override
     public void setInventoryItems(Player arbitre) {
         WorldDownloader.getMaps(false);
-        registerItem(new ConfirmMapDeletionItem(nom_dossier));
-        registerItem(new CancelMapDeletionItem());
+        this.registerItem(new ConfirmMapDeletionItem(this.nom_dossier));
+        this.registerItem(new CancelMapDeletionItem());
     }
 
     @Override
@@ -43,3 +42,4 @@ public class ConfirmationSuppressionInventory extends InventoryInterface {
         return Lang.map_downloader_delete_title.toString();
     }
 }
+

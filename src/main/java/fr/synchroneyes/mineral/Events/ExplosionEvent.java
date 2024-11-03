@@ -14,13 +14,11 @@ import org.bukkit.event.entity.ExplosionPrimeEvent;
 public class ExplosionEvent implements Listener {
     @EventHandler
     public void onExplosionEvent(ExplosionPrimeEvent event) {
+        Game partie;
         World worldEvent = event.getEntity().getWorld();
-        if (mineralcontest.isAMineralContestWorld(worldEvent)) {
-            Game partie = mineralcontest.getWorldGame(worldEvent);
-            if (partie != null && (partie.isGamePaused() || !partie.isGameStarted()))
-                event.setCancelled(true);
+        if (mineralcontest.isAMineralContestWorld(worldEvent) && (partie = mineralcontest.getWorldGame(worldEvent)) != null && (partie.isGamePaused() || !partie.isGameStarted())) {
+            event.setCancelled(true);
         }
-
     }
 
     @EventHandler
@@ -29,16 +27,15 @@ public class ExplosionEvent implements Listener {
         World worldEvent = e.getEntity().getWorld();
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             Game partie = mineralcontest.getWorldGame(worldEvent);
-            if (partie == null) return;
-            // On récupère le centre de l'arène
+            if (partie == null) {
+                return;
+            }
             Location centreArene = partie.getArene().getCoffre().getLocation();
             int rayonProtection = partie.groupe.getParametresPartie().getCVAR("protected_zone_area_radius").getValeurNumerique();
-
-            if (partie != null && (partie.isGamePaused() || !partie.isGameStarted()) || Radius.isBlockInRadius(centreArene, e.getLocation(), rayonProtection))
+            if (partie != null && (partie.isGamePaused() || !partie.isGameStarted()) || Radius.isBlockInRadius(centreArene, e.getLocation(), rayonProtection)) {
                 e.setCancelled(true);
+            }
         }
-
     }
-
-
 }
+

@@ -9,19 +9,13 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-
-/**
- * Ce bonus offre une pioche en fer avec l'enchantement Fortune I
- */
 public class Pioche1 extends LevelableItem {
-
     public static String coloredItemName = ChatColor.GOLD + Lang.shopitem_pickaxelvl1_title.toString();
 
     @Override
     public Class getRequiredLevel() {
         return null;
     }
-
 
     @Override
     public String getNomItem() {
@@ -60,29 +54,24 @@ public class Pioche1 extends LevelableItem {
 
     @Override
     public void onItemUse() {
-
-
-        for (ItemStack item : joueur.getInventory().getContents())
-            if (item != null && item.getType().toString().toLowerCase().contains("pickaxe")) {
-                item.setAmount(0);
-                break;
-            }
-
-
-        ItemStack pioche = new ItemStack(Material.IRON_PICKAXE);
-        ItemMeta meta = pioche.getItemMeta();
-
-        if (meta != null) meta.setDisplayName(coloredItemName);
+        ItemStack pioche;
+        ItemMeta meta;
+        for (ItemStack item : this.joueur.getInventory().getContents()) {
+            if (item == null || !item.getType().toString().toLowerCase().contains("pickaxe")) continue;
+            item.setAmount(0);
+            break;
+        }
+        if ((meta = (pioche = new ItemStack(Material.IRON_PICKAXE)).getItemMeta()) != null) {
+            meta.setDisplayName(coloredItemName);
+        }
         pioche.setItemMeta(meta);
-
         pioche.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
-
-        joueur.getInventory().addItem(pioche);
+        this.joueur.getInventory().addItem(new ItemStack[]{pioche});
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("upgrade_pickaxe1");
-
     }
 }
+

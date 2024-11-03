@@ -2,52 +2,44 @@ package fr.synchroneyes.mineral.Statistics.Class;
 
 import fr.synchroneyes.mineral.Statistics.Statistic;
 import fr.synchroneyes.mineral.Translation.Lang;
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MinerStat extends Statistic {
-
-    private Map<Player, Integer> playerInformation;
-
-    public MinerStat() {
-        this.playerInformation = new HashMap<>();
-    }
+    private Map<Player, Integer> playerInformation = new HashMap<Player, Integer>();
 
     @Override
     public void perform(Player p, Object target) {
-        if (!playerInformation.containsKey(p)) playerInformation.put(p, 0);
-
-        int nombreDeBlockCasse = playerInformation.get(p);
-        playerInformation.replace(p, nombreDeBlockCasse + 1);
-
+        if (!this.playerInformation.containsKey(p)) {
+            this.playerInformation.put(p, 0);
+        }
+        int nombreDeBlockCasse = this.playerInformation.get(p);
+        this.playerInformation.replace(p, nombreDeBlockCasse + 1);
     }
-
 
     @Override
     public Player getHighestPlayer() {
         int max = -1;
         Player maxPlayer = null;
-        for (Map.Entry<Player, Integer> infoJoueur : playerInformation.entrySet())
-            if (infoJoueur.getValue() > max) {
-                max = infoJoueur.getValue();
-                maxPlayer = infoJoueur.getKey();
-            }
+        for (Map.Entry<Player, Integer> infoJoueur : this.playerInformation.entrySet()) {
+            if (infoJoueur.getValue() <= max) continue;
+            max = infoJoueur.getValue();
+            maxPlayer = infoJoueur.getKey();
+        }
         return maxPlayer;
-
     }
 
     @Override
     public Player getLowestPlayer() {
         int max = Integer.MAX_VALUE;
         Player maxPlayer = null;
-        for (Map.Entry<Player, Integer> infoJoueur : playerInformation.entrySet())
-            if (infoJoueur.getValue() < max) {
-                max = infoJoueur.getValue();
-                maxPlayer = infoJoueur.getKey();
-            }
+        for (Map.Entry<Player, Integer> infoJoueur : this.playerInformation.entrySet()) {
+            if (infoJoueur.getValue() >= max) continue;
+            max = infoJoueur.getValue();
+            maxPlayer = infoJoueur.getKey();
+        }
         return maxPlayer;
     }
 
@@ -63,12 +55,12 @@ public class MinerStat extends Statistic {
 
     @Override
     public String getHighestItemSubTitle() {
-        return Lang.stats_miner_subtitle.toString().replace("%d", getHighestPlayerValue() + "");
+        return Lang.stats_miner_subtitle.toString().replace("%d", this.getHighestPlayerValue() + "");
     }
 
     @Override
     public String getLowestItemSubTitle() {
-        return Lang.stats_miner_subtitle.toString().replace("%d", getLowerPlayerValue() + "");
+        return Lang.stats_miner_subtitle.toString().replace("%d", this.getLowerPlayerValue() + "");
     }
 
     @Override
@@ -85,11 +77,11 @@ public class MinerStat extends Statistic {
     public int getHighestPlayerValue() {
         int max = -1;
         Player maxPlayer = null;
-        for (Map.Entry<Player, Integer> infoJoueur : playerInformation.entrySet())
-            if (infoJoueur.getValue() > max) {
-                max = infoJoueur.getValue();
-                maxPlayer = infoJoueur.getKey();
-            }
+        for (Map.Entry<Player, Integer> infoJoueur : this.playerInformation.entrySet()) {
+            if (infoJoueur.getValue() <= max) continue;
+            max = infoJoueur.getValue();
+            maxPlayer = infoJoueur.getKey();
+        }
         return max;
     }
 
@@ -97,11 +89,11 @@ public class MinerStat extends Statistic {
     public int getLowerPlayerValue() {
         int max = Integer.MAX_VALUE;
         Player maxPlayer = null;
-        for (Map.Entry<Player, Integer> infoJoueur : playerInformation.entrySet())
-            if (infoJoueur.getValue() < max) {
-                max = infoJoueur.getValue();
-                maxPlayer = infoJoueur.getKey();
-            }
+        for (Map.Entry<Player, Integer> infoJoueur : this.playerInformation.entrySet()) {
+            if (infoJoueur.getValue() >= max) continue;
+            max = infoJoueur.getValue();
+            maxPlayer = infoJoueur.getKey();
+        }
         return max;
     }
 
@@ -112,6 +104,7 @@ public class MinerStat extends Statistic {
 
     @Override
     public boolean isStatUsable() {
-        return (!playerInformation.isEmpty());
+        return !this.playerInformation.isEmpty();
     }
 }
+

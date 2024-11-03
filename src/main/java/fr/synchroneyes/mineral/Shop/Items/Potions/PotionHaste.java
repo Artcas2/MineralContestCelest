@@ -35,6 +35,5 @@ public class PotionHaste extends PotionItem {
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("haste_potion");
     }
-
-
 }
+

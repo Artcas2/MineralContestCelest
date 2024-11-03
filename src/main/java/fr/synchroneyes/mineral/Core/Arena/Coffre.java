@@ -8,9 +8,6 @@ import org.bukkit.block.Chest;
 public class Coffre {
     private Location position;
 
-    public Coffre() {
-    }
-
     public void setPosition(Location p) {
         this.position = p;
     }
@@ -22,10 +19,13 @@ public class Coffre {
     public void clear() {
         if (this.position != null) {
             Block b = this.position.getBlock();
-            if (b.getState() instanceof Chest) ((Chest) b.getState()).getInventory().clear();
-            if (!b.getType().equals(Material.AIR)) b.breakNaturally();
+            if (b.getState() instanceof Chest) {
+                ((Chest)b.getState()).getInventory().clear();
+            }
+            if (!b.getType().equals((Object)Material.AIR)) {
+                b.breakNaturally();
+            }
         }
     }
-
-
 }
+

@@ -14,51 +14,49 @@ import fr.synchroneyes.mineral.Utils.Log.GameLogger;
 import fr.synchroneyes.mineral.Utils.Log.Log;
 import fr.synchroneyes.mineral.Utils.Player.PlayerUtils;
 import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.LinkedList;
 import java.util.Locale;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.inventory.ItemStack;
 
 public class Equipe implements Comparable<Equipe> {
-    private LinkedList<Player> joueurs;
+    private LinkedList<Player> joueurs = new LinkedList();
     private String nomEquipe;
     private ChatColor couleur;
     private int score = 0;
     private int penalty = 0;
     private House maison;
-
     private Groupe groupe;
-
     private Game partie;
 
-
     public Equipe(String nom, ChatColor c, Groupe g, House maison) {
-        this.joueurs = new LinkedList<Player>();
         this.nomEquipe = nom;
         this.couleur = c;
         this.groupe = g;
         this.maison = maison;
-
-        this.partie = groupe.getGame();
+        this.partie = this.groupe.getGame();
     }
 
-
     public House getMaison() {
-        return maison;
+        return this.maison;
     }
 
     public Groupe getGroupe() {
-        return groupe;
+        return this.groupe;
     }
 
     public Game getPartie() {
-        return partie;
+        return this.partie;
     }
 
     public void clear() {
@@ -72,236 +70,181 @@ public class Equipe implements Comparable<Equipe> {
     }
 
     public void updateScore(Player JoueurAyantAjouteLesPoints) throws Exception {
-
+        MCPlayer mcPlayer;
+        ItemStack[] items;
         int score_gagne = 0;
-
-        // Variable permettant de vérifier si un minerai déposé doit faire perdre des points aux autres
         boolean hasNegativePointItemBeenAdded = false;
         int score_perdu_equipes = 0;
-
-
-        Block block_coffre = maison.getCoffreEquipeLocation().getBlock();
-        Chest openedChest = ((Chest) block_coffre.getState());
-
-        ItemStack[] items = openedChest.getInventory().getContents();
-        for (ItemStack item : items) {
-
-            if (item != null) {
-
-                int current_item_score = 0;
-
-                if (item.isSimilar(new ItemStack(Material.IRON_INGOT, 1))) {
-                    current_item_score = groupe.getParametresPartie().getCVAR("SCORE_IRON").getValeurNumerique();
-
-                    if (current_item_score >= 0) score_gagne += current_item_score * item.getAmount();
-                    else {
-                        hasNegativePointItemBeenAdded = true;
-                        score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
-                    }
-
+        Block block_coffre = this.maison.getCoffreEquipeLocation().getBlock();
+        Chest openedChest = (Chest)block_coffre.getState();
+        for (ItemStack item : items = openedChest.getInventory().getContents()) {
+            if (item == null) continue;
+            int current_item_score = 0;
+            if (item.isSimilar(new ItemStack(Material.IRON_INGOT, 1))) {
+                current_item_score = this.groupe.getParametresPartie().getCVAR("SCORE_IRON").getValeurNumerique();
+                if (current_item_score >= 0) {
                     score_gagne += current_item_score * item.getAmount();
-                } else if (item.isSimilar(new ItemStack(Material.GOLD_INGOT, 1))) {
-
-                    current_item_score = groupe.getParametresPartie().getCVAR("SCORE_GOLD").getValeurNumerique();
-
-                    if (current_item_score >= 0) score_gagne += current_item_score * item.getAmount();
-                    else {
-                        hasNegativePointItemBeenAdded = true;
-                        score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
-                    }
-
-                } else if (item.isSimilar(new ItemStack(Material.DIAMOND, 1))) {
-
-                    current_item_score = groupe.getParametresPartie().getCVAR("SCORE_DIAMOND").getValeurNumerique();
-                    if (current_item_score >= 0) score_gagne += current_item_score * item.getAmount();
-                    else {
-                        hasNegativePointItemBeenAdded = true;
-                        score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
-                    }
-
-                } else if (item.isSimilar(new ItemStack(Material.EMERALD, 1))) {
-
-                    current_item_score = groupe.getParametresPartie().getCVAR("SCORE_EMERALD").getValeurNumerique();
-
-                    if (current_item_score >= 0) score_gagne += current_item_score * item.getAmount();
-                    else {
-                        hasNegativePointItemBeenAdded = true;
-                        score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
-                    }
-
-                } else if (item.isSimilar(new ItemStack(Material.REDSTONE))) {
-
-                    current_item_score = groupe.getParametresPartie().getCVAR("SCORE_REDSTONE").getValeurNumerique();
-                    if (current_item_score >= 0) score_gagne += current_item_score * item.getAmount();
-                    else {
-                        hasNegativePointItemBeenAdded = true;
-                        score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
-                    }
-
                 } else {
-                    block_coffre.getWorld().dropItemNaturally(block_coffre.getLocation(), item);
+                    hasNegativePointItemBeenAdded = true;
+                    score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
                 }
+                score_gagne += current_item_score * item.getAmount();
+                continue;
             }
+            if (item.isSimilar(new ItemStack(Material.GOLD_INGOT, 1))) {
+                current_item_score = this.groupe.getParametresPartie().getCVAR("SCORE_GOLD").getValeurNumerique();
+                if (current_item_score >= 0) {
+                    score_gagne += current_item_score * item.getAmount();
+                    continue;
+                }
+                hasNegativePointItemBeenAdded = true;
+                score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
+                continue;
+            }
+            if (item.isSimilar(new ItemStack(Material.DIAMOND, 1))) {
+                current_item_score = this.groupe.getParametresPartie().getCVAR("SCORE_DIAMOND").getValeurNumerique();
+                if (current_item_score >= 0) {
+                    score_gagne += current_item_score * item.getAmount();
+                    continue;
+                }
+                hasNegativePointItemBeenAdded = true;
+                score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
+                continue;
+            }
+            if (item.isSimilar(new ItemStack(Material.EMERALD, 1))) {
+                current_item_score = this.groupe.getParametresPartie().getCVAR("SCORE_EMERALD").getValeurNumerique();
+                if (current_item_score >= 0) {
+                    score_gagne += current_item_score * item.getAmount();
+                    continue;
+                }
+                hasNegativePointItemBeenAdded = true;
+                score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
+                continue;
+            }
+            if (item.isSimilar(new ItemStack(Material.REDSTONE))) {
+                current_item_score = this.groupe.getParametresPartie().getCVAR("SCORE_REDSTONE").getValeurNumerique();
+                if (current_item_score >= 0) {
+                    score_gagne += current_item_score * item.getAmount();
+                    continue;
+                }
+                hasNegativePointItemBeenAdded = true;
+                score_perdu_equipes += Math.abs(current_item_score) * item.getAmount();
+                continue;
+            }
+            block_coffre.getWorld().dropItemNaturally(block_coffre.getLocation(), item);
         }
-
-
-        // On vide l'inventaire du coffre
         openedChest.getInventory().clear();
-
-
         boolean scoreWasUpdated = false;
-        if (score_gagne > 0) scoreWasUpdated = true;
-
-        MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(JoueurAyantAjouteLesPoints);
-        if(mcPlayer != null) {
+        if (score_gagne > 0) {
+            scoreWasUpdated = true;
+        }
+        if ((mcPlayer = mineralcontest.plugin.getMCPlayer(JoueurAyantAjouteLesPoints)) != null) {
             mcPlayer.addPlayerScore(score_gagne);
         }
-
-        groupe.getGame().getStatsManager().register(MeilleurJoueurStat.class, JoueurAyantAjouteLesPoints, score_gagne);
-
-
-        score_gagne += getScore();
-        setScore(score_gagne);
-
-        // Si le score gagné est différend du score, ça veut dire qu'on a déposé des blocs dans le coffre, on averti l'équipe
+        this.groupe.getGame().getStatsManager().register(MeilleurJoueurStat.class, JoueurAyantAjouteLesPoints, score_gagne);
+        this.setScore(score_gagne += this.getScore());
         if (scoreWasUpdated) {
-            for (Player online : joueurs) {
-                if(online != null) {
-                    online.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.team_score_now.toString(), this));
-                }
+            for (Player online : this.joueurs) {
+                if (online == null) continue;
+                online.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.team_score_now.toString(), this));
             }
         }
-
-
-
-
-        // Si on a déposé de la redstone
         if (hasNegativePointItemBeenAdded) {
-
-            if(mcPlayer != null) mcPlayer.addPlayerScorePenalityToOtherTeams(score_perdu_equipes);
-
-            // On enregistre le score perdu
-            groupe.getGame().getStatsManager().register(VilainJoueurStat.class, JoueurAyantAjouteLesPoints, score_perdu_equipes);
-
-            // On averti les autres joueurs qu'on leur a fait perdre des points
-            groupe.sendToEveryone(mineralcontest.prefixGlobal + this.getCouleur() + JoueurAyantAjouteLesPoints.getDisplayName() + ChatColor.WHITE + " a fait perdre " + ChatColor.RED + score_perdu_equipes + " points" + ChatColor.WHITE + " aux autres équipes!");
-
-            // On retire des points aux autres équipes!
-            for (House maison : partie.getHouses())
-                // Si ce n'est pas NOTRE équipe, on retire des points
-                if (maison.getTeam() != this)
-                    maison.getTeam().retirerPoints(score_perdu_equipes);
+            if (mcPlayer != null) {
+                mcPlayer.addPlayerScorePenalityToOtherTeams(score_perdu_equipes);
+            }
+            this.groupe.getGame().getStatsManager().register(VilainJoueurStat.class, JoueurAyantAjouteLesPoints, score_perdu_equipes);
+            this.groupe.sendToEveryone(mineralcontest.prefixGlobal + this.getCouleur() + JoueurAyantAjouteLesPoints.getDisplayName() + ChatColor.WHITE + " a fait perdre " + ChatColor.RED + score_perdu_equipes + " points" + ChatColor.WHITE + " aux autres \u00e9quipes!");
+            for (House maison : this.partie.getHouses()) {
+                if (maison.getTeam() == this) continue;
+                maison.getTeam().retirerPoints(score_perdu_equipes);
+            }
         }
-
-
     }
 
-    /**
-     * Permet de retirer des points à l'équipe
-     *
-     * @param score - le nombre de points à perdre
-     */
     public void retirerPoints(int score) {
         MCTeamScoreUpdated event = new MCTeamScoreUpdated(this.score, this.score - score, this);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-
-        if(event.isCancelled()) return;
-
+        Bukkit.getServer().getPluginManager().callEvent((Event)event);
+        if (event.isCancelled()) {
+            return;
+        }
         this.score -= score;
     }
 
     public void ajouterPoints(int score) {
         MCTeamScoreUpdated event = new MCTeamScoreUpdated(this.score, this.score + score, this);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-
-        if(event.isCancelled()) return;
-
+        Bukkit.getServer().getPluginManager().callEvent((Event)event);
+        if (event.isCancelled()) {
+            return;
+        }
         this.score += score;
     }
 
     public void sendMessage(String message, Player sender) {
         if (this.joueurs.contains(sender)) {
-            for (Player member : joueurs)
+            for (Player member : this.joueurs) {
                 member.sendMessage(mineralcontest.prefixTeamChat + sender.getDisplayName() + ": " + message);
-
+            }
         }
     }
 
     public void sendMessage(String message) {
-        for (Player member : joueurs)
+        for (Player member : this.joueurs) {
             member.sendMessage(message);
+        }
     }
 
     public int getScore() {
         return this.score - this.penalty;
     }
+
     public void setScore(int score) {
-
         MCTeamScoreUpdated event = new MCTeamScoreUpdated(this.score, score, this);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-
-        if(event.isCancelled()) return;
-
+        Bukkit.getServer().getPluginManager().callEvent((Event)event);
+        if (event.isCancelled()) {
+            return;
+        }
         this.score = score;
-        GameLogger.addLog(new Log("TeamChestScoreUpdated", "The team " + getNomEquipe() + " score got updated to " + score + "", "ChestEvent"));
+        GameLogger.addLog(new Log("TeamChestScoreUpdated", "The team " + this.getNomEquipe() + " score got updated to " + score + "", "ChestEvent"));
     }
 
-
     public boolean addPlayerToTeam(Player p, boolean teleportToBase) throws Exception {
-
-        MCPlayerJoinTeamEvent event = new MCPlayerJoinTeamEvent(mineralcontest.plugin.getMCPlayer(p), this );
-        Bukkit.getPluginManager().callEvent(event);
-        if(event.isCancelled()) return false;
-
+        MCPlayerJoinTeamEvent event = new MCPlayerJoinTeamEvent(mineralcontest.plugin.getMCPlayer(p), this);
+        Bukkit.getPluginManager().callEvent((Event)event);
+        if (event.isCancelled()) {
+            return false;
+        }
         Game partie = mineralcontest.getPlayerGame(p);
-
         if (partie != null) {
             Equipe team = mineralcontest.getPlayerGame(p).getPlayerTeam(p);
-            if (team != null) team.removePlayer(p);
-            if (mineralcontest.getPlayerGame(p).isReferee(p)) mineralcontest.getPlayerGame(p).removeReferee(p, false);
+            if (team != null) {
+                team.removePlayer(p);
+            }
+            if (mineralcontest.getPlayerGame(p).isReferee(p)) {
+                mineralcontest.getPlayerGame(p).removeReferee(p, false);
+            }
         }
-
-
         this.joueurs.add(p);
-
         p.setGameMode(GameMode.SURVIVAL);
-
-
-        if (PlayerUtils.getPlayerItemsCountInInventory(p) == 0 && mineralcontest.getPlayerGame(p).isGameInitialized) {
-            //PlayerBaseItem.givePlayerItems(p, PlayerBaseItem.onFirstSpawnName);
-            if (teleportToBase)
-                PlayerUtils.teleportPlayer(p, mineralcontest.getPlayerGroupe(p).getMonde(), mineralcontest.getPlayerGame(p).getPlayerHouse(p).getHouseLocation());
+        if (PlayerUtils.getPlayerItemsCountInInventory(p) == 0 && mineralcontest.getPlayerGame((Player)p).isGameInitialized && teleportToBase) {
+            PlayerUtils.teleportPlayer(p, mineralcontest.getPlayerGroupe(p).getMonde(), mineralcontest.getPlayerGame(p).getPlayerHouse(p).getHouseLocation());
         }
-
         p.sendMessage(mineralcontest.prefix + Lang.translate(Lang.team_welcome.toString(), this));
-
-
-        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.translate(Lang.team_player_joined.toString(), this, p), groupe);
-
-        // On set son équipe
+        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.translate(Lang.team_player_joined.toString(), this, p), this.groupe);
         mineralcontest.plugin.getMCPlayer(p).setEquipe(this);
-
         mineralcontest.plugin.getMCPlayer(p).setVisible();
-
-
-
-
-
-
         return true;
-
     }
 
     public boolean removePlayer(Player p) {
-        if (isPlayerInTeam(p)) {
-
+        if (this.isPlayerInTeam(p)) {
             MCPlayerLeaveTeamEvent event = new MCPlayerLeaveTeamEvent(mineralcontest.plugin.getMCPlayer(p), this);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-            if(event.isCancelled()) return false;
-
+            Bukkit.getServer().getPluginManager().callEvent((Event)event);
+            if (event.isCancelled()) {
+                return false;
+            }
             this.joueurs.remove(p);
             p.sendMessage(mineralcontest.prefix + Lang.translate(Lang.team_kicked.toString(), this));
-
             return true;
         }
         return false;
@@ -317,8 +260,8 @@ public class Equipe implements Comparable<Equipe> {
 
     public String toString() {
         String joueurs = "Team " + this.getCouleur() + this.nomEquipe + ChatColor.WHITE + ": ";
-        for (int i = 0; i < this.joueurs.size(); i++) {
-            joueurs += this.joueurs.get(i).getDisplayName() + " ";
+        for (int i = 0; i < this.joueurs.size(); ++i) {
+            joueurs = joueurs + this.joueurs.get(i).getDisplayName() + " ";
         }
         return joueurs;
     }
@@ -327,94 +270,81 @@ public class Equipe implements Comparable<Equipe> {
         return this.nomEquipe;
     }
 
-
     public ChatColor getCouleur() {
         return this.couleur;
     }
 
     public Color toColor() {
-        if (this.nomEquipe.equals(Lang.red_team.toString())) return Color.RED;
-        if (this.nomEquipe.equals(Lang.yellow_team.toString())) return Color.YELLOW;
-        if (this.nomEquipe.equals(Lang.blue_team.toString())) return Color.BLUE;
-
+        if (this.nomEquipe.equals(Lang.red_team.toString())) {
+            return Color.RED;
+        }
+        if (this.nomEquipe.equals(Lang.yellow_team.toString())) {
+            return Color.YELLOW;
+        }
+        if (this.nomEquipe.equals(Lang.blue_team.toString())) {
+            return Color.BLUE;
+        }
         return Color.WHITE;
     }
 
     @Override
     public int compareTo(Equipe equipe) {
-        return (int) (this.getScore() - equipe.getScore());
+        return this.getScore() - equipe.getScore();
     }
 
-
     public Color getBukkitColor() {
-        switch (getCouleur()) {
-            case YELLOW:
-            case GOLD:
+        switch (this.getCouleur()) {
+            case YELLOW: 
+            case GOLD: {
                 return Color.YELLOW;
-            case GREEN:
-            case DARK_GREEN:
+            }
+            case GREEN: 
+            case DARK_GREEN: {
                 return Color.GREEN;
-            case BLACK: return Color.BLACK;
-            case GRAY:
-            case DARK_GRAY:
+            }
+            case BLACK: {
+                return Color.BLACK;
+            }
+            case GRAY: 
+            case DARK_GRAY: {
                 return Color.GRAY;
-            case BLUE:
-            case DARK_BLUE:
+            }
+            case BLUE: 
+            case DARK_BLUE: {
                 return Color.BLUE;
-            case AQUA:
-            case DARK_AQUA:
+            }
+            case AQUA: 
+            case DARK_AQUA: {
                 return Color.AQUA;
-            case DARK_RED:
-            case RED:
+            }
+            case DARK_RED: 
+            case RED: {
                 return Color.RED;
-            case DARK_PURPLE:
-
-            case LIGHT_PURPLE:
+            }
+            case DARK_PURPLE: 
+            case LIGHT_PURPLE: {
                 return Color.PURPLE;
-
-            default: return Color.WHITE;
-
+            }
         }
+        return Color.WHITE;
     }
 
     public String getFormattedScore() {
-        // ON calcule le nouveau score
         String nouveau_score = "";
-
-        // On ajoute un espace pour les milliers etc
         DecimalFormatSymbols customSymbols = DecimalFormatSymbols.getInstance(Locale.US);
         customSymbols.setGroupingSeparator(' ');
-        nouveau_score = new DecimalFormat("#,###;-#,###", customSymbols).format(score);
-
-        // Si le score est positif, le score est vert
-        // sinon il est rouge
-        if(score >= 0){
-            nouveau_score = ChatColor.GREEN + nouveau_score;
-        } else {
-            nouveau_score = ChatColor.RED + nouveau_score;
-        }
-
+        nouveau_score = new DecimalFormat("#,###;-#,###", customSymbols).format(this.score);
+        nouveau_score = this.score >= 0 ? ChatColor.GREEN + nouveau_score : ChatColor.RED + nouveau_score;
         return nouveau_score;
     }
 
-
     public String getFormattedScore(int score) {
-        // ON calcule le nouveau score
         String nouveau_score = "";
-
-        // On ajoute un espace pour les milliers etc
         DecimalFormatSymbols customSymbols = DecimalFormatSymbols.getInstance(Locale.US);
         customSymbols.setGroupingSeparator(' ');
         nouveau_score = new DecimalFormat("#,###;-#,###", customSymbols).format(score);
-
-        // Si le score est positif, le score est vert
-        // sinon il est rouge
-        if(score >= 0){
-            nouveau_score = ChatColor.GREEN + nouveau_score;
-        } else {
-            nouveau_score = ChatColor.RED + nouveau_score;
-        }
-
+        nouveau_score = score >= 0 ? ChatColor.GREEN + nouveau_score : ChatColor.RED + nouveau_score;
         return nouveau_score;
     }
 }
+

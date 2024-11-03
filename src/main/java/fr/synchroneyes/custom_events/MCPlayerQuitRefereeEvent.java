@@ -1,13 +1,10 @@
 package fr.synchroneyes.custom_events;
 
+import fr.synchroneyes.custom_events.MCEvent;
 import fr.synchroneyes.mineral.Core.MCPlayer;
 import org.bukkit.event.Cancellable;
 
-/**
- * Event appelé lorsqu'un joueur n'est plus arbitre
- */
 public class MCPlayerQuitRefereeEvent extends MCEvent implements Cancellable {
-
     private boolean isCancelled;
     private MCPlayer player;
 
@@ -16,16 +13,15 @@ public class MCPlayerQuitRefereeEvent extends MCEvent implements Cancellable {
     }
 
     public MCPlayer getPlayer() {
-        return player;
+        return this.player;
     }
 
-    @Override
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 
-    @Override
     public void setCancelled(boolean b) {
-        isCancelled = b;
+        this.isCancelled = b;
     }
 }
+

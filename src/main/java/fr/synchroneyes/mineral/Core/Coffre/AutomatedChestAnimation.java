@@ -1,359 +1,208 @@
 package fr.synchroneyes.mineral.Core.Coffre;
 
 import fr.synchroneyes.custom_events.MCPlayerOpenChestEvent;
+import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
 import fr.synchroneyes.mineral.mineralcontest;
-import lombok.Getter;
-import org.bukkit.*;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.bukkit.Bukkit;
+import org.bukkit.Instrument;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Note;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 public abstract class AutomatedChestAnimation {
-
-    // Variable pour controler si le coffre a été ouvert ou non
     protected boolean isChestContentGenerated = false;
-
-    // variable pour enregistrer le joueur ouvrant le coffre
     protected Player openingPlayer = null;
-
-    @Getter
-    // Variable pour enregistrer le joueur ouvrant le coffre
     protected Player playerOpenedChest = null;
-
-    // Variable contenant le contenu de l'inventaire du coffre
     protected Inventory inventaireCoffre;
-
-    // Variable contenant la position du coffre
     private Location chestLocation;
-
     protected boolean isAnimationOver = false;
-
     private int tailleInventaire;
-
     private BukkitTask tacheOuverture = null;
-
-
-    // Permet de vérifier si le coffre est apparu ou non
     private boolean isChestSpawned = false;
-
-    // Utile afin de mettre à jour le coffre dans la liste
     private AutomatedChestManager manager;
 
-
-    /**
-     * Constructeur, permet de donner en paramètre le nom de l'inventaire ainsi que la taille
-     *
-     * @param tailleInventaire - Taille de l'inventaire, doit-être un multiple de 7
-     */
     public AutomatedChestAnimation(int tailleInventaire, AutomatedChestManager manager) {
         this.tailleInventaire = tailleInventaire;
-        this.inventaireCoffre = Bukkit.createInventory(null, tailleInventaire, getOpeningChestTitle());
+        this.inventaireCoffre = Bukkit.createInventory(null, (int)tailleInventaire, (String)this.getOpeningChestTitle());
         this.manager = manager;
     }
 
-
     public void setChestLocation(Location chestLocation) {
-
-        Location loc = new Location(chestLocation.getWorld(), chestLocation.getBlockX(), chestLocation.getBlockY(), chestLocation.getBlockZ());
-
-        this.chestLocation = loc;
-        updateManager();
+        Location loc;
+        this.chestLocation = loc = new Location(chestLocation.getWorld(), (double)chestLocation.getBlockX(), (double)chestLocation.getBlockY(), (double)chestLocation.getBlockZ());
+        this.updateManager();
     }
 
-    /**
-     * Permet de supprimer un coffre
-     */
     public void remove() {
         this.chestLocation.getBlock().setType(Material.AIR);
-        closeInventory();
+        this.closeInventory();
     }
 
     public Player getOpeningPlayer() {
-        return openingPlayer;
+        return this.openingPlayer;
     }
 
     public Inventory getInventory() {
-        return inventaireCoffre;
+        return this.inventaireCoffre;
     }
 
     public boolean isBeingOpened() {
-        return openingPlayer != null;
+        return this.openingPlayer != null;
     }
 
     public boolean isAnimationOver() {
-        return isAnimationOver;
+        return this.isAnimationOver;
     }
-
 
     public abstract int playNoteOnTick();
 
     public abstract int playNoteOnEnd();
 
-    /**
-     * Fonction appelée avant de faire apparaitre le coffre
-     */
     public abstract void actionToPerformBeforeSpawn();
 
-    /**
-     * Fonction appelée lorsque le coffre a été ouvert
-     */
     public abstract void actionToPerformAfterAnimationOver();
 
-    /**
-     * Fonction permettant d'afficher ou non les items d'attente
-     *
-     * @return
-     */
     public abstract boolean displayWaitingItems();
 
-    /**
-     * Récupère le nom du coffre lors de l'ouverture
-     *
-     * @return
-     */
     public abstract String getOpeningChestTitle();
 
-
-    /**
-     * Récupère le nom du coffre lorsqu'il est ouvert
-     *
-     * @return
-     */
     public abstract String getOpenedChestTitle();
 
-
     public Location getLocation() {
-        return chestLocation;
+        return this.chestLocation;
     }
 
-    /**
-     * Le WaitingItemMaterial est l'item qui sera affiché en tout premier
-     *
-     * @return ItemStack
-     */
     public abstract ItemStack getWaitingItemMaterial();
 
-    /**
-     * Le UsedItemMaterial est l'item qui sera affiché lorsque l'animation sera en cours
-     *
-     * @return ItemStack
-     */
     public abstract ItemStack getUsedItemMaterial();
 
-    /**
-     * Récupère la séquence d'ouverture du coffre (pour l'animation, les numéros de slots, ex: 27;26;25;24;10;11;12 ...)
-     *
-     * @return Liste ordonnée
-     */
     public abstract LinkedList<Integer> getOpeningSequence();
 
-    /**
-     * Retourne le type de coffre à ouvrir
-     *
-     * @return
-     */
     public abstract Material getChestMaterial();
 
-    /**
-     * Retourne le temps en seconde d'ouverture d'un coffre
-     *
-     * @return
-     */
     public abstract int getAnimationTime();
 
-    /**
-     * Retourne si oui ou non le coffre peut être ouvert pas plusieurs joueurs
-     *
-     * @return
-     */
     public abstract boolean canChestBeOpenedByMultiplePlayers();
 
-    /**
-     * Fonction permettant de générer le contenu du coffre après ouverture
-     *
-     * @return
-     */
     public abstract List<ItemStack> genererContenuCoffre();
 
-
-    /**
-     * Fonction permettant de définir si oui ou non l'utilisateur doit récuperer le contenu du coffre automatiquement après l'ouverture
-     *
-     * @return
-     */
     public abstract boolean automaticallyGiveItemsToPlayer();
 
-
-    /**
-     * Fonction permettant d'executer l'animation
-     */
     public void performAnimation() {
-
-        // Si l'animation est terminée, on s'arrête tout de suite
-        if (isAnimationOver) return;
-
-        // On clear l'inventaire
+        if (this.isAnimationOver) {
+            return;
+        }
         this.inventaireCoffre.clear();
-
-        // On récupère la séquence et le nombre d'item
-        int nombreItemSequence = getOpeningSequence().size();
-
-        // On récupère le temps d'execution
-        double tempsExecution = getAnimationTime();
-
-        // Variable permettant de mettre en pause l'animation avant de passer au prochain tour de boucle
-        // On multiplie le tempsExecution afin d'avoir un résultat en millisecondes
-        double tempsPauseEntreChaqueTour = (tempsExecution * 1000) / nombreItemSequence;
-
-        double intervalTimer = (tempsPauseEntreChaqueTour * 20) / 1000;
-
-        // On commence par remplir l'inventaire avec les items en attente
-        // Seulement si l'option est activée
-        if (displayWaitingItems())
-            for (int slot : getOpeningSequence())
-                inventaireCoffre.setItem(slot, getWaitingItemMaterial());
-
-
-        // Variable pour stocker la séquence actuelle afin de savoir quelle bloc il faut changer
-        AtomicInteger indexSequence = new AtomicInteger(0);
-
-        AutomatedChestAnimation instance = this;
-
-        // On lance la boucle d'animation
-        tacheOuverture = new BukkitRunnable() {
-            @Override
-            public void run() {
-
-                // Dans le cas où le joueur qui a ouvert le coffre s'est fait attaqué ou a fermer le coffre
-                if (openingPlayer == null) {
-                    this.cancel();
-                    return;
-                }
-
-                if (indexSequence.get() > nombreItemSequence - 1) {
-                    // On joue le son
-                    if(playNoteOnEnd() > 0) openingPlayer.playNote(openingPlayer.getLocation(), Instrument.PIANO, new Note(playNoteOnEnd()));
-
-                    inventaireCoffre.clear();
-                    inventaireCoffre = Bukkit.createInventory(null, tailleInventaire, getOpenedChestTitle());
-
-                    // On rempli l'inventaire du coffre
-                    List<ItemStack> itemsGenere = genererContenuCoffre();
-                    for (ItemStack item : itemsGenere)
-                        inventaireCoffre.addItem(item);
-
-                    // On marque le coffre comme ayant été généré
-                    isChestContentGenerated = true;
-
-                    playerOpenedChest = openingPlayer;
-
-                    // On dit que l'animation du coffre est terminée
-                    isAnimationOver = true;
-
-                    openInventoryToPlayer(openingPlayer);
-
-                    actionToPerformAfterAnimationOver();
-
-                    // On lance l'event d'ouverture de coffre
-                    MCPlayerOpenChestEvent playerOpenChestEvent = new MCPlayerOpenChestEvent(instance, playerOpenedChest);
-                    Bukkit.getPluginManager().callEvent(playerOpenChestEvent);
-
-
-
-                    // On ferme le coffre en question
-                    closeInventory();
-
-
-
-
-
-                    this.cancel();
-
-
-                    return;
-                }
-
-                // On remplace l'index actuel par le bloc "utilisé"
-                int slot = getOpeningSequence().get(indexSequence.get());
-                inventaireCoffre.setItem(slot, getUsedItemMaterial());
-
-                // On incrémente le compteur
-                indexSequence.incrementAndGet();
-
-                // On joue le son
-                if(playNoteOnTick() > 0) openingPlayer.playNote(openingPlayer.getLocation(), Instrument.PIANO, new Note(playNoteOnTick()));
-
-
+        final int nombreItemSequence = this.getOpeningSequence().size();
+        double tempsExecution = this.getAnimationTime();
+        double tempsPauseEntreChaqueTour = tempsExecution * 1000.0 / (double)nombreItemSequence;
+        double intervalTimer = tempsPauseEntreChaqueTour * 20.0 / 1000.0;
+        if (this.displayWaitingItems()) {
+            Iterator iterator = this.getOpeningSequence().iterator();
+            while (iterator.hasNext()) {
+                int slot = (Integer)iterator.next();
+                this.inventaireCoffre.setItem(slot, this.getWaitingItemMaterial());
             }
-        }.runTaskTimer(mineralcontest.plugin, 0, (long) intervalTimer);
+        }
+        final AtomicInteger indexSequence = new AtomicInteger(0);
+        final AutomatedChestAnimation instance = this;
+        this.tacheOuverture = new BukkitRunnable(){
 
+            public void run() {
+                if (AutomatedChestAnimation.this.openingPlayer == null) {
+                    this.cancel();
+                    return;
+                }
+                if (indexSequence.get() > nombreItemSequence - 1) {
+                    if (AutomatedChestAnimation.this.playNoteOnEnd() > 0) {
+                        AutomatedChestAnimation.this.openingPlayer.playNote(AutomatedChestAnimation.this.openingPlayer.getLocation(), Instrument.PIANO, new Note(AutomatedChestAnimation.this.playNoteOnEnd()));
+                    }
+                    AutomatedChestAnimation.this.inventaireCoffre.clear();
+                    AutomatedChestAnimation.this.inventaireCoffre = Bukkit.createInventory(null, (int)AutomatedChestAnimation.this.tailleInventaire, (String)AutomatedChestAnimation.this.getOpenedChestTitle());
+                    List<ItemStack> itemsGenere = AutomatedChestAnimation.this.genererContenuCoffre();
+                    for (ItemStack item : itemsGenere) {
+                        AutomatedChestAnimation.this.inventaireCoffre.addItem(new ItemStack[]{item});
+                    }
+                    AutomatedChestAnimation.this.isChestContentGenerated = true;
+                    AutomatedChestAnimation.this.playerOpenedChest = AutomatedChestAnimation.this.openingPlayer;
+                    AutomatedChestAnimation.this.isAnimationOver = true;
+                    AutomatedChestAnimation.this.openInventoryToPlayer(AutomatedChestAnimation.this.openingPlayer);
+                    AutomatedChestAnimation.this.actionToPerformAfterAnimationOver();
+                    MCPlayerOpenChestEvent playerOpenChestEvent = new MCPlayerOpenChestEvent(instance, AutomatedChestAnimation.this.playerOpenedChest);
+                    Bukkit.getPluginManager().callEvent((Event)playerOpenChestEvent);
+                    AutomatedChestAnimation.this.closeInventory();
+                    this.cancel();
+                    return;
+                }
+                int slot = AutomatedChestAnimation.this.getOpeningSequence().get(indexSequence.get());
+                AutomatedChestAnimation.this.inventaireCoffre.setItem(slot, AutomatedChestAnimation.this.getUsedItemMaterial());
+                indexSequence.incrementAndGet();
+                if (AutomatedChestAnimation.this.playNoteOnTick() > 0) {
+                    AutomatedChestAnimation.this.openingPlayer.playNote(AutomatedChestAnimation.this.openingPlayer.getLocation(), Instrument.PIANO, new Note(AutomatedChestAnimation.this.playNoteOnTick()));
+                }
+            }
+        }.runTaskTimer((Plugin)mineralcontest.plugin, 0L, (long)intervalTimer);
     }
 
-
-    /**
-     * Fonction permettant de mettre le joueur ouvrant le coffre
-     *
-     * @param p
-     */
     public void setOpeningPlayer(Player p) {
         this.openingPlayer = p;
-        performAnimation();
-        p.openInventory(inventaireCoffre);
+        this.performAnimation();
+        p.openInventory(this.inventaireCoffre);
     }
 
     public void closeInventory() {
         this.openingPlayer = null;
-        if (tacheOuverture != null) tacheOuverture.cancel();
+        if (this.tacheOuverture != null) {
+            this.tacheOuverture.cancel();
+        }
     }
 
     public void spawn() {
-
-
-
-        actionToPerformBeforeSpawn();
-
-        isChestSpawned = true;
-        isAnimationOver = false;
-        isChestContentGenerated = false;
-        inventaireCoffre = Bukkit.createInventory(null, tailleInventaire, getOpeningChestTitle());
-        getLocation().getBlock().setType(getChestMaterial());
+        this.actionToPerformBeforeSpawn();
+        this.isChestSpawned = true;
+        this.isAnimationOver = false;
+        this.isChestContentGenerated = false;
+        this.inventaireCoffre = Bukkit.createInventory(null, (int)this.tailleInventaire, (String)this.getOpeningChestTitle());
+        this.getLocation().getBlock().setType(this.getChestMaterial());
     }
 
-    /**
-     * Fonction appelée lorsqu'il faut donner le contenu d'un inventaire à un joueur
-     *
-     * @param p
-     */
     public void openInventoryToPlayer(Player p) {
-        // On vérifie si le contenu du coffre  a été généré
-        if (isChestContentGenerated) {
-            if (automaticallyGiveItemsToPlayer()) {
-
-                for (ItemStack item : inventaireCoffre.getContents())
-                    if (item != null) p.getInventory().addItem(item);
-
-                inventaireCoffre.clear();
-                // On supprime le bloc
-                getLocation().getBlock().setType(Material.AIR);
-                openingPlayer.closeInventory();
-
+        if (this.isChestContentGenerated) {
+            if (this.automaticallyGiveItemsToPlayer()) {
+                for (ItemStack item : this.inventaireCoffre.getContents()) {
+                    if (item == null) continue;
+                    p.getInventory().addItem(new ItemStack[]{item});
+                }
+                this.inventaireCoffre.clear();
+                this.getLocation().getBlock().setType(Material.AIR);
+                this.openingPlayer.closeInventory();
             } else {
-                p.openInventory(inventaireCoffre);
+                p.openInventory(this.inventaireCoffre);
             }
         }
     }
 
     public boolean isChestSpawned() {
-        return isChestSpawned;
+        return this.isChestSpawned;
     }
 
     public void updateManager() {
         this.manager.replace(this.getClass(), this);
     }
+
+    public Player getPlayerOpenedChest() {
+        return this.playerOpenedChest;
+    }
 }
+

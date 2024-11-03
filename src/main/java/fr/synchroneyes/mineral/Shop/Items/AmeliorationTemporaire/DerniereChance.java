@@ -42,36 +42,28 @@ public class DerniereChance extends ConsumableItem {
     @Override
     public void onItemUse() {
         Location playerDeathLocation = this.joueur.getLocation();
-
         int rayon_block_tnt = 1;
         int temps_avant_explosion = 3;
-
-        int defaultX, defaultY, defaultZ;
-        defaultX = playerDeathLocation.getBlockX();
-        defaultY = playerDeathLocation.getBlockY();
-        defaultZ = playerDeathLocation.getBlockZ();
-
-
-        for (int x = defaultX - rayon_block_tnt; x < defaultX + rayon_block_tnt; ++x)
+        int defaultX = playerDeathLocation.getBlockX();
+        int defaultY = playerDeathLocation.getBlockY();
+        int defaultZ = playerDeathLocation.getBlockZ();
+        for (int x = defaultX - rayon_block_tnt; x < defaultX + rayon_block_tnt; ++x) {
             for (int z = defaultZ - rayon_block_tnt; z < defaultZ + rayon_block_tnt; ++z) {
-                TNTPrimed primed = playerDeathLocation.getWorld().spawn(new Location(playerDeathLocation.getWorld(), x, defaultY, z), TNTPrimed.class);
+                TNTPrimed primed = (TNTPrimed)playerDeathLocation.getWorld().spawn(new Location(playerDeathLocation.getWorld(), (double)x, (double)defaultY, (double)z), TNTPrimed.class);
                 primed.setFuseTicks(20 * temps_avant_explosion);
             }
-
-
-        joueur.sendMessage(mineralcontest.prefixPrive + Lang.shopitem_martyr_onitemuse.toString());
-
+        }
+        this.joueur.sendMessage(mineralcontest.prefixPrive + Lang.shopitem_martyr_onitemuse.toString());
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("self_martyr");
-
     }
-
 
     @Override
     public boolean isEnabledOnDeathByAnotherPlayer() {
         return true;
     }
 }
+

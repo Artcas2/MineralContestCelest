@@ -8,37 +8,26 @@ import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
 import fr.synchroneyes.mineral.Statistics.Class.ArenaChestStat;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.mineralcontest;
+import java.util.LinkedList;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.LinkedList;
-import java.util.List;
-
-/**
- * Classe gérant le coffre d'arène
- */
 public class CoffreArene extends AutomatedChestAnimation {
-
-    // Variable utilisée pour pouvoir récupérer le groupe du coffre
-
-    // Variable utilisée pour pouvoir générer le contenu du coffre
     private ArenaChestContentGenerator arenaChestContentGenerator;
-
-    // Variable utilisée pour pouvoir gérer l'arène
     private Arene arene;
 
-
     public CoffreArene(AutomatedChestManager manager, Arene arene) {
-        super(3 * 9, manager);
+        super(27, manager);
         this.arenaChestContentGenerator = new ArenaChestContentGenerator(manager.getGroupe());
         this.arene = arene;
-
-        if (arene != null) updateManager();
+        if (arene != null) {
+            this.updateManager();
+        }
     }
 
-
     public ArenaChestContentGenerator getArenaChestContentGenerator() {
-        return arenaChestContentGenerator;
+        return this.arenaChestContentGenerator;
     }
 
     @Override
@@ -54,24 +43,18 @@ public class CoffreArene extends AutomatedChestAnimation {
     @Override
     public void actionToPerformBeforeSpawn() {
         this.arene.getCoffre().remove();
-
         this.arene.setChestSpawned(true);
         this.arene.generateTimeBetweenChest();
         this.arene.enableTeleport();
         this.arene.automaticallyTeleportTeams();
-
     }
 
     @Override
     public void actionToPerformAfterAnimationOver() {
         this.arene.setChestSpawned(false);
         this.arene.disableTeleport();
-        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.arena_chest_opened.toString(), arene.groupe);
-        arene.groupe.getGame().getStatsManager().register(ArenaChestStat.class, openingPlayer, null);
-
-
-        // Register chest opened
-
+        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.arena_chest_opened.toString(), this.arene.groupe);
+        this.arene.groupe.getGame().getStatsManager().register(ArenaChestStat.class, this.openingPlayer, null);
     }
 
     @Override
@@ -111,7 +94,7 @@ public class CoffreArene extends AutomatedChestAnimation {
 
     @Override
     public int getAnimationTime() {
-        return arene.groupe.getParametresPartie().getCVAR("chest_opening_cooldown").getValeurNumerique();
+        return this.arene.groupe.getParametresPartie().getCVAR("chest_opening_cooldown").getValeurNumerique();
     }
 
     @Override
@@ -121,11 +104,12 @@ public class CoffreArene extends AutomatedChestAnimation {
 
     @Override
     public List<ItemStack> genererContenuCoffre() {
-        LinkedList<ItemStack> items = new LinkedList<>();
-
+        LinkedList<ItemStack> items = new LinkedList<ItemStack>();
         try {
-            for (ItemStack item : arenaChestContentGenerator.generateInventory().getContents())
-                if (item != null) items.add(item);
+            for (ItemStack item : this.arenaChestContentGenerator.generateInventory().getContents()) {
+                if (item == null) continue;
+                items.add(item);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -137,3 +121,4 @@ public class CoffreArene extends AutomatedChestAnimation {
         return true;
     }
 }
+

@@ -9,8 +9,6 @@ import fr.synchroneyes.mineral.mineralcontest;
 import org.bukkit.Material;
 
 public class ActiverAnnonceProchainCoffre extends ConsumableItem {
-
-
     @Override
     public String getNomItem() {
         return Lang.shopitem_enable_next_arenachest_announce_title.toString();
@@ -44,19 +42,19 @@ public class ActiverAnnonceProchainCoffre extends ConsumableItem {
     @Override
     public void onItemUse() {
         Groupe playerGroup = mineralcontest.getPlayerGroupe(this.joueur);
-
-        if (playerGroup == null) return;
-
+        if (playerGroup == null) {
+            return;
+        }
         Equipe playerTeam = playerGroup.getPlayerTeam(this.joueur);
-        if (playerTeam == null) return;
-
+        if (playerTeam == null) {
+            return;
+        }
         playerGroup.getGame().getArene().addTeamToNotify(playerTeam);
     }
 
     @Override
     public int getPrice() {
         return ShopManager.getBonusPriceFromName("team_enable_chest_announcement");
-
     }
-
 }
+

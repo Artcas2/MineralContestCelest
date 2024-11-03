@@ -13,7 +13,18 @@ import fr.synchroneyes.mineral.Teams.Equipe;
 import fr.synchroneyes.mineral.Utils.MassBlockSpawner;
 import fr.synchroneyes.mineral.Utils.Player.PlayerUtils;
 import fr.synchroneyes.mineral.mineralcontest;
-import org.bukkit.*;
+import fr.synchroneyes.special_events.halloween2024.game_events.HalloweenEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,12 +32,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-
-import java.io.File;
-import java.util.*;
+import org.bukkit.plugin.Plugin;
 
 public class FightArenaEvent extends HalloweenEvent implements Listener {
-
     private Location arenaLocation;
     private List<Player> alivePlayers;
     private Boolean enabled = false;
@@ -41,16 +49,14 @@ public class FightArenaEvent extends HalloweenEvent implements Listener {
     public FightArenaEvent(Game partie) {
         super(partie);
         this.arenaLocation = partie.getArene().getCoffre().getLocation().clone();
-        this.arenaLocation.setX(18000);
-        this.arenaLocation.setY(222);
-        this.arenaLocation.setZ(18000);
-
-        this.alivePlayers = new LinkedList<>();
-        this.teamSpawnLocation = new HashMap<>();
-        this.blocks = new ArrayList<>();
+        this.arenaLocation.setX(18000.0);
+        this.arenaLocation.setY(222.0);
+        this.arenaLocation.setZ(18000.0);
+        this.alivePlayers = new LinkedList<Player>();
+        this.teamSpawnLocation = new HashMap();
+        this.blocks = new ArrayList<Block>();
         this.blockSpawner = new MassBlockSpawner();
-
-        Bukkit.getPluginManager().registerEvents(this, mineralcontest.plugin);
+        Bukkit.getPluginManager().registerEvents((Listener)this, (Plugin)mineralcontest.plugin);
     }
 
     @Override
@@ -60,112 +66,85 @@ public class FightArenaEvent extends HalloweenEvent implements Listener {
 
     @Override
     public void executionContent() {
-        if(!this.blockSpawnEnded) return;
-        for(Player joueur : this.alivePlayers) {
-
+        if (!this.blockSpawnEnded) {
+            return;
+        }
+        for (Player joueur : this.alivePlayers) {
             PlayerUtils.respawnPlayer(joueur);
-
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
             Equipe equipe = mcPlayer.getEquipe();
             Location spawnLocation = this.teamSpawnLocation.get(equipe);
             joueur.teleport(spawnLocation);
         }
-
-        for(Player p : this.getPartie().groupe.getPlayers()) {
-            if(getPartie().isReferee(p)) {
-                p.teleport(arenaLocation);
-            }
+        for (Player p : this.getPartie().groupe.getPlayers()) {
+            if (!this.getPartie().isReferee(p)) continue;
+            p.teleport(this.arenaLocation);
         }
     }
 
     @Override
     public void beforeExecute() {
-
-        for(Player p : this.getPartie().groupe.getPlayers()) {
-            if(getPartie().isReferee(p)) continue;
-            alivePlayers.add(p);
+        for (Player player : this.getPartie().groupe.getPlayers()) {
+            if (this.getPartie().isReferee(player)) continue;
+            this.alivePlayers.add(player);
         }
-
-
-        for(Player player : alivePlayers) {
-            player.sendMessage(mineralcontest.prefixPrive + "[???] J'ai appuyé sur un bouton, ça risque de ne pas être bon... Des lags sont à prévoir pendant un instant...");
-
+        for (Player player : this.alivePlayers) {
+            player.sendMessage(mineralcontest.prefixPrive + "[???] J'ai appuy\u00e9 sur un bouton, \u00e7a risque de ne pas \u00eatre bon... Des lags sont \u00e0 pr\u00e9voir pendant un instant...");
         }
-
-        List<Equipe> teams = new ArrayList<>();
-        for(Player joueur : this.alivePlayers) {
+        ArrayList<Equipe> teams = new ArrayList<Equipe>();
+        for (Player joueur : this.alivePlayers) {
             Equipe team = this.getPartie().getPlayerTeam(joueur);
-            if(!teams.contains(team)) teams.add(team);
+            if (teams.contains(team)) continue;
+            teams.add(team);
         }
-
-        // Spawn arena
-
         World world = this.getPartie().groupe.getMonde();
         int xLocation = 18000;
         int yLocation = 250;
         int zLocation = 18000;
-
         File arenaContent = new File(mineralcontest.plugin.getDataFolder(), FileList.Halloween_Arena.toString());
-        YamlConfiguration arenaContentConfig = YamlConfiguration.loadConfiguration(arenaContent);
+        YamlConfiguration arenaContentConfig = YamlConfiguration.loadConfiguration((File)arenaContent);
         ConfigurationSection blocksSection = arenaContentConfig.getConfigurationSection("blocks");
-        for(String blockId : blocksSection.getKeys(false)) {
-            //arenaContentConfig.get("blocks." + blockId + ".x").toString());
+        for (String blockId : blocksSection.getKeys(false)) {
             int x = Integer.parseInt(arenaContentConfig.get("blocks." + blockId + ".x").toString());
             int y = Integer.parseInt(arenaContentConfig.get("blocks." + blockId + ".y").toString());
             int z = Integer.parseInt(arenaContentConfig.get("blocks." + blockId + ".z").toString());
             String itemType = arenaContentConfig.get("blocks." + blockId + ".type").toString();
-
-            Material itemTypeMaterial = Material.valueOf(itemType);
-            this.blockSpawner.addBlock(new Location(world, xLocation + x, yLocation + y, zLocation + z), itemTypeMaterial);
-
-            // If material is YELLOW WOOL, team spawn location
-            if(itemTypeMaterial == Material.YELLOW_WOOL) {
-                if(teams.isEmpty()) continue;
-                Equipe _team = teams.get(0);
+            Material itemTypeMaterial = Material.valueOf((String)itemType);
+            this.blockSpawner.addBlock(new Location(world, (double)(xLocation + x), (double)(yLocation + y), (double)(zLocation + z)), itemTypeMaterial);
+            if (itemTypeMaterial == Material.YELLOW_WOOL) {
+                if (teams.isEmpty()) continue;
+                Equipe _team = (Equipe)teams.get(0);
                 teams.remove(_team);
-                this.teamSpawnLocation.put(_team, new Location(world, xLocation + x, yLocation + y+1, zLocation + z));
+                this.teamSpawnLocation.put(_team, new Location(world, (double)(xLocation + x), (double)(yLocation + y + 1), (double)(zLocation + z)));
             }
-
-            if(itemTypeMaterial == Material.REDSTONE_BLOCK) {
-                this.arenaCenter = new Location(world, xLocation + x, yLocation + y+2, zLocation + z);
-            }
-
-
-
-
+            if (itemTypeMaterial != Material.REDSTONE_BLOCK) continue;
+            this.arenaCenter = new Location(world, (double)(xLocation + x), (double)(yLocation + y + 2), (double)(zLocation + z));
         }
-
-
         this.blockSpawner.setBlockPerBatch(500);
         this.blockSpawner.spawnBlocks();
-
     }
 
     @Override
     public void afterExecute() {
-        // Spawn Boss
-
-        if(!this.blockSpawnEnded) return;
-
-        Bukkit.getScheduler().runTaskLater(mineralcontest.plugin, () -> {
+        if (!this.blockSpawnEnded) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater((Plugin)mineralcontest.plugin, () -> {
             AngryZombie boss = new AngryZombie();
             this.boss = boss;
-            getPartie().getBossManager().spawnNewBoss(this.arenaCenter, boss);
-        }, 20 * 4);
-
+            this.getPartie().getBossManager().spawnNewBoss(this.arenaCenter, boss);
+        }, 80L);
         this.isEnabled = true;
-
-
     }
 
     @Override
     public String getEventTitle() {
-        return "Arène maudite...";
+        return "Ar\u00e8ne maudite...";
     }
 
     @Override
     public String getEventDescription() {
-        return "Vous avez été envoyé dans l'arène maudite, combattez pour votre survie!";
+        return "Vous avez \u00e9t\u00e9 envoy\u00e9 dans l'ar\u00e8ne maudite, combattez pour votre survie!";
     }
 
     @Override
@@ -178,117 +157,98 @@ public class FightArenaEvent extends HalloweenEvent implements Listener {
         return true;
     }
 
-
     @EventHandler
-    public void onPlayerDeath(PlayerDeathByPlayerEvent event){
-        if(!this.isEnabled) return;
-
+    public void onPlayerDeath(PlayerDeathByPlayerEvent event) {
+        if (!this.isEnabled) {
+            return;
+        }
         this.alivePlayers.remove(event.getPlayerDead());
-
-        if(this.getTeamLeftCount() == 0) {
-            punishPlayers();
+        if (this.getTeamLeftCount() == 0) {
+            this.punishPlayers();
         }
-
-        if(this.getTeamLeftCount() == 1 && !this.boss.isAlive()) {
-            // Il ne reste plus qu'une équipe, on téléporte les joueurs en vie dans leur base et on leur offre 10 redstone, 4 fer, 3 or, 2 diamants et 1 emeraude
-            sendRewardToPlayers();
+        if (this.getTeamLeftCount() == 1 && !this.boss.isAlive()) {
+            this.sendRewardToPlayers();
         }
-
-
     }
 
     private int getTeamLeftCount() {
         int teamCount = 0;
-        Set<String> teams = new HashSet<>();
-        for(Player joueur : this.alivePlayers) {
+        HashSet<String> teams = new HashSet<String>();
+        for (Player joueur : this.alivePlayers) {
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
-            if(!teams.contains(mcPlayer.getEquipe().getNomEquipe())) {
-                teams.add(mcPlayer.getEquipe().getNomEquipe());
-                teamCount++;
-            }
+            if (teams.contains(mcPlayer.getEquipe().getNomEquipe())) continue;
+            teams.add(mcPlayer.getEquipe().getNomEquipe());
+            ++teamCount;
         }
-
         return teamCount;
     }
 
     @EventHandler
-    public void onBossDeath(MCBossKilledByPlayerEvent event){
-        if(!this.isEnabled) return;
-        if(getTeamLeftCount() == 1) {
-            if(this.boss.equals(event.getBoss())) {
-                sendRewardToPlayers();
-            }
+    public void onBossDeath(MCBossKilledByPlayerEvent event) {
+        if (!this.isEnabled) {
+            return;
+        }
+        if (this.getTeamLeftCount() == 1 && this.boss.equals(event.getBoss())) {
+            this.sendRewardToPlayers();
         }
     }
 
     private void sendRewardToPlayers() {
-        for(Player joueur : this.alivePlayers) {
+        for (Player joueur : this.alivePlayers) {
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
             Equipe equipe = mcPlayer.getEquipe();
             joueur.teleport(equipe.getMaison().getHouseLocation());
-
-            joueur.sendMessage(mineralcontest.prefixPrive + "Vous avez survécu à l'arène maudite! Vous avez été téléporté dans votre base. Vous avez également reçu une récompense.");
-
-            joueur.getInventory().addItem(new ItemStack(Material.REDSTONE, 10));
-            joueur.getInventory().addItem(new ItemStack(Material.IRON_INGOT, 3));
-            joueur.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 2));
-            joueur.getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
-
+            joueur.sendMessage(mineralcontest.prefixPrive + "Vous avez surv\u00e9cu \u00e0 l'ar\u00e8ne maudite! Vous avez \u00e9t\u00e9 t\u00e9l\u00e9port\u00e9 dans votre base. Vous avez \u00e9galement re\u00e7u une r\u00e9compense.");
+            joueur.getInventory().addItem(new ItemStack[]{new ItemStack(Material.REDSTONE, 10)});
+            joueur.getInventory().addItem(new ItemStack[]{new ItemStack(Material.IRON_INGOT, 3)});
+            joueur.getInventory().addItem(new ItemStack[]{new ItemStack(Material.GOLD_INGOT, 2)});
+            joueur.getInventory().addItem(new ItemStack[]{new ItemStack(Material.DIAMOND, 1)});
         }
-
-        cleanArena();
+        this.cleanArena();
         this.boss.remove();
-
     }
 
     private void punishPlayers() {
-        for(Player joueur : this.getPartie().groupe.getPlayers()) {
-            if(getPartie().isReferee(joueur)) continue;
-
+        for (Player joueur : this.getPartie().groupe.getPlayers()) {
+            if (this.getPartie().isReferee(joueur)) continue;
             MCPlayer mcPlayer = mineralcontest.plugin.getMCPlayer(joueur);
             Equipe equipe = mcPlayer.getEquipe();
             equipe.retirerPoints(100);
-
-            joueur.sendMessage(mineralcontest.prefixPrive + "[???] J'ai triomphé. Vous n'êtes qu'une bande de nullard sans talent.");
-            joueur.sendMessage(mineralcontest.prefixPrive + "Vous avez fait perdre " + ChatColor.RED + " -100 points" + ChatColor.RESET + " à votre équipe.");
+            joueur.sendMessage(mineralcontest.prefixPrive + "[???] J'ai triomph\u00e9. Vous n'\u00eates qu'une bande de nullard sans talent.");
+            joueur.sendMessage(mineralcontest.prefixPrive + "Vous avez fait perdre " + ChatColor.RED + " -100 points" + ChatColor.RESET + " \u00e0 votre \u00e9quipe.");
         }
-
-        cleanArena();
+        this.cleanArena();
         this.boss.remove();
-
     }
 
     private void cleanArena() {
         this.blockSpawner.removeSpawnedBlocks();
-
         this.isEnabled = false;
-
-        for(Player p: getPartie().groupe.getPlayers()) {
+        for (Player p : this.getPartie().groupe.getPlayers()) {
             this.boss.removePlayerBossBar(p);
-
-            if(getPartie().isReferee(p)) {
-                p.teleport(getPartie().getArene().getCoffre().getLocation());
-            }
+            if (!this.getPartie().isReferee(p)) continue;
+            p.teleport(this.getPartie().getArene().getCoffre().getLocation());
         }
     }
 
     @EventHandler
-    public void onPlayerRespawn(MCPlayerRespawnEvent event){
-        if(!this.enabled) return;
-        if(this.alivePlayers.contains(event.getJoueur())) {
+    public void onPlayerRespawn(MCPlayerRespawnEvent event) {
+        if (!this.enabled.booleanValue()) {
+            return;
+        }
+        if (this.alivePlayers.contains(event.getJoueur())) {
             event.getJoueur().teleport(this.teamSpawnLocation.get(mineralcontest.plugin.getMCPlayer(event.getJoueur()).getEquipe()));
         }
     }
 
     @EventHandler
-    public void onBlockSpawnEnd(MCMassBlockSpawnEndedEvent event){
-        if(event.getSpawner().equals(this.blockSpawner)) {
+    public void onBlockSpawnEnd(MCMassBlockSpawnEndedEvent event) {
+        if (event.getSpawner().equals(this.blockSpawner)) {
             this.blockSpawnEnded = true;
-            sendEventNotification();
-            executionContent();
-            afterExecute();
+            this.sendEventNotification();
+            this.executionContent();
+            this.afterExecute();
         }
-
     }
-
 }
+

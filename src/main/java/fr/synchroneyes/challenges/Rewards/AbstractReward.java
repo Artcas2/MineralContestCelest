@@ -6,26 +6,15 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public abstract class AbstractReward {
-
     private Player joueur;
-
     private MCPlayer mcPlayer;
 
-
-    /**
-     * Méthode permettant de donner une récompense à un joueur
-     */
     protected abstract void giveToPlayer();
 
-
-    /**
-     * Méthode permettant de récuperer le texte à afficher à un joueur quand il reçoit sa récompense
-     * @return
-     */
     public abstract String getRewardText();
 
     public Player getJoueur() {
-        return joueur;
+        return this.joueur;
     }
 
     public void setJoueur(Player joueur) {
@@ -34,15 +23,12 @@ public abstract class AbstractReward {
     }
 
     public MCPlayer getMcPlayer() {
-        return mcPlayer;
+        return this.mcPlayer;
     }
 
-    /**
-     * Méthode permettant de donner la récompense à un joueur
-     */
     public void rewardPlayer() {
-        // On informe le joueur qu'il a reçu une récompense
-        getJoueur().sendMessage(mineralcontest.prefixPrive + ChatColor.GREEN + getRewardText());
-        giveToPlayer();
+        this.getJoueur().sendMessage(mineralcontest.prefixPrive + ChatColor.GREEN + this.getRewardText());
+        this.giveToPlayer();
     }
 }
+

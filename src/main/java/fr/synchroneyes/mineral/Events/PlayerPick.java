@@ -9,17 +9,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 public class PlayerPick implements Listener {
-
     @EventHandler
     public void onPlayerPickEvent(PlayerPickupItemEvent event) {
         Player p = event.getPlayer();
         if (mineralcontest.isInAMineralContestWorld(p)) {
             Game partie = mineralcontest.getPlayerGame(p);
-            if (partie == null) return;
+            if (partie == null) {
+                return;
+            }
             if (PlayerUtils.isPlayerInDeathZone(p)) {
                 event.setCancelled(true);
             }
         }
     }
-
 }
+

@@ -9,17 +9,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class PauseGameCommand implements CommandExecutor {
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
         if (!(sender instanceof Player)) {
             sender.sendMessage(Lang.error_command_can_only_be_used_in_game.toString());
             return false;
         }
-
-        Player player = (Player) sender;
-
-
+        Player player = (Player)sender;
         if (mineralcontest.isInAMineralContestWorld(player)) {
             Game partie = mineralcontest.getPlayerGame(player);
             if (partie == null) {
@@ -38,8 +33,7 @@ public class PauseGameCommand implements CommandExecutor {
                 }
             }
         }
-
-
         return false;
     }
 }
+
