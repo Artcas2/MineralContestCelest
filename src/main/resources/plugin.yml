@@ -1,12 +1,12 @@
-name: MineralContest
+name: MineralContestCelest
 version: ${project.version}
 main: fr.synchroneyes.mineral.mineralcontest
 api-version: 1.13
 prefix: MINERALC
 load: STARTUP
-authors: [Groupe6]
-description: Plugin gamemode Mineral Contest
-website: http://mineral.synchroneyes.fr
+authors: ["Synchroneyes", "Artcas2"]
+description: Fork de MineralContest, un plugin mineral contest sur Spigot, inspiré du plugin de Squeezie
+website: https://github.com/Artcas2/MineralContestPlus
 commands:
   start:
     description: Démarre une partie
