@@ -104,7 +104,7 @@ public abstract class Category {
                 }
                 int score = playerTeam.getScore();
                 if (score < ((ShopItem)entry.getKey()).getPrice()) {
-                    joueur.sendMessage(mineralcontest.prefixErreur + Lang.shopitem_not_enought_credit.toString());
+                    joueur.sendMessage(mineralcontest.prefixErreur + Lang.shopitem_not_enough_credit.toString());
                     return;
                 }
                 if (!((ShopItem)entry.getKey()).isBonusCompatibleWithKits() && playerGroup.getKitManager().isKitsEnabled()) {
@@ -122,7 +122,7 @@ public abstract class Category {
                         e.printStackTrace();
                     }
                 }
-                joueur.sendMessage(mineralcontest.prefixErreur + Lang.shopitem_not_enought_credit.toString());
+                joueur.sendMessage(mineralcontest.prefixErreur + Lang.shopitem_not_enough_credit.toString());
             }
             return;
         }

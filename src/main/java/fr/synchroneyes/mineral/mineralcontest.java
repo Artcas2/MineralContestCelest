@@ -113,7 +113,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public final class mineralcontest extends JavaPlugin {
     public static boolean debug = false;
     public static boolean communityVersion = false;
-    public static String prefix = "[MineralContest]";
+    public static String prefix = "[MineralContestCelest]";
     public static String prefixErreur;
     public static String prefixGlobal;
     public static String prefixPrive;

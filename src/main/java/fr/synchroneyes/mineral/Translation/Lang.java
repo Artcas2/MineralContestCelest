@@ -41,8 +41,8 @@ public enum Lang {
     team_chest_not_defined("chest_not_defined", "Le coffre de l'\u00e9quipe %coloredTeamName% n'a pas encore \u00e9t\u00e9 d\u00e9fini"),
     team_house_location_not_added("team_house_location_not_added", "Le spawn de l'\u00e9quipe %coloredTeamName% n'a pas \u00e9t\u00e9 ajout\u00e9"),
     team_house_location_added("team_house_location_added", "Le spawn de l'\u00e9quipe %coloredTeamName% a \u00e9t\u00e9 ajout\u00e9"),
-    team_got_penality("team_got_penality", "L'\u00e9quipe %coloredTeamName% poss\u00e8de %penality% points de p\u00e9nalit\u00e9"),
-    team_got_penality_reseted("team_got_penality_reseted", "L'\u00e9quipe %coloredTeamName% n'a plus de p\u00e9nalit\u00e9"),
+    team_got_penalty("team_got_penalty", "L'\u00e9quipe %coloredTeamName% poss\u00e8de %penalty% points de p\u00e9nalit\u00e9"),
+    team_got_penalty_reset("team_got_penalty", "L'\u00e9quipe %coloredTeamName% n'a plus de p\u00e9nalit\u00e9"),
     cant_teleport_player_without_team("cant_teleport_player_without_team", "Impossible de t\u00e9l\u00e9porter un joueur sans \u00e9quipe"),
     vote_map("vote_map", "Voter pour la carte: %map%"),
     currently_no_vote("currently_no_vote", "Personne n'a vot\u00e9"),
@@ -228,8 +228,8 @@ public enum Lang {
     referee_item_enable_disable_chicken_wave_title("referee_item_enable_disable_chicken_wave_title", "Activer/D\u00e9sactiver poulets"),
     referee_item_enable_disable_chicken_wave_description("referee_item_enable_disable_chicken_wave_description", "Activer ou d\u00e9sactiver les vagues de poulets"),
     referee_item_start_chicken_wave_title("referee_item_start_chicken_wave_title", "D\u00e9marrer les vagues de poulets"),
-    chiken_wave_now_enabled("chiken_wave_now_enabled", "Les vagues de poulets sont d\u00e9sormais activ\u00e9"),
-    chiken_wave_now_disabled("chiken_wave_now_disabled", "Les vagues de poulets sont d\u00e9sormais d\u00e9sactiv\u00e9"),
+    chicken_wave_now_enabled("chicken_wave_now_enabled", "Les vagues de poulets sont d\u00e9sormais activ\u00e9"),
+    chicken_wave_now_disabled("chicken_wave_now_disabled", "Les vagues de poulets sont d\u00e9sormais d\u00e9sactiv\u00e9"),
     chicken_wave_error_disabled("chicken_wave_error_disabled", "Les vagues de poulets sont d\u00e9sactiv\u00e9."),
     chicken_wave_spawned("chicken_wave_spawned", "Des poulets sont apparu dans l'ar\u00e8ne !"),
     referee_item_inventory_stopgame_title("referee_item_inventory_stopgame_title", "Arr\u00eater la partie"),
@@ -333,7 +333,7 @@ public enum Lang {
     shopitem_auto_arena_teleport_title("shopitem_auto_arena_teleport_title", "Auto /arene"),
     shopitem_auto_arena_teleport_desc1("shopitem_auto_arena_teleport_desc1", "Ce bonus permet de t\u00e9l\u00e9porter toute l'\u00e9quipe \u00e0 l'ar\u00e8ne"),
     shopitem_auto_arena_teleport_desc2("shopitem_auto_arena_teleport_desc2", "Fonctionne pour le prochain coffre"),
-    personnal_category_title("personnal_category_title", "Bonus personnel"),
+    personal_category_title("personal_category_title", "Bonus personnel"),
     shopitem_temp_max_health_title("shopitem_temp_max_health_title", "Sant\u00e9 suppl\u00e9mentaire"),
     shopitem_temp_max_health_desc("shopitem_temp_max_health_desc", "Permet d'ajouter 3 coeurs jusqu'\u00e0 votre mort"),
     shopitem_martyr_title("shopitem_martyr_title", "Derni\u00e8re chance"),
@@ -350,7 +350,7 @@ public enum Lang {
     shopitem_pickaxelvl3_title("shopitem_pickaxelvl3_title", "Pioche III"),
     shopitem_pickaxelvl3_desc("shopitem_pickaxelvl3_desc", "Obtenez une pioche en diamant avec Fortune I et Efficacit\u00e9 II"),
     shopitem_bonus_required("shopitem_bonus_required", "Vous devez d'abord acheter le bonus: %bonus"),
-    shopitem_not_enought_credit("shopitem_not_enought_credit", "Vous n'avez pas assez de points"),
+    shopitem_not_enough_credit("shopitem_not_enough_credit", "Vous n'avez pas assez de points"),
     shopitem_player_purchased("shopitem_player_purchased", "Le joueur %p a achet\u00e9 le bonus %bonus"),
     shopitem_bonus_already_purchased("shopitem_bonus_already_purchased", "Vous avez d\u00e9j\u00e0 ce bonus"),
     shopitem_npc_title("shopitem_npc_title", "Boutique"),
@@ -500,8 +500,8 @@ public enum Lang {
         if (string.contains("%coloredTeamName%")) {
             string = string.replace("%coloredTeamName%", team.getCouleur() + team.getNomEquipe() + ChatColor.WHITE);
         }
-        if (string.contains("%penality%")) {
-            string = string.replace("%penality%", team.getPenalty() + "");
+        if (string.contains("%penalty%")) {
+            string = string.replace("%penalty%", team.getPenalty() + "");
         }
         if (string.contains("%teamScore%")) {
             string = string.replace("%teamScore%", team.getPenalty() != 0 ? "" + team.getScore() + " (%red%" + team.getPenalty() + team_penalty.toString() + ")" : team.getScore() + " point(s)");

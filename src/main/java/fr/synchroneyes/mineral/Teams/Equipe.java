@@ -151,7 +151,7 @@ public class Equipe implements Comparable<Equipe> {
         }
         if (hasNegativePointItemBeenAdded) {
             if (mcPlayer != null) {
-                mcPlayer.addPlayerScorePenalityToOtherTeams(score_perdu_equipes);
+                mcPlayer.addPlayerScorePenaltyToOtherTeams(score_perdu_equipes);
             }
             this.groupe.getGame().getStatsManager().register(VilainJoueurStat.class, JoueurAyantAjouteLesPoints, score_perdu_equipes);
             this.groupe.sendToEveryone(mineralcontest.prefixGlobal + this.getCouleur() + JoueurAyantAjouteLesPoints.getDisplayName() + ChatColor.WHITE + " a fait perdre " + ChatColor.RED + score_perdu_equipes + " points" + ChatColor.WHITE + " aux autres \u00e9quipes!");

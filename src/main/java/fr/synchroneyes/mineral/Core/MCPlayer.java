@@ -2,7 +2,6 @@ package fr.synchroneyes.mineral.Core;
 
 import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mineral.Core.Game.Game;
-import fr.synchroneyes.mineral.Core.House;
 import fr.synchroneyes.mineral.Kits.KitAbstract;
 import fr.synchroneyes.mineral.Teams.Equipe;
 import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
@@ -141,7 +140,7 @@ public class MCPlayer {
         this.score_brought += score;
     }
 
-    public void addPlayerScorePenalityToOtherTeams(int score) {
+    public void addPlayerScorePenaltyToOtherTeams(int score) {
         this.score_lost += score;
     }
 

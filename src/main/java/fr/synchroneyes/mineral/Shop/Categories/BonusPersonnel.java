@@ -12,7 +12,7 @@ public class BonusPersonnel extends Category {
 
     @Override
     public String getNomCategorie() {
-        return Lang.personnal_category_title.toString();
+        return Lang.personal_category_title.toString();
     }
 
     @Override

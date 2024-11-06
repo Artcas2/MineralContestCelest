@@ -22,9 +22,9 @@ public class EnableDisableChickenItem extends RefereeItemTemplate {
         boolean chickenEnabled = groupe.getGame().getArene().chickenWaves.isEnabled();
         groupe.getGame().getArene().chickenWaves.setEnabled(!chickenEnabled);
         if (chickenEnabled) {
-            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_disabled.toString());
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chicken_wave_now_disabled.toString());
         } else {
-            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chiken_wave_now_enabled.toString());
+            joueur.sendMessage(mineralcontest.prefixPrive + Lang.chicken_wave_now_enabled.toString());
         }
     }
 
