@@ -3,7 +3,6 @@ package fr.synchroneyes.mineral.Translation;
 import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.Teams.Equipe;
-import fr.synchroneyes.mineral.Translation.Language;
 import fr.synchroneyes.mineral.Utils.Log.GameLogger;
 import fr.synchroneyes.mineral.Utils.Log.Log;
 import fr.synchroneyes.mineral.Utils.TimeConverter;
@@ -19,7 +18,7 @@ import org.bukkit.entity.Player;
 
 public enum Lang {
     title("title", "%white%[%gold%Mineral%blue%Contest%white%]"),
-    cvar_diamond_score("cvar_diamond_score", "Le score du diamand est maintenant de"),
+    cvar_diamond_score("cvar_diamond_score", "Le score du diamant est maintenant de"),
     cvar_iron_score("cvar_iron_score", "Le score du fer est maintenant de "),
     cvar_emerald_score("cvar_emerald_score", "Le score de l'\u00e9meraude est maintenant de "),
     cvar_gold_score("cvar_gold_score", "Le score de l'or est maintenant de "),
@@ -31,7 +30,7 @@ public enum Lang {
     group("group", "[Groupe]"),
     error_when_resume("error_when_resume", "Impossible de reprendre la partie, elle n'est pas en pause ou une \u00e9quipe n'est pas pleine"),
     game_already_started("game_already_started", "La partie a d\u00e9j\u00e0 commenc\u00e9 !"),
-    not_enought_player_connected("not_enought_player_connected", "Il n'y a pas assez de joueurs connect\u00e9"),
+    not_enough_player_connected("not_enough_player_connected", "Il n'y a pas assez de joueurs connect\u00e9"),
     must_be_in_team("must_be_in_team", "Vous devez \u00eatre dans une \u00e9quipe"),
     arena_not_defined("arena_not_defined", "L'ar\u00e8ne n'est pas d\u00e9fini"),
     game_not_started("game_not_started", "La partie n'a pas encore commenc\u00e9"),
