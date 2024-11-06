@@ -12,7 +12,7 @@ import org.json.JSONObject;
 public class Urls {
     public static boolean isWebsiteDown = false;
     public static String API_URL_WORKSHOP_LIST = "";
-    public static String API_URL_VERSIONS = "";
+    public static String API_URL_VERSIONS = "https://artcas2.github.io/mineralcontestcelest/versions.json";
     public static String API_URL_MESSAGES = "";
     public static String WEBSITE_URL = "https://api.mc.monvoisin-kevin.fr";
     public static String GET_ALL_URL_ROUTE = "/index.json";
@@ -36,10 +36,10 @@ public class Urls {
             if (displayInConsole) {
                 logger.info(prefixURL + "API_URL_WORKSHOP_LIST => " + API_URL_WORKSHOP_LIST);
             }
-            API_URL_VERSIONS = WEBSITE_URL + jsonResponse.getString("api_files_list");
+            /*API_URL_VERSIONS = WEBSITE_URL + jsonResponse.getString("api_files_list");
             if (displayInConsole) {
                 logger.info(prefixURL + "API_URL_VERSIONS => " + API_URL_VERSIONS);
-            }
+            }*/
             API_URL_MESSAGES = WEBSITE_URL + jsonResponse.getString("api_messages_list");
             if (displayInConsole) {
                 logger.info(prefixURL + "API_URL_MESSAGES => " + API_URL_MESSAGES);

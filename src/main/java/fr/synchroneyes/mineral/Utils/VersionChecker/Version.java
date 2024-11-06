@@ -61,8 +61,7 @@ public class Version {
             response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             String entityContents = EntityUtils.toString(entity);
-            JSONObject files = new JSONObject(entityContents);
-            JSONObject versions = files.getJSONObject("plugins");
+            JSONObject versions = new JSONObject(entityContents);
             ArrayList<String> available_versions = new ArrayList<String>(versions.keySet());
             available_versions.sort((v1, v2) -> {
                 String[] parts1 = v1.split("\\.");
@@ -81,9 +80,10 @@ public class Version {
             if (Version.isCurrentVersionLast(latestVersion)) {
                 Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.GREEN + " Plugin is up-to-date! Current Version: " + currentVersion + " - Latest Version: " + latestVersion);
             } else {
-                Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.RED + " A new update is available, plugin will now auto-update to version " + latestVersion);
-                isUpdating = true;
-                Version.DownloadNewVersion(versions.getJSONObject(latestVersion).getString("file_url"), versions.getJSONObject(latestVersion).getString("file_name"), versions.getJSONObject(latestVersion).getString("file_size"), latestVersion);
+                Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.RED + " A new update is available, please update to version " + latestVersion);
+                Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + versions.getJSONObject(latestVersion).getString("file_url"));
+                //isUpdating = true;
+                //Version.DownloadNewVersion(versions.getJSONObject(latestVersion).getString("file_url"), versions.getJSONObject(latestVersion).getString("file_name"), versions.getJSONObject(latestVersion).getString("file_size"), latestVersion);
             }
         } catch (Exception e) {
             e.printStackTrace();
