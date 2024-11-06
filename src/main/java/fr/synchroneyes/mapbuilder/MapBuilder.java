@@ -117,7 +117,7 @@ public class MapBuilder {
     }
 
     private void printToConsole(String text) {
-        String prefix = "[MINERALC] [CUSTOM-MAPS] ";
+        String prefix = "[MineralContestCelest] [CUSTOM-MAPS] ";
         Bukkit.getLogger().info(prefix + text);
     }
 

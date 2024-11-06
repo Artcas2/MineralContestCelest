@@ -284,7 +284,7 @@ public class WorldDownloader {
     }
 
     protected void printToConsole(String text) {
-        String prefix = "[MINERALC] [WORLD-DOWNLOADER] ";
+        String prefix = "[MineralContestCelest] [WORLD-DOWNLOADER] ";
         Bukkit.getLogger().info(prefix + text);
     }
 

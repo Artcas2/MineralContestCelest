@@ -420,7 +420,7 @@ public enum Lang {
 
     public static void loadLang(String lang) {
         mineralcontest plugin = mineralcontest.plugin;
-        Bukkit.getLogger().info("[MINERALC] Loading " + lang + " language");
+        Bukkit.getLogger().info("[MineralContestCelest] Loading " + lang + " language");
         File langFile = new File(plugin.getDataFolder() + File.separator + langDataFolderName, lang + ".yml");
         if (!langFile.exists()) {
             Bukkit.getLogger().severe(lang + ".yml lang file doesnt exists or could not be loaded.");
@@ -435,7 +435,7 @@ public enum Lang {
         Lang.setFile(conf);
         try {
             conf.save(langFile);
-            Bukkit.getLogger().info("[MINERALC] Loaded " + lang + " language");
+            Bukkit.getLogger().info("[MineralContestCelest] Loaded " + lang + " language");
             GameLogger.addLog(new Log("loadLang", lang + " loaded", "plugin_lang_loaded"));
             mineralcontest.prefix = title.toString() + ChatColor.WHITE;
             mineralcontest.prefixErreur = title.toString() + ChatColor.RED + error.toString() + ChatColor.WHITE + " ";

@@ -2,7 +2,7 @@ name: MineralContestCelest
 version: ${project.version}
 main: fr.synchroneyes.mineral.mineralcontest
 api-version: 1.13
-prefix: MINERALC
+prefix: MineralContestCelest
 load: STARTUP
 authors: ["Synchroneyes", "Artcas2"]
 description: Fork de MineralContest, un plugin mineral contest sur Spigot, inspiré du plugin de Squeezie

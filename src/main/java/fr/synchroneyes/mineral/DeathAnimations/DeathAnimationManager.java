@@ -33,7 +33,7 @@ public class DeathAnimationManager implements Listener {
     private File fichier_data;
 
     public DeathAnimationManager() {
-        Bukkit.getLogger().info(mineralcontest.prefix + "Enabling death animation manager");
+        Bukkit.getLogger().info("[MineralContestCelest] Enabling death animation manager");
         this.liste_animations = new LinkedList<DeathAnimation>();
         this.animation_par_joueur = new HashMap();
         this.initAnimations();
