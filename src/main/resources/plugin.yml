@@ -4,118 +4,81 @@ main: fr.synchroneyes.mineral.mineralcontest
 api-version: 1.13
 prefix: MineralContestCelest
 load: STARTUP
-authors: ["Synchroneyes", "Artcas2"]
+authors:
+  - Synchroneyes
+  - Artcas2
 description: Fork de MineralContest, un plugin mineral contest sur Spigot, inspiré du plugin de Squeezie
 website: https://github.com/Artcas2/MineralContestPlus
 commands:
   start:
     description: Démarre une partie
     use: /start
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   pause:
     description: Met une partie en pause
     use: /pause
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   resume:
     description: Reprend une partie
     use: /resume
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   stopGame:
     description: Arrête une partie
     use: /stopGame
-    permission-message: you do not have the permission
-    permission:
-
-
   switch:
     description: Change l'équipe d'un joueur
     use: /switch <player> <jaune|rouge|bleu>
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   allow:
     description: Autorise la connexion d'un joueur
     use: /allow <playername>
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   leaveteam:
     description: Quitter son équipe
     use: /leaveteam
-    permission:
-    permission-message: you do not have the permission
-
-
-
   t:
     description: Permet d'envoyer un message à sa team
     use: /t <message>
-    permission:
-    permission-message: you do not have the permission
-
-
   team:
     description: Permet d'envoyer un message à sa team
     use: /team <message>
-    permission:
-    permission-message: you do not have the permission
-
   ready:
     description: Permet de se mettre prêt
     use: /ready
-    permission:
-    permission-message: you do not have the permission
-
-
   arene:
-    description: Permet de se teleporter vers l'arene
+    description: Permet de se téléporter vers l'arène
     use: /arene
-    permission:
-    permission-message: you do not have the permission
-
   arena:
     description: Teleport to the arena
     use: /arena
-    permission:
-    permission-message: you do not have the permission
-
   join:
     description: Permet de rejoindre une équipe
     use: /join <rouge | jaune | bleu>
-    permission:
-    permission-message: you do not have the permission
-
   spawnchest:
     description: Spawn le coffre d'arène
     use: /spawnchest
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   setup:
     description: Spawn le coffre d'arène
     use: /setup
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   saveworld:
     description: Spawn le coffre d'arène
     use: /saveworld
-    permission: admin
-    permission-message: you do not have the permission
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   valider:
     description: Spawn le coffre d'arène
     use: /valider
-    permission: admin
-    permission-message: you do not have the permission
-
-
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   permissions:
-    admin:
-      description: allow all plugin command
+    mineralcontestcelest.admin:
+      description: Autorise toutes les commandes du plugin
