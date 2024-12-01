@@ -1,8 +1,6 @@
 package fr.synchroneyes.groups.Core;
 
 import fr.synchroneyes.custom_events.MCPlayerReconnectEvent;
-import fr.synchroneyes.groups.Core.MapVote;
-import fr.synchroneyes.groups.Core.WorldLoader;
 import fr.synchroneyes.groups.Utils.Etats;
 import fr.synchroneyes.mineral.Core.Coffre.AutomatedChestManager;
 import fr.synchroneyes.mineral.Core.Game.Game;
@@ -22,26 +20,19 @@ import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
 import fr.synchroneyes.mineral.Utils.Player.CouplePlayer;
 import fr.synchroneyes.mineral.Utils.Player.PlayerUtils;
 import fr.synchroneyes.mineral.mineralcontest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.apache.commons.lang3.StringUtils;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import java.util.*;
+
 public class Groupe {
     private int tailleIdentifiant = 25;
-    private String identifiant = "";
+    private String identifiant = StringUtils.repeat('0', tailleIdentifiant);
     private LinkedList<Player> admins = new LinkedList();
     private LinkedList<Player> joueurs = new LinkedList();
     private LinkedList<Player> joueursInvites = new LinkedList();
