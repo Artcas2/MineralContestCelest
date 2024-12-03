@@ -10,6 +10,11 @@ authors:
 description: Fork de MineralContest, un plugin mineral contest sur Spigot, inspiré du plugin de Squeezie
 website: https://github.com/Artcas2/MineralContestPlus
 commands:
+  mapbuilder:
+    description: Active ou désactive le plugin MapBuilder
+    use: /mapbuilder
+    permission: mineralcontestcelest.admin
+    permission-message: §cYou do not have permission to use this command!
   start:
     description: Démarre une partie
     use: /start

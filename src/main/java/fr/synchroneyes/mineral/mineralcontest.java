@@ -1,6 +1,7 @@
 package fr.synchroneyes.mineral;
 
 import de.slikey.effectlib.EffectManager;
+import fr.artcas2.mineralcontestcelest.commands.MapBuilderCommand;
 import fr.synchroneyes.custom_events.MCGameEndEvent;
 import fr.synchroneyes.custom_events.MCPlayerJoinEvent;
 import fr.synchroneyes.custom_events.MCPluginLoaded;
@@ -17,23 +18,7 @@ import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.groups.GroupeExtension;
 import fr.synchroneyes.groups.Utils.Etats;
 import fr.synchroneyes.mapbuilder.MapBuilder;
-import fr.synchroneyes.mineral.Commands.AllowCommand;
-import fr.synchroneyes.mineral.Commands.AreneTeleportCommand;
-import fr.synchroneyes.mineral.Commands.DisplayScoreCommand;
-import fr.synchroneyes.mineral.Commands.JoinCommand;
-import fr.synchroneyes.mineral.Commands.LeaveTeamCommand;
-import fr.synchroneyes.mineral.Commands.MCCvarCommand;
-import fr.synchroneyes.mineral.Commands.McStats;
-import fr.synchroneyes.mineral.Commands.PauseGameCommand;
-import fr.synchroneyes.mineral.Commands.ReadyCommand;
-import fr.synchroneyes.mineral.Commands.RefereeCommand;
-import fr.synchroneyes.mineral.Commands.ResumeGameCommand;
-import fr.synchroneyes.mineral.Commands.SelectDeathAnimationCommand;
-import fr.synchroneyes.mineral.Commands.SpawnChestCommand;
-import fr.synchroneyes.mineral.Commands.StartGameCommand;
-import fr.synchroneyes.mineral.Commands.StopGameCommand;
-import fr.synchroneyes.mineral.Commands.SwitchCommand;
-import fr.synchroneyes.mineral.Commands.TeamChat;
+import fr.synchroneyes.mineral.Commands.*;
 import fr.synchroneyes.mineral.Core.Game.Game;
 import fr.synchroneyes.mineral.Core.Game.JoinTeam.JoinTeamInventoryEvent;
 import fr.synchroneyes.mineral.Core.MCPlayer;
@@ -92,6 +77,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -101,9 +87,11 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
@@ -183,6 +171,55 @@ public final class mineralcontest extends JavaPlugin {
             return null;
         }
         return joueur.getGroupe();
+    }
+
+    public static boolean enableMapBuilderPlugin() {
+        Plugin mapBuilderPlugin = Bukkit.getPluginManager().getPlugin("Mapbuilder");
+
+        if (mapBuilderPlugin == null) {
+            return false;
+        }
+
+        mapBuilderPlugin.onEnable();
+        HandlerList.bakeAll();
+
+        return true;
+    }
+
+    public static boolean disableMapBuilderPlugin() {
+        Plugin mapBuilderPlugin = Bukkit.getPluginManager().getPlugin("Mapbuilder");
+        Field commandMapField;
+        Field knownCommandsField;
+
+        if (mapBuilderPlugin == null) {
+            return false;
+        }
+
+        try {
+            commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+
+            SimpleCommandMap simpleCommandMap = (SimpleCommandMap) commandMapField.get(Bukkit.getPluginManager());
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(simpleCommandMap);
+            Command buildMenuCommand = simpleCommandMap.getCommand(":buildmenu");
+
+            if (buildMenuCommand != null) {
+                buildMenuCommand.unregister(simpleCommandMap);
+                knownCommands.remove(":" + buildMenuCommand.getName());
+                knownCommands.remove(buildMenuCommand.getName());
+                knownCommandsField.set(simpleCommandMap, knownCommands);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        mapBuilderPlugin.onDisable();
+        Bukkit.getScheduler().cancelTasks(mapBuilderPlugin);
+        HandlerList.unregisterAll(mapBuilderPlugin);
+
+        return true;
     }
 
     public Groupe getNonCommunityGroup() {
@@ -296,6 +333,8 @@ public final class mineralcontest extends JavaPlugin {
         GameLogger.addLog(new Log("server_event", "OnEnable", "plugin_startup"));
         if (((Boolean)mineralcontest.getPluginConfigValue("enable_auto_update")).booleanValue()) {
             this.getServer().getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
+                disableMapBuilderPlugin();
+
                 Version.isCheckingStarted = true;
                 Thread operationsThreade = new Thread(() -> {
                     Urls.FetchAllUrls();
@@ -385,6 +424,7 @@ public final class mineralcontest extends JavaPlugin {
     }
 
     private void registerCommands() {
+        this.getCommand("mapbuilder").setExecutor((CommandExecutor)new MapBuilderCommand());
         this.getCommand("start").setExecutor((CommandExecutor)new StartGameCommand());
         this.getCommand("pause").setExecutor((CommandExecutor)new PauseGameCommand());
         this.getCommand("stopGame").setExecutor((CommandExecutor)new StopGameCommand());

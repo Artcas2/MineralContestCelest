@@ -14,6 +14,7 @@ public class Urls {
     public static String API_URL_WORKSHOP_LIST = "";
     public static String API_URL_VERSIONS = "https://artcas2.github.io/mineralcontestcelest/versions.json";
     public static String API_URL_MESSAGES = "";
+    public static String API_URL_MAP_BUILDER_VERSIONS = "https://artcas2.github.io/mineralcontestcelest/mapbuilder_versions.json";
     public static String WEBSITE_URL = "https://api.mc.monvoisin-kevin.fr";
     public static String GET_ALL_URL_ROUTE = "/index.json";
     public static boolean areAllUrlFetched = false;
