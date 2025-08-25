@@ -24,6 +24,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -35,7 +36,7 @@ import java.util.*;
 
 public class Groupe {
     private int tailleIdentifiant = 25;
-    private String identifiant = "";
+    private String identifiant = StringUtils.repeat('0', tailleIdentifiant);
 
     private LinkedList<Player> admins;
     private LinkedList<Player> joueurs;
