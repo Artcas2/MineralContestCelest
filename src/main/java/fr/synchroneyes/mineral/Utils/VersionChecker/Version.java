@@ -114,9 +114,10 @@ public class Version {
             if (isCurrentVersionLast(latestVersion)) {
                 Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.GREEN + " Plugin is up-to-date! Current Version: " + currentVersion + " - Latest Version: " + latestVersion);
             } else {
-                Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.RED + " A new update is available, plugin will now auto-update to version " + latestVersion);
+                Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.RED + " A new update is available. Please update manually to version " + latestVersion + " - Current Version: " + currentVersion);
+                /*Bukkit.getConsoleSender().sendMessage(mineralcontest.prefix + ChatColor.RED + " A new update is available, plugin will now auto-update to version " + latestVersion);
                 isUpdating = true;
-                DownloadNewVersion(versions.getJSONObject(latestVersion).getString("file_url"), versions.getJSONObject(latestVersion).getString("file_name"), versions.getJSONObject(latestVersion).getString("file_size"), latestVersion);
+                DownloadNewVersion(versions.getJSONObject(latestVersion).getString("file_url"), versions.getJSONObject(latestVersion).getString("file_name"), versions.getJSONObject(latestVersion).getString("file_size"), latestVersion);*/
             }
         } catch(Exception e){
             e.printStackTrace();

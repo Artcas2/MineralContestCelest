@@ -18,7 +18,7 @@ public class Urls {
     public static boolean isWebsiteDown = false;
 
     public static String API_URL_WORKSHOP_LIST = "";
-    public static String API_URL_VERSIONS = "";
+    public static String API_URL_VERSIONS = "https://artcas2.github.io/mineralcontestcelest/versions.json";
     public static String API_URL_MESSAGES = "";
 
 
@@ -52,7 +52,7 @@ public class Urls {
             API_URL_WORKSHOP_LIST = WEBSITE_URL + jsonResponse.getString("api_workshop_list");
             if (displayInConsole) logger.info(prefixURL + "API_URL_WORKSHOP_LIST => " + API_URL_WORKSHOP_LIST);
 
-            API_URL_VERSIONS = WEBSITE_URL + jsonResponse.getString("api_files_list");
+            //API_URL_VERSIONS = WEBSITE_URL + jsonResponse.getString("api_files_list");
             if (displayInConsole) logger.info(prefixURL + "API_URL_VERSIONS => " + API_URL_VERSIONS);
 
             API_URL_MESSAGES = WEBSITE_URL + jsonResponse.getString("api_messages_list");
