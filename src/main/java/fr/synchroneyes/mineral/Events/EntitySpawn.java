@@ -17,7 +17,7 @@ public class EntitySpawn implements Listener {
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             if (e.getEntity() instanceof Phantom) {
                 e.setCancelled(true);
-                Bukkit.getLogger().info("[MineralContest][INFO] Blocked a phantom spawn");
+                Bukkit.getLogger().info("[MineralContestCelest][INFO] Blocked a phantom spawn");
                 return;
             }
 

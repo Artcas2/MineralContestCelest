@@ -30,7 +30,7 @@ public abstract class HalloweenEvent {
 
     public void execute() {
 
-        Bukkit.getLogger().info("[MineralContest][Halloween2024] Executing event: " + getEventName());
+        Bukkit.getLogger().info("[MineralContestCelest][Halloween2024] Executing event: " + getEventName());
         beforeExecute();
         if(!isNotificationDelayed()) sendEventNotification();
         executionContent();

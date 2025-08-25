@@ -19,7 +19,7 @@ public class SpecialEventManager {
 
         for(SpecialEvent event : this.eventList) {
             if(event.isEventEnabled()) {
-                Bukkit.getLogger().info("[MineralContest] Initialising event: " + event.getEventName());
+                Bukkit.getLogger().info("[MineralContestCelest] Initialising event: " + event.getEventName());
                 event.init();
             }
         }

@@ -38,7 +38,7 @@ public class BlockPlaced implements Listener {
             // Si on est pas dans une game, on arrête là, ne devrait pas arriver
             if (mineralcontest.isInMineralContestHub(event.getPlayer())) {
                 event.setCancelled(true);
-                Bukkit.getLogger().severe("[MineralContest] Block got placed, but not inside a game ...");
+                Bukkit.getLogger().severe("[MineralContestCelest] Block got placed, but not inside a game ...");
                 return;
             }
 

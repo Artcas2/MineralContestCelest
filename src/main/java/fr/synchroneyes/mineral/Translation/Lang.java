@@ -19,7 +19,7 @@ import java.util.logging.Level;
 
 public enum Lang {
 
-    title("title", "%white%[%gold%Mineral%blue%Contest%white%]"),
+    title("title", "%gray%[%gold%Mineral%blue%Contest%aqua%Celest%gray%]"),
     cvar_diamond_score("cvar_diamond_score", "Le score du diamant est maintenant de"),
     cvar_iron_score("cvar_iron_score", "Le score du fer est maintenant de "),
     cvar_emerald_score("cvar_emerald_score", "Le score de l'émeraude est maintenant de "),
@@ -466,7 +466,7 @@ public enum Lang {
         mineralcontest plugin = mineralcontest.plugin;
         File langFile;
 
-        Bukkit.getLogger().info("[MINERALC] Loading " + lang + " language");
+        Bukkit.getLogger().info("[MineralContestCelest] Loading " + lang + " language");
 
         langFile = new File(plugin.getDataFolder() + File.separator + Lang.langDataFolderName, lang + ".yml");
         if (!langFile.exists()) {
@@ -487,7 +487,7 @@ public enum Lang {
 
         try {
             conf.save(langFile);
-            Bukkit.getLogger().info("[MINERALC] Loaded " + lang + " language");
+            Bukkit.getLogger().info("[MineralContestCelest] Loaded " + lang + " language");
             GameLogger.addLog(new Log("loadLang", lang + " loaded", "plugin_lang_loaded"));
             mineralcontest.prefix = Lang.title.toString() + ChatColor.WHITE;
             mineralcontest.prefixErreur = Lang.title.toString() + ChatColor.RED + Lang.error.toString() + ChatColor.WHITE + " ";
@@ -500,7 +500,7 @@ public enum Lang {
 
 
         } catch (IOException ioe) {
-            plugin.getLogger().log(Level.WARNING, "MineralContest: Failed to save lang.yml.");
+            plugin.getLogger().log(Level.WARNING, "MineralContestCelest: Failed to save lang.yml.");
             ioe.printStackTrace();
             GameLogger.addLog(new Log("error", "failed to save lang.yml", "plugin_error"));
 
