@@ -1,6 +1,7 @@
 package fr.synchroneyes.mineral;
 
 import de.slikey.effectlib.EffectManager;
+import fr.artcas2.mineralcontestcelest.commands.MapBuilderCommand;
 import fr.synchroneyes.custom_events.*;
 import fr.synchroneyes.custom_plugins.CustomPlugin;
 import fr.synchroneyes.custom_plugins.CustomPluginManager;
@@ -23,7 +24,6 @@ import fr.synchroneyes.mineral.Core.Player.BaseItem.Events.InventoryClick;
 import fr.synchroneyes.mineral.Core.Referee.RefereeEvent;
 import fr.synchroneyes.mineral.DeathAnimations.DeathAnimationManager;
 import fr.synchroneyes.mineral.Events.*;
-import fr.synchroneyes.mineral.Events.ArmorStandPickup;
 import fr.synchroneyes.mineral.Translation.Lang;
 import fr.synchroneyes.mineral.Utils.DisconnectedPlayer;
 import fr.synchroneyes.mineral.Utils.Log.GameLogger;
@@ -35,13 +35,16 @@ import fr.synchroneyes.special_events.SpecialEventManager;
 import fr.synchroneyes.world_downloader.WorldDownloader;
 import lombok.Getter;
 import org.bukkit.*;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -49,6 +52,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public final class mineralcontest extends JavaPlugin {
@@ -174,6 +178,55 @@ public final class mineralcontest extends JavaPlugin {
 
         return joueur.getGroupe();
 
+    }
+
+    public static boolean enableMapBuilderPlugin() {
+        Plugin mapBuilderPlugin = Bukkit.getPluginManager().getPlugin("Mapbuilder");
+
+        if (mapBuilderPlugin == null) {
+            return false;
+        }
+
+        mapBuilderPlugin.onEnable();
+        HandlerList.bakeAll();
+
+        return true;
+    }
+
+    public static boolean disableMapBuilderPlugin() {
+        Plugin mapBuilderPlugin = Bukkit.getPluginManager().getPlugin("Mapbuilder");
+        Field commandMapField;
+        Field knownCommandsField;
+
+        if (mapBuilderPlugin == null) {
+            return false;
+        }
+
+        try {
+            commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+
+            SimpleCommandMap simpleCommandMap = (SimpleCommandMap) commandMapField.get(Bukkit.getPluginManager());
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(simpleCommandMap);
+            Command buildMenuCommand = simpleCommandMap.getCommand(":buildmenu");
+
+            if (buildMenuCommand != null) {
+                buildMenuCommand.unregister(simpleCommandMap);
+                knownCommands.remove(":" + buildMenuCommand.getName());
+                knownCommands.remove(buildMenuCommand.getName());
+                knownCommandsField.set(simpleCommandMap, knownCommands);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        mapBuilderPlugin.onDisable();
+        Bukkit.getScheduler().cancelTasks(mapBuilderPlugin);
+        HandlerList.unregisterAll(mapBuilderPlugin);
+
+        return true;
     }
 
     public Groupe getNonCommunityGroup() {
@@ -346,7 +399,7 @@ public final class mineralcontest extends JavaPlugin {
 
         // On lance la procédure de vérification de version une fois que le plugin est totalement chargé
         getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-
+            disableMapBuilderPlugin();
 
             Version.isCheckingStarted = true;
             Thread operationsThreade = new Thread(() -> {
@@ -527,7 +580,8 @@ public final class mineralcontest extends JavaPlugin {
 
     private void registerCommands() {
 
-        // Register les commands
+        // Enregistrer les commandes
+        getCommand("mapbuilder").setExecutor(new MapBuilderCommand());
         getCommand("start").setExecutor(new StartGameCommand());
         getCommand("pause").setExecutor(new PauseGameCommand());
         getCommand("stopGame").setExecutor(new StopGameCommand());
