@@ -392,7 +392,7 @@ public enum Lang {
     kitmanager_inventory_kitSelectionTitle("kitmanager_inventory_kitSelectionTitle", "Sélectionnez votre kit"),
 
     kit_agile_title("kit_agile_title", "Agile"),
-    kit_agile_description("kit_agile_description", "Vous permet de vous déplacer 25% plus vite, et retire vos dégâts de chute (sauf chute mortelle!)"),
+    kit_agile_description("kit_agile_description", "Vous permet de vous déplacer 25% plus vite, et retire vos dégâts de chute"),
     kit_wizard_title("kit_wizard_title", "Enchanteur"),
     kit_wizard_description("kit_wizard_description", "Vous réapparaissez avec 15 niveaux d'expérience, 32 lapis lazuli, et 3 livres d'enchantement"),
     kit_warrior_title("kit_warrior_title", "Guerrier"),
