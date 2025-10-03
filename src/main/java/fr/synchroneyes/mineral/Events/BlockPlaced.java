@@ -29,7 +29,7 @@ public class BlockPlaced implements Listener {
 
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             // SI on est dans le HUB, on ne peut pas poser de bloc
-            if (worldEvent.equals(mineralcontest.plugin.pluginWorld)) {
+            if (worldEvent.equals(mineralcontest.plugin.pluginWorld) && mineralcontest.enable_lobby_block_protection) {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(mineralcontest.prefixErreur + Lang.cant_interact_block_hub.toString());
                 return;
@@ -37,8 +37,11 @@ public class BlockPlaced implements Listener {
 
             // Si on est pas dans une game, on arrête là, ne devrait pas arriver
             if (mineralcontest.isInMineralContestHub(event.getPlayer())) {
-                event.setCancelled(true);
-                Bukkit.getLogger().severe("[MineralContestCelest] Block got placed, but not inside a game ...");
+                if (mineralcontest.enable_lobby_block_protection) {
+                    event.setCancelled(true);
+                    Bukkit.getLogger().severe("[MineralContestCelest] Block got placed, but not inside a game ...");
+                }
+
                 return;
             }
 
