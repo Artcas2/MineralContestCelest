@@ -1,0 +1,4 @@
+move:
+  enabled: true
+  general-voice-channel: 000000000000000000
+  move-when-game-finished: true

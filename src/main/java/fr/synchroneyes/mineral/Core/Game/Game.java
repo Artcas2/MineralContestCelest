@@ -1,6 +1,6 @@
 package fr.synchroneyes.mineral.Core.Game;
 
-import fr.synchroneyes.challenges.ChallengeManager;
+import fr.artcas2.mineralcontestcelest.DiscordSRVImpl;
 import fr.synchroneyes.custom_events.*;
 import fr.synchroneyes.groups.Core.Groupe;
 import fr.synchroneyes.groups.Utils.Etats;
@@ -32,6 +32,7 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -1004,6 +1005,11 @@ public class Game implements Listener {
                 ScoreboardAPI.clearScoreboard(joueur);
                 ScoreboardAPI.createScoreboard(joueur, true);
 
+                YamlConfiguration discordConfig = mineralcontest.plugin.getDiscordConfig();
+
+                if (!discordConfig.getBoolean("move.move-when-game-finished")) {
+                    mineralcontest.plugin.getDiscordSRV().move(Bukkit.getConsoleSender(), joueur, discordConfig.getLong("move.general-voice-channel"));
+                }
             }
 
             this.resetMap();

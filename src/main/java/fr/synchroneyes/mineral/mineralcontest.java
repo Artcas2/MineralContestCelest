@@ -1,7 +1,10 @@
 package fr.synchroneyes.mineral;
 
 import de.slikey.effectlib.EffectManager;
+import fr.artcas2.mineralcontestcelest.DiscordSRV;
+import fr.artcas2.mineralcontestcelest.DiscordSRVImpl;
 import fr.artcas2.mineralcontestcelest.commands.MapBuilderCommand;
+import fr.artcas2.mineralcontestcelest.commands.MoveCommand;
 import fr.synchroneyes.custom_events.*;
 import fr.synchroneyes.custom_plugins.CustomPlugin;
 import fr.synchroneyes.custom_plugins.CustomPluginManager;
@@ -37,6 +40,7 @@ import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -124,7 +128,8 @@ public final class mineralcontest extends JavaPlugin {
     // Gestionnaire des animations dde mort
     public DeathAnimationManager deathAnimationManager;
 
-
+    private DiscordSRV discordSRV;
+    private YamlConfiguration discordConfig;
 
 
     // Constructeur, on initialise les variables
@@ -229,6 +234,14 @@ public final class mineralcontest extends JavaPlugin {
         return true;
     }
 
+    public DiscordSRV getDiscordSRV() {
+        return discordSRV;
+    }
+
+    public YamlConfiguration getDiscordConfig() {
+        return discordConfig;
+    }
+
     public Groupe getNonCommunityGroup() {
         return groupes.getFirst();
     }
@@ -308,7 +321,25 @@ public final class mineralcontest extends JavaPlugin {
         this.groupes = new LinkedList<>();
         this.groupeExtension = GroupeExtension.getInstance();
 
+        if (Bukkit.getPluginManager().getPlugin("DiscordSRV") == null) {
+            discordSRV = new DiscordSRV() {
+                @Override
+                public boolean move(CommandSender sender, Player player, long voiceChannelId) {
+                    return false;
+                }
+            };
+        } else {
+            discordSRV = new DiscordSRVImpl();
+        }
 
+        String discordConfigPath = "config/discord_config.yml";
+        File discordConfigFile = new File(mineralcontest.plugin.getDataFolder(), discordConfigPath);
+
+        if (!discordConfigFile.exists()) {
+            mineralcontest.plugin.saveResource(discordConfigPath, false);
+        }
+
+        this.discordConfig = YamlConfiguration.loadConfiguration(discordConfigFile);
 
         registerCommands();
         registerEvents();
@@ -582,6 +613,16 @@ public final class mineralcontest extends JavaPlugin {
 
         // Enregistrer les commandes
         getCommand("mapbuilder").setExecutor(new MapBuilderCommand());
+
+        if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null) {
+            this.getCommand("move").setExecutor(new MoveCommand());
+        } else {
+            this.getCommand("move").setExecutor((sender, command, label, args) -> {
+                sender.sendMessage(ChatColor.RED + "Le plugin DiscordSRV n'est pas installé sur le serveur !");
+                return true;
+            });
+        }
+
         getCommand("start").setExecutor(new StartGameCommand());
         getCommand("pause").setExecutor(new PauseGameCommand());
         getCommand("stopGame").setExecutor(new StopGameCommand());
